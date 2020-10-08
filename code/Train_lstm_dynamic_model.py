@@ -9,27 +9,27 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 import numpy as np
 import pandas as pd
 import warnings
-import gc
 
-from WeaponLib import ReduceMemoryUsage
 from WeaponLib import LoadSave
 
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from sklearn.model_selection import TimeSeriesSplit
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 import sklearn
 
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
-from keras.layers import Activation
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 
-from radam import RAdam
+from radam import RAdamOptimizer
+import tensorflow as tf
+import tensorflow_addons as tfa # pip install tensorflow-addons
+
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
@@ -51,6 +51,28 @@ else:
     PATH = "..//Data//TrainedRes//sec1//"
 
 
+swish = tf.keras.activations.swish
+mish = tfa.activations.mish
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--activation1', type=str, default='tanh',
+                    help='choose the activation function instead of tanh: swish, mish')
+parser.add_argument('--activation2', type=str, default='sigmoid',
+                    help='choose the activation function instead of sigmoid: swish, mish')
+args = parser.parse_args()
+activation1 = args.activation1
+activation2 = args.activation2
+
+if activation1 == 'swish':
+    activation1 = swish
+elif activation1 == 'mish':
+    activation1 = mish
+
+
+if activation2 == 'swish':
+    activation2 = swish
+elif activation2 == 'mish':
+    activation2 = mish
 ###############################################################################
 def load_train_test_data():
     ls = LoadSave(PATH + "Train.pkl")
@@ -74,20 +96,44 @@ def plot_history(history, result_dir):
     plt.close()
 
 
-def save_history(history, result_dir):
-    loss = history.history['loss']
-    acc = history.history['acc']
-    val_loss = history.history['val_loss']
-    val_acc = history.history['val_acc']
-    nb_epoch = len(acc)
+def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
+                       model, param_grid, cv=10, scoring_fit='neg_mean_squared_error',
+                       do_probabilities=False):
+    gs = GridSearchCV(
+        estimator=model,
+        param_grid=param_grid,
+        cv=cv,
+        n_jobs=-1,
+        scoring=scoring_fit,
+        verbose=2
+    )
+    fitted_model = gs.fit(X_train_data, y_train_data)
 
-    with open('result.txt', 'w') as fp:
-        fp.write('epoch\tloss\tacc\tval_loss\tval_acc\n')
-        for i in range(nb_epoch):
-            fp.write('{}\t{}\t{}\t{}\t{}\n'.format(
-                i, loss[i], acc[i], val_loss[i], val_acc[i]))
+    if do_probabilities:
+        pred = fitted_model.predict_proba(X_test_data)
+    else:
+        pred = fitted_model.predict(X_test_data)
+
+    return fitted_model, pred
 
 
+def build_model(lr = 0.002, optimizer='adam'):
+    model = Sequential()
+    model.add(LSTM(20,
+                   activation=activation1,
+                   recurrent_activation=activation2,
+                   return_sequences=False,
+                   input_shape=(X_train.shape[1], X_train.shape[2]
+                                )))
+    model.add(Dense(1))
+    model.compile(loss=mean_absolute_error,
+                  optimizer=Adam(lr=lr),
+                  metrics=['cosine_similarity'])
+    if optimizer == 'radam':
+        model.compile(loss=mean_absolute_error,
+                      optimizer=RAdamOptimizer(learning_rate=lr),
+                      metrics=['cosine_similarity'])
+    return model
 ###############################################################################
 if __name__ == "__main__":
     trainData, testData = load_train_test_data()
@@ -131,14 +177,10 @@ if __name__ == "__main__":
         X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
         # Start training the model
-        model = Sequential()
-        model.add(LSTM(20, return_sequences=False, input_shape=(X_train.shape[1], X_train.shape[2])))
-        model.add(Dense(1))
-        #model.compile(loss=mean_absolute_error, optimizer=Adam(lr=0.0005), metrics=['mae'])
-        model.compile(loss=mean_absolute_error, optimizer=RAdam(lr=0.0005), metrics=['mae'])
-        history = model.fit(X_train, y_train, epochs=500, batch_size=64, validation_data=(X_valid, y_valid), verbose=1, shuffle=False, callbacks=[earlyStopping])
+        model = build_model()
+        history = model.fit(X_train, y_train, epochs=500, batch_size=64, validation_data=(X_valid, y_valid), verbose=1,
+                            shuffle=False, callbacks=[earlyStopping])
         model.evaluate(X_test, y_test, verbose=0)
-
 
         y_test_pred = model.predict(X_test)
         y_test, y_test_pred = y_sc.inverse_transform(y_test), y_sc.inverse_transform(y_test_pred)
@@ -152,6 +194,17 @@ if __name__ == "__main__":
         score[ind, 1], score[ind, 2] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred), np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
         score[ind, 0] = ind
 
+        model = KerasRegressor(build_fn=build_cnn, verbose=0)
+        model, pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model,
+                                         param_grid, cv=5, scoring_fit='neg_log_loss')
+
+        with open('result.txt', 'a') as fp:
+        fp.write(f'{numFolds}\n')
+        fp.write(f'({model.best_score_}, {model.best_params_})\n')
+
+        print(model.best_score_)
+        print(model.best_params_)
+
 
         start, end = 0, len(y_test)
         plt.figure(figsize=(16, 10))
@@ -161,21 +214,11 @@ if __name__ == "__main__":
         plt.xlim(0, end - start)
         plt.ylim(-500, 2600)
         plt.grid(True)
-        if not os.isdir('..//Plots'):
+        if not os.path.exists('..//Plots'):
             os.makedirs('..//Plots')
         plt.savefig("..//Plots//PredictedStepTest_" + str(PREDICTED_STEP) + "_folds_" + str(ind + 1) + "_Original.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
     score = pd.DataFrame(score, columns=["fold", "validRMSE", "validMAE", "testRMSE", "testMAE"])
-
-
-
-
-    # plt.figure()
-    # sns.distplot(trainData["target"].values, kde=True, bins=100)
-    # sns.distplot(testData["target"].values, kde=True, color="green", bins=100)
-    # plt.legend(["Train", "Test"])
-    #
-    # plt.figure()
-    # sns.boxplot(data=[trainData["target"].values, testData["target"].values], color="green")
+    print(score)
 

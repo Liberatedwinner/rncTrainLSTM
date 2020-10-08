@@ -59,3 +59,25 @@ else:
 tf.keras.layers.LSTM = tf.keras.layers.LSTM(activation=activation1,
                                             recurrent_activation=activation2)
 ###########################################
+
+
+
+optimizers = ['adam', 'radam']
+hiddensizes = [8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
+batches = [32, 64, 128, 256, 512, 1024, 2048]
+lrs = [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+hiddenlayers = [1, 2, 3]
+
+
+
+param_grid = {
+    'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
+    'optimizer': ['adam', 'radam']
+}
+
+model = KerasRegressor(build_fn = build_cnn, verbose=0)
+model, pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model,
+                                        param_grid, cv=5, scoring_fit='neg_log_loss')
+
+print(model.best_score_)
+print(model.best_params_)
