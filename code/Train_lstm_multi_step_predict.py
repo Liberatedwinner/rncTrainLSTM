@@ -72,12 +72,10 @@ if activation1 == 'swish':
 elif activation1 == 'mish':
     activation1 = mish
 
-
 if activation2 == 'swish':
     activation2 = swish
 elif activation2 == 'mish':
     activation2 = mish
-
 ###############################################################################
 def load_train_test_data():
     ls = LoadSave(PATH + "Train.pkl")
