@@ -204,7 +204,6 @@ if __name__ == "__main__":
                                          param_grid, cv=5)
 
         with open('result.txt', 'a') as fp:
-            fp.write(f'{numFolds}\n')
             fp.write(f'({model.best_score_}, {model.best_params_})\n')
 
         print(model.best_score_)
