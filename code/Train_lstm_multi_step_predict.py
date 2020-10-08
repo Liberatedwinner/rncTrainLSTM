@@ -29,6 +29,9 @@ from keras.callbacks import EarlyStopping
 
 from radam import RAdamOptimizer
 from radam2 import RAdam
+import tensorflow as tf
+import tensorflow_addons as tfa # pip install tensorflow-addons
+import argparse
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
@@ -36,7 +39,7 @@ np.random.seed(2019)
 sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
-lr = 0.002
+lr = 0.005
 metric = 'cosine_similarity'
 
 PREDICTED_STEP = 10
@@ -51,6 +54,29 @@ elif PREDICTED_STEP == 30:
 else:
     PATH = "..//Data//TrainedRes//sec1//"
 
+
+swish = tf.keras.activations.swish
+mish = tfa.activations.mish
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--activation1', type=str, default='tanh',
+                    help='choose the activation function instead of tanh: swish, mish')
+parser.add_argument('--activation2', type=str, default='sigmoid',
+                    help='choose the activation function instead of sigmoid: swish, mish')
+args = parser.parse_args()
+activation1 = args.activation1
+activation2 = args.activation2
+
+if activation1 == 'swish':
+    activation1 = swish
+elif activation1 == 'mish':
+    activation1 = mish
+
+
+if activation2 == 'swish':
+    activation2 = swish
+elif activation2 == 'mish':
+    activation2 = mish
 
 ###############################################################################
 def load_train_test_data():
@@ -132,12 +158,17 @@ if __name__ == "__main__":
         X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
         # Start training the model
-        model = Sequential([Activation("relu")])
-        #model = Sequential()
-        model.add(LSTM(20,  return_sequences=False, input_shape=(X_train.shape[1], X_train.shape[2])))
+        #model = Sequential([Activation("relu")])
+        model = Sequential()
+        model.add(LSTM(20,
+                       activation=activation1,
+                       recurrent_activation=activation2,
+                       return_sequences=False,
+                       input_shape=(X_train.shape[1], X_train.shape[2]
+                                    )))
         model.add(Dense(1))
-        model.compile(loss=mean_absolute_error, optimizer=RAdamOptimizer(learning_rate=lr), metrics=[metric])
-        #model.compile(loss=mean_absolute_error, optimizer=Adam(lr=0.002), metrics=['mse'])
+        #model.compile(loss=mean_absolute_error, optimizer=RAdamOptimizer(learning_rate=lr), metrics=[metric])
+        model.compile(loss=mean_absolute_error, optimizer=Adam(lr=lr), metrics=[metric])
         history = model.fit(x=X_train, y=y_train, epochs=500, batch_size=64, validation_data=(X_valid, y_valid), verbose=1, shuffle=False, callbacks=[earlyStopping])
         model.evaluate(X_test, y_test, verbose=0)
         
