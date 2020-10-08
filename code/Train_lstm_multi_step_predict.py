@@ -25,7 +25,7 @@ from keras.layers import LSTM
 from keras.layers import Activation
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 
 from radam import RAdamOptimizer
 from radam2 import RAdam
@@ -116,7 +116,7 @@ def save_history(hist, metric):
 ###############################################################################
 if __name__ == "__main__":
     trainData, testData = load_train_test_data()
-    
+
 
     ls = LoadSave("..//Data//TrainedRes//sec" + str(PREDICTED_STEP) + "//TestResults.pkl")
     testData["target"] = ls.load_data()
@@ -169,8 +169,15 @@ if __name__ == "__main__":
         model.compile(loss=mean_absolute_error, optimizer=Adam(lr=lr), metrics=[metric])
         history = model.fit(x=X_train, y=y_train, epochs=500, batch_size=64, validation_data=(X_valid, y_valid), verbose=1, shuffle=False, callbacks=[earlyStopping])
         model.evaluate(X_test, y_test, verbose=0)
-        
 
+        filename = f'checkpoint-fold {folds} - lr={lr}'
+        checkpoint = ModelCheckpoint(filename,  # file명을 지정합니다
+                                     monitor='val_loss',  # val_loss 값이 개선되었을때 호출됩니다
+                                     verbose=1,  # 로그를 출력합니다
+                                     save_best_only=True,  # 가장 best 값만 저장합니다
+                                     mode='auto'  # auto는 알아서 best를 찾습니다. min/max
+                                     )
+        
         y_test_pred = model.predict(X_test)
         y_test, y_test_pred = y_sc.inverse_transform(y_test), y_sc.inverse_transform(y_test_pred)
         y_test_pred[y_test_pred < 1] = 0
