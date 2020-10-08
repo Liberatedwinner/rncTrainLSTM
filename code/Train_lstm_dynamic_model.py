@@ -199,8 +199,8 @@ if __name__ == "__main__":
                                          param_grid, cv=5, scoring_fit='neg_log_loss')
 
         with open('result.txt', 'a') as fp:
-        fp.write(f'{numFolds}\n')
-        fp.write(f'({model.best_score_}, {model.best_params_})\n')
+            fp.write(f'{numFolds}\n')
+            fp.write(f'({model.best_score_}, {model.best_params_})\n')
 
         print(model.best_score_)
         print(model.best_params_)
