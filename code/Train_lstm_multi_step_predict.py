@@ -167,7 +167,10 @@ if __name__ == "__main__":
         model.add(Dense(1))
         #model.compile(loss=mean_absolute_error, optimizer=RAdamOptimizer(learning_rate=lr), metrics=[metric])
         model.compile(loss=mean_absolute_error, optimizer=Adam(lr=lr), metrics=[metric])
-        history = model.fit(x=X_train, y=y_train, epochs=500, batch_size=64, validation_data=(X_valid, y_valid), verbose=1, shuffle=False, callbacks=[earlyStopping])
+        history = model.fit(x=X_train, y=y_train,
+                            epochs=500, batch_size=64,
+                            validation_data=(X_valid, y_valid), verbose=1,
+                            shuffle=False, callbacks=[earlyStopping, checkpoint])
         model.evaluate(X_test, y_test, verbose=0)
 
         filename = f'checkpoint-fold {folds} - lr={lr}'
