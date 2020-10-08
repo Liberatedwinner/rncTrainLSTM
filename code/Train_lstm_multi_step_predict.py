@@ -155,7 +155,7 @@ if __name__ == "__main__":
         X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
         X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
-        filename = f'checkpoint-fold {folds} - lr={lr}'
+        filename = f'checkpoint-foldnum {ind} - lr={lr}'
         checkpoint = ModelCheckpoint(filename,  # file명을 지정합니다
                                      monitor='val_loss',  # val_loss 값이 개선되었을때 호출됩니다
                                      verbose=1,  # 로그를 출력합니다
