@@ -29,7 +29,7 @@ from keras.callbacks import EarlyStopping
 from radam import RAdamOptimizer
 import tensorflow as tf
 import tensorflow_addons as tfa # pip install tensorflow-addons
-
+import argparse
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
@@ -194,9 +194,14 @@ if __name__ == "__main__":
         score[ind, 1], score[ind, 2] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred), np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
         score[ind, 0] = ind
 
-        model = KerasRegressor(build_fn=build_cnn, verbose=0)
+        param_grid = {
+            'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
+            'optimizer': ['adam', 'radam']
+        }
+
+        model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=build_model, verbose=0)
         model, pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model,
-                                         param_grid, cv=5, scoring_fit='neg_log_loss')
+                                         param_grid, cv=5)
 
         with open('result.txt', 'a') as fp:
             fp.write(f'{numFolds}\n')
