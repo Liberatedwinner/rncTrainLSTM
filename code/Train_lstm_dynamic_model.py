@@ -1,7 +1,6 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -39,30 +38,28 @@ sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
-PREDICTED_STEP = 1
-if PREDICTED_STEP == 10:
-    PATH = "..//Data//TrainedRes//sec10//"
-elif PREDICTED_STEP == 50:
-    PATH = "..//Data//TrainedRes//sec50//"
-elif PREDICTED_STEP == 100:
-    PATH = "..//Data//TrainedRes//sec100//"
-elif PREDICTED_STEP == 30:
-    PATH = "..//Data//TrainedRes//sec30//"
-else:
-    PATH = "..//Data//TrainedRes//sec1//"
-
-
-
-
-# parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()
 # parser.add_argument('--activation1', type=str, default='tanh',
 #                     help='choose the activation function instead of tanh: swish, mish')
 # parser.add_argument('--activation2', type=str, default='sigmoid',
 #                     help='choose the activation function instead of sigmoid: swish, mish')
-# args = parser.parse_args()
+parser.add_argument('--predictstep', type=int, default=1,
+                    help='choose the predicted step: 1, 10, 30, 50, 100')
+args = parser.parse_args()
 # activation1 = args.activation1
 # activation2 = args.activation2
 
+PREDICTED_STEP = args.predictstep
+if PREDICTED_STEP == 10:
+    PATH = "..//Data//TrainedRes//sec10//"
+elif PREDICTED_STEP == 30:
+    PATH = "..//Data//TrainedRes//sec30//"
+elif PREDICTED_STEP == 50:
+    PATH = "..//Data//TrainedRes//sec50//"
+elif PREDICTED_STEP == 100:
+    PATH = "..//Data//TrainedRes//sec100//"
+else:
+    PATH = "..//Data//TrainedRes//sec1//"
 
 ###############################################################################
 def load_train_test_data():
@@ -91,15 +88,19 @@ def plot_history(history, result_dir):
 #     if swish_value < 1:
 #         swish_value = 1
 #     return swish_value
+#
+# def mish(x):
+#     mish_value = x * math.tanh(math.log((1 + math.exp(x))))
+#     if mish_value < 1:
+#         mish_value = 1
+#     return mish_value
+
 
 def mish(x):
-    mish_value = x * math.tanh(math.log((1 + math.exp(x))))
-    if mish_value < 1:
-        mish_value = 1
-    return mish_value
+    return x * tf.nn.tanh(tf.nn.softplus(x))
+
 
 swish = tf.keras.activations.swish
-
 activation_f1, activation_f2 = 'tanh', 'sigmoid'
 # if activation1 == 'swish':
 #     activation_f1 = swish
@@ -134,12 +135,13 @@ def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
     return fitted_model, pred
 
 
-def build_model(lr=0.002,
+def build_model(hidden_size=20,
+                lr=0.002,
                 optimizer='adam',
                 activation_1=activation_f1,
                 activation_2=activation_f2):
     model = Sequential()
-    model.add(LSTM(20,
+    model.add(LSTM(hidden_size,
                    activation=activation_1,
                    recurrent_activation=activation_2,
                    return_sequences=False,
@@ -203,19 +205,19 @@ if __name__ == "__main__":
                             shuffle=False, callbacks=[earlyStopping])
         model.evaluate(X_test, y_test, verbose=0)
 
+        y_valid_pred = model.predict(X_valid)
+        y_valid, y_valid_pred = y_sc.inverse_transform(y_valid), y_sc.inverse_transform(y_valid_pred)
+        y_valid_pred[y_valid_pred < 1] = 0
+        score[ind, 0] = ind
+        score[ind, 1], score[ind, 2] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred), np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
+
         y_test_pred = model.predict(X_test)
         y_test, y_test_pred = y_sc.inverse_transform(y_test), y_sc.inverse_transform(y_test_pred)
         y_test_pred[y_test_pred < 1] = 0
         score[ind, 3], score[ind, 4] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred), np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
 
-
-        y_valid_pred = model.predict(X_valid)
-        y_valid, y_valid_pred = y_sc.inverse_transform(y_valid), y_sc.inverse_transform(y_valid_pred)
-        y_valid_pred[y_valid_pred < 1] = 0
-        score[ind, 1], score[ind, 2] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred), np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
-        score[ind, 0] = ind
-
         param_grid = {
+            'hidden_size': [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
             'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
             'optimizer': ['adam', 'radam'],
             'activation_1': ['tanh', swish, mish],
@@ -246,6 +248,11 @@ if __name__ == "__main__":
         plt.savefig("..//Plots//PredictedStepTest_" + str(PREDICTED_STEP) + "_folds_" + str(ind + 1) + "_Original.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
-    score = pd.DataFrame(score, columns=["fold", "validRMSE", "validMAE", "testRMSE", "testMAE"])
+    score = pd.DataFrame(score, columns=["fold", "validMAE", "validRMSE", "testMAE", "testRMSE"])
     print(score)
 
+    #save
+    score.to_pickle("score.pkl")
+
+    # #load
+    # df = pd.read_pickle("score.pkl")
