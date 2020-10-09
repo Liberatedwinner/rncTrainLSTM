@@ -218,8 +218,8 @@ if __name__ == "__main__":
         param_grid = {
             'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
             'optimizer': ['adam', 'radam'],
-            'activation1': ['tanh', swish, mish],
-            'activation2': ['sigmoid', swish, mish]
+            'activation_1': ['tanh', swish, mish],
+            'activation_2': ['sigmoid', swish, mish]
         }
 
         model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=build_model, verbose=0)
