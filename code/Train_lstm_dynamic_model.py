@@ -28,8 +28,9 @@ from keras.callbacks import EarlyStopping
 
 from radam import RAdamOptimizer
 import tensorflow as tf
-import tensorflow_addons as tfa # pip install tensorflow-addons
+# import tensorflow_addons as tfa # pip install tensorflow-addons
 import argparse
+import math
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
@@ -51,28 +52,18 @@ else:
     PATH = "..//Data//TrainedRes//sec1//"
 
 
-swish = tf.keras.activations.swish
-mish = tfa.activations.mish
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--activation1', type=str, default='tanh',
-                    help='choose the activation function instead of tanh: swish, mish')
-parser.add_argument('--activation2', type=str, default='sigmoid',
-                    help='choose the activation function instead of sigmoid: swish, mish')
-args = parser.parse_args()
-activation1 = args.activation1
-activation2 = args.activation2
-
-if activation1 == 'swish':
-    activation1 = swish
-elif activation1 == 'mish':
-    activation1 = mish
 
 
-if activation2 == 'swish':
-    activation2 = swish
-elif activation2 == 'mish':
-    activation2 = mish
+# parser = argparse.ArgumentParser()
+# parser.add_argument('--activation1', type=str, default='tanh',
+#                     help='choose the activation function instead of tanh: swish, mish')
+# parser.add_argument('--activation2', type=str, default='sigmoid',
+#                     help='choose the activation function instead of sigmoid: swish, mish')
+# args = parser.parse_args()
+# activation1 = args.activation1
+# activation2 = args.activation2
+
+
 ###############################################################################
 def load_train_test_data():
     ls = LoadSave(PATH + "Train.pkl")
@@ -94,6 +85,32 @@ def plot_history(history, result_dir):
     plt.legend(['mae', 'val_loss'], loc='upper right')
     plt.savefig(result_dir, dpi=500, bbox_inches="tight")
     plt.close()
+
+# def swish(x):
+#     swish_value = x * sigmoid(x)
+#     if swish_value < 1:
+#         swish_value = 1
+#     return swish_value
+
+def mish(x):
+    mish_value = x * math.tanh(math.log((1 + math.exp(x))))
+    if mish_value < 1:
+        mish_value = 1
+    return mish_value
+
+swish = tf.keras.activations.swish
+
+activation_f1, activation_f2 = 'tanh', 'sigmoid'
+# if activation1 == 'swish':
+#     activation_f1 = swish
+# elif activation1 == 'mish':
+#     activation_f1 = mish
+#
+#
+# if activation2 == 'swish':
+#     activation_f2 = swish
+# elif activation2 == 'mish':
+#     activation_f2 = mish
 
 
 def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
@@ -117,14 +134,18 @@ def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
     return fitted_model, pred
 
 
-def build_model(lr = 0.002, optimizer='adam'):
+def build_model(lr=0.002,
+                optimizer='adam',
+                activation_1=activation_f1,
+                activation_2=activation_f2):
     model = Sequential()
     model.add(LSTM(20,
-                   activation=activation1,
-                   recurrent_activation=activation2,
+                   activation=activation_1,
+                   recurrent_activation=activation_2,
                    return_sequences=False,
-                   input_shape=(X_train.shape[1], X_train.shape[2]
-                                )))
+                   input_shape=(X_train.shape[1], X_train.shape[2])
+                   )
+              )
     model.add(Dense(1))
     model.compile(loss=mean_absolute_error,
                   optimizer=Adam(lr=lr),
@@ -196,7 +217,9 @@ if __name__ == "__main__":
 
         param_grid = {
             'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
-            'optimizer': ['adam', 'radam']
+            'optimizer': ['adam', 'radam'],
+            'activation1': ['tanh', swish, mish],
+            'activation2': ['sigmoid', swish, mish]
         }
 
         model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=build_model, verbose=0)
@@ -214,7 +237,7 @@ if __name__ == "__main__":
         plt.figure(figsize=(16, 10))
         plt.plot(y_test_pred[start:end], linewidth=2, linestyle="-", color="r")
         plt.plot(y_test[start:end], linewidth=2, linestyle="-", color="b")
-        plt.legend(["Predition", "Ground Truth"])
+        plt.legend(["Prediction", "Ground Truth"])
         plt.xlim(0, end - start)
         plt.ylim(-500, 2600)
         plt.grid(True)
