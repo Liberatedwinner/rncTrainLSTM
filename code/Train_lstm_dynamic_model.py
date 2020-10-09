@@ -27,9 +27,9 @@ from keras.callbacks import EarlyStopping
 
 from radam import RAdamOptimizer
 import tensorflow as tf
-# import tensorflow_addons as tfa # pip install tensorflow-addons
 import argparse
-import math
+# import tensorflow_addons as tfa # pip install tensorflow-addons
+# import math
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
@@ -46,20 +46,21 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--predictstep', type=int, default=1,
                     help='choose the predicted step: 1, 10, 30, 50, 100')
 args = parser.parse_args()
+PATH = f"..//Data//TrainedRes//sec{args.predictstep}//"
 # activation1 = args.activation1
 # activation2 = args.activation2
 
-PREDICTED_STEP = args.predictstep
-if PREDICTED_STEP == 10:
-    PATH = "..//Data//TrainedRes//sec10//"
-elif PREDICTED_STEP == 30:
-    PATH = "..//Data//TrainedRes//sec30//"
-elif PREDICTED_STEP == 50:
-    PATH = "..//Data//TrainedRes//sec50//"
-elif PREDICTED_STEP == 100:
-    PATH = "..//Data//TrainedRes//sec100//"
-else:
-    PATH = "..//Data//TrainedRes//sec1//"
+# PREDICTED_STEP = args.predictstep
+# if PREDICTED_STEP == 10:
+#     PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
+# elif PREDICTED_STEP == 30:
+#     PATH = "..//Data//TrainedRes//sec30//"
+# elif PREDICTED_STEP == 50:
+#     PATH = "..//Data//TrainedRes//sec50//"
+# elif PREDICTED_STEP == 100:
+#     PATH = "..//Data//TrainedRes//sec100//"
+# else:
+#     PATH = "..//Data//TrainedRes//sec1//"
 
 ###############################################################################
 def load_train_test_data():
@@ -165,13 +166,13 @@ if __name__ == "__main__":
     ls = LoadSave("..//Data//TrainedRes//sec" + str(PREDICTED_STEP) + "//TestResults.pkl")
     testData["target"] = ls.load_data()
 
-    print("Train shape:{}, Test shape:{} before dropping nan values.".format(trainData.shape, testData.shape))
+    print(f"Train shape:{trainData.shape}, Test shape:{testData.shape} before dropping nan values.")
     trainData.dropna(inplace=True)
     testData.dropna(inplace=True)
 
     trainData.drop("FLAG", axis=1, inplace=True)
     testData.drop("FLAG", axis=1, inplace=True)
-    print("Train shape:{}, Test shape:{} After dropping nan values.".format(trainData.shape, testData.shape))
+    print(f"Train shape:{trainData.shape}, Test shape:{testData.shape} After dropping nan values.")
 
     numFolds = 10
     tscv = TimeSeriesSplit(n_splits=numFolds)
@@ -182,13 +183,15 @@ if __name__ == "__main__":
     # Start the time series cross validation
     score = np.zeros((numFolds, 5))
     for ind, (train, valid) in enumerate(folds):
-        X_train, X_valid = trainData.iloc[train].drop(["target"], axis=1).values, trainData.iloc[valid].drop(["target"], axis=1).values
-        y_train, y_valid = trainData.iloc[train]["target"].values.reshape(len(X_train), 1), trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
+        X_train = trainData.iloc[train].drop(["target"], axis=1).values
+        X_valid = trainData.iloc[valid].drop(["target"], axis=1).values
+        y_train = trainData.iloc[train]["target"].values.reshape(len(X_train), 1)
+        y_valid = trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
 
         # Access the normalized data
         X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
         X_train = X_sc.fit_transform(X_train)
-        X_valid = X_sc.transform(X_valid)
+        X_valid = X_sc.transform(X_valid) #fit 기준으로 transform하는
         X_test = X_sc.transform(testData.drop(["target"], axis=1).values)
 
         y_train = y_sc.fit_transform(y_train)
@@ -201,7 +204,8 @@ if __name__ == "__main__":
 
         # Start training the model
         model = build_model()
-        history = model.fit(X_train, y_train, epochs=500, batch_size=64, validation_data=(X_valid, y_valid), verbose=1,
+        history = model.fit(X_train, y_train, epochs=500, batch_size=64,
+                            validation_data=(X_valid, y_valid), verbose=1,
                             shuffle=False, callbacks=[earlyStopping])
         model.evaluate(X_test, y_test, verbose=0)
 
@@ -224,15 +228,16 @@ if __name__ == "__main__":
             'activation_2': ['sigmoid', swish, mish]
         }
 
+        #search the best hp
         model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=build_model, verbose=0)
-        model, pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model,
-                                         param_grid, cv=5)
+        model, pred = algorithm_pipeline(X_train, X_test, y_train, y_test,
+                                         model, param_grid, cv=5)
 
-        with open('result.txt', 'a') as fp:
-            fp.write(f'({model.best_score_}, {model.best_params_})\n')
-
-        print(model.best_score_)
-        print(model.best_params_)
+        # with open('result.txt', 'a') as fp:
+        #     fp.write(f'({model.best_score_}, {model.best_params_})\n')
+        #
+        # print(model.best_score_)
+        # print(model.best_params_)
 
 
         start, end = 0, len(y_test)
