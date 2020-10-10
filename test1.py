@@ -64,7 +64,7 @@ tf.keras.layers.LSTM = tf.keras.layers.LSTM(activation=activation1,
 
 optimizers = ['adam', 'radam']
 hiddensizes = [8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
-batches = [32, 64, 128, 256, 512, 1024, 2048]
+batches = [32, 64, 128, 256, 512, 1024]
 lrs = [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
 hiddenlayers = [1, 2, 3]
 

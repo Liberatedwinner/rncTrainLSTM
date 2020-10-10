@@ -1,6 +1,5 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -16,7 +15,6 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
-import sklearn
 
 from keras.models import Sequential
 from keras.layers import Dense
@@ -24,10 +22,11 @@ from keras.layers import LSTM
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
-
+#
 from radam import RAdamOptimizer
 import tensorflow as tf
 import argparse
+from sklearn.metrics import r2_score
 # import tensorflow_addons as tfa # pip install tensorflow-addons
 # import math
 
@@ -46,7 +45,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--predictstep', type=int, default=1,
                     help='choose the predicted step: 1, 10, 30, 50, 100')
 args = parser.parse_args()
-PATH = f"..//Data//TrainedRes//sec{args.predictstep}//"
+PREDICTED_STEP = args.predictstep
+PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
 # activation1 = args.activation1
 # activation2 = args.activation2
 
@@ -72,17 +72,17 @@ def load_train_test_data():
     return trainData, testData
 
 
-def plot_history(history, result_dir):
-    plt.figure()
-    plt.plot(history.history['loss'], marker='.')
-    plt.plot(history.history['val_loss'], marker='.')
-    plt.title('Model Mean Absoluted Error')
-    plt.xlabel('epoch')
-    plt.ylabel('MAE')
-    plt.grid()
-    plt.legend(['mae', 'val_loss'], loc='upper right')
-    plt.savefig(result_dir, dpi=500, bbox_inches="tight")
-    plt.close()
+# def plot_history(history, result_dir):
+#     plt.figure()
+#     plt.plot(history.history['loss'], marker='.')
+#     plt.plot(history.history['val_loss'], marker='.')
+#     plt.title('Model Mean Absoluted Error')
+#     plt.xlabel('epoch')
+#     plt.ylabel('MAE')
+#     plt.grid()
+#     plt.legend(['mae', 'val_loss'], loc='upper right')
+#     plt.savefig(result_dir, dpi=500, bbox_inches="tight")
+#     plt.close()
 
 # def swish(x):
 #     swish_value = x * sigmoid(x)
@@ -102,7 +102,7 @@ def mish(x):
 
 
 swish = tf.keras.activations.swish
-activation_f1, activation_f2 = 'tanh', 'sigmoid'
+
 # if activation1 == 'swish':
 #     activation_f1 = swish
 # elif activation1 == 'mish':
@@ -115,40 +115,18 @@ activation_f1, activation_f2 = 'tanh', 'sigmoid'
 #     activation_f2 = mish
 
 
-def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
-                       model, param_grid, cv=10, scoring_fit='neg_mean_squared_error',
-                       do_probabilities=False):
-    gs = GridSearchCV(
-        estimator=model,
-        param_grid=param_grid,
-        cv=cv,
-        n_jobs=-1,
-        scoring=scoring_fit,
-        verbose=2
-    )
-    fitted_model = gs.fit(X_train_data, y_train_data)
-
-    if do_probabilities:
-        pred = fitted_model.predict_proba(X_test_data)
-    else:
-        pred = fitted_model.predict(X_test_data)
-
-    return fitted_model, pred
-
-
 def build_model(hidden_size=20,
+                batch_size=128,
                 lr=0.002,
                 optimizer='adam',
-                activation_1=activation_f1,
-                activation_2=activation_f2):
+                activation_1='tanh',
+                activation_2='sigmoid'):
     model = Sequential()
     model.add(LSTM(hidden_size,
                    activation=activation_1,
                    recurrent_activation=activation_2,
                    return_sequences=False,
-                   input_shape=(X_train.shape[1], X_train.shape[2])
-                   )
-              )
+                   input_shape=(X_train.shape[1], X_train.shape[2])))
     model.add(Dense(1))
     model.compile(loss=mean_absolute_error,
                   optimizer=Adam(lr=lr),
@@ -157,7 +135,29 @@ def build_model(hidden_size=20,
         model.compile(loss=mean_absolute_error,
                       optimizer=RAdamOptimizer(learning_rate=lr),
                       metrics=['cosine_similarity'])
+    # model.fit(X_train, y_train, epochs=500, batch_size=batch_size,
+    #                     validation_data=(X_valid, y_valid), verbose=1,
+    #                     shuffle=False, callbacks=[earlyStopping])
     return model
+
+
+def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
+                       model, param_grid, cv=10, scoring_fit='neg_mean_squared_error',
+                       do_probabilities=False):
+    gs = GridSearchCV(estimator=model,
+                      param_grid=param_grid,
+                      cv=cv,
+                      n_jobs=-1,
+                      scoring=scoring_fit,
+                      verbose=2)
+    fitted_model = gs.fit(X_train_data, y_train_data)
+
+    if do_probabilities:
+        pred = fitted_model.predict_proba(X_test_data)
+    else:
+        pred = fitted_model.predict(X_test_data)
+
+    return fitted_model, pred
 ###############################################################################
 if __name__ == "__main__":
     trainData, testData = load_train_test_data()
@@ -166,13 +166,13 @@ if __name__ == "__main__":
     ls = LoadSave("..//Data//TrainedRes//sec" + str(PREDICTED_STEP) + "//TestResults.pkl")
     testData["target"] = ls.load_data()
 
-    print(f"Train shape:{trainData.shape}, Test shape:{testData.shape} before dropping nan values.")
+    print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")
     trainData.dropna(inplace=True)
     testData.dropna(inplace=True)
 
     trainData.drop("FLAG", axis=1, inplace=True)
     testData.drop("FLAG", axis=1, inplace=True)
-    print(f"Train shape:{trainData.shape}, Test shape:{testData.shape} After dropping nan values.")
+    print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} After dropping nan values.")
 
     numFolds = 10
     tscv = TimeSeriesSplit(n_splits=numFolds)
@@ -181,7 +181,8 @@ if __name__ == "__main__":
         folds.append([trainInd, validInd])
 
     # Start the time series cross validation
-    score = np.zeros((numFolds, 5))
+    # score = np.zeros((numFolds, 6))
+    score = np.zeros((numFolds, 4))
     for ind, (train, valid) in enumerate(folds):
         X_train = trainData.iloc[train].drop(["target"], axis=1).values
         X_valid = trainData.iloc[valid].drop(["target"], axis=1).values
@@ -204,24 +205,29 @@ if __name__ == "__main__":
 
         # Start training the model
         model = build_model()
-        history = model.fit(X_train, y_train, epochs=500, batch_size=64,
-                            validation_data=(X_valid, y_valid), verbose=1,
-                            shuffle=False, callbacks=[earlyStopping])
-        model.evaluate(X_test, y_test, verbose=0)
+        # history = model.fit(X_train, y_train, epochs=500, batch_size=64,
+        #                     validation_data=(X_valid, y_valid), verbose=1,
+        #                     shuffle=False, callbacks=[earlyStopping])
+        # model.evaluate(X_test, y_test, verbose=0)
 
-        y_valid_pred = model.predict(X_valid)
-        y_valid, y_valid_pred = y_sc.inverse_transform(y_valid), y_sc.inverse_transform(y_valid_pred)
-        y_valid_pred[y_valid_pred < 1] = 0
-        score[ind, 0] = ind
-        score[ind, 1], score[ind, 2] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred), np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
+        # y_valid_pred = model.predict(X_valid)
+        # y_valid, y_valid_pred = y_sc.inverse_transform(y_valid), y_sc.inverse_transform(y_valid_pred)
+        # y_valid_pred[y_valid_pred < 1] = 0
+        #
+        # y_test_pred = model.predict(X_test)
+        # y_test, y_test_pred = y_sc.inverse_transform(y_test), y_sc.inverse_transform(y_test_pred)
+        # y_test_pred[y_test_pred < 1] = 0
 
-        y_test_pred = model.predict(X_test)
-        y_test, y_test_pred = y_sc.inverse_transform(y_test), y_sc.inverse_transform(y_test_pred)
-        y_test_pred[y_test_pred < 1] = 0
-        score[ind, 3], score[ind, 4] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred), np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
+        # score[ind, 0] = ind
+        # score[ind, 1] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred)
+        # score[ind, 2] = np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
+        # score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred)
+        # score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
+        # score[ind, 5] = r2_score(y_test, y_test_pred)
 
         param_grid = {
             'hidden_size': [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
+            'batch_size': [32, 64, 128, 256, 512, 1024],
             'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
             'optimizer': ['adam', 'radam'],
             'activation_1': ['tanh', swish, mish],
@@ -229,9 +235,9 @@ if __name__ == "__main__":
         }
 
         #search the best hp
-        model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=build_model, verbose=0)
-        model, pred = algorithm_pipeline(X_train, X_test, y_train, y_test,
-                                         model, param_grid, cv=5)
+        model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=model, verbose=0)
+        model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test,
+                                         model, param_grid, cv=5, scoring_fit='max_error')
 
         # with open('result.txt', 'a') as fp:
         #     fp.write(f'({model.best_score_}, {model.best_params_})\n')
@@ -239,10 +245,18 @@ if __name__ == "__main__":
         # print(model.best_score_)
         # print(model.best_params_)
 
+        y_pred = y_sc.inverse_transform(y_pred)
+        y_pred[y_pred < 1] = 0
+
+        score[ind, 0] = ind
+        score[ind, 1] = model.best_score_
+        score[ind, 2] = r2_score(y_test, y_pred)
+        score[ind, 3] = model.best_params_
+
 
         start, end = 0, len(y_test)
         plt.figure(figsize=(16, 10))
-        plt.plot(y_test_pred[start:end], linewidth=2, linestyle="-", color="r")
+        plt.plot(y_pred[start:end], linewidth=2, linestyle="-", color="r")
         plt.plot(y_test[start:end], linewidth=2, linestyle="-", color="b")
         plt.legend(["Prediction", "Ground Truth"])
         plt.xlim(0, end - start)
@@ -250,10 +264,13 @@ if __name__ == "__main__":
         plt.grid(True)
         if not os.path.exists('..//Plots'):
             os.makedirs('..//Plots')
-        plt.savefig("..//Plots//PredictedStepTest_" + str(PREDICTED_STEP) + "_folds_" + str(ind + 1) + "_Original.png",
+        # plt.savefig("..//Plots//PredictedStepTest_" + str(PREDICTED_STEP) + "_folds_" + str(ind + 1) + "_Original.png",
+        #             dpi=50, bbox_inches="tight")
+        plt.savefig(f"..//Plots//PredictedStepTest_{PREDICTED_STEP}_folds_{ind + 1}_Original.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
-    score = pd.DataFrame(score, columns=["fold", "validMAE", "validRMSE", "testMAE", "testRMSE"])
+    # score = pd.DataFrame(score, columns=["fold", "validMAE", "validRMSE", "testMAE", "testRMSE", 'testRsqr'])
+    score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square', 'best_params'])
     print(score)
 
     #save
