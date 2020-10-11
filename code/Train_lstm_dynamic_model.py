@@ -236,8 +236,9 @@ if __name__ == "__main__":
 
         #search the best hp
         model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=model, verbose=0)
-        model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test,
-                                         model, param_grid, cv=5, scoring_fit='max_error')
+        model, y_pred = algorithm_pipeline(X_train, X_test,
+                                           y_train, y_test,
+                                           model, param_grid)
 
         # with open('result.txt', 'a') as fp:
         #     fp.write(f'({model.best_score_}, {model.best_params_})\n')
