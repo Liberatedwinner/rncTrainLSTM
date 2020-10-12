@@ -28,7 +28,7 @@ from radam import RAdamOptimizer
 import tensorflow as tf
 import argparse
 from sklearn.metrics import r2_score
-import keras.wrappers
+from keras.wrappers.scikit_learn import KerasRegressor
 
 
 rcParams['patch.force_edgecolor'] = True
@@ -63,7 +63,7 @@ swish = tf.keras.activations.swish
 
 
 def build_model(hidden_size=20,
-                #batch_size=128,
+                # batch_size=128,
                 lr=0.002,
                 optimizer='adam',
                 activation_1='tanh',
@@ -165,7 +165,7 @@ if __name__ == "__main__":
         }
 
         # search the best hp
-        model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=build_model, verbose=0)
+        model = KerasRegressor(build_fn=build_model, verbose=0)
         model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
 
         with open('result.txt', 'a') as fp:
