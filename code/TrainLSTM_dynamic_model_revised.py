@@ -63,7 +63,7 @@ swish = tf.keras.activations.swish
 
 
 def build_model(hidden_size=20,
-                batch_size=128,
+                #batch_size=128,
                 lr=0.002,
                 optimizer='adam',
                 activation_1='tanh',
@@ -77,11 +77,11 @@ def build_model(hidden_size=20,
     model.add(Dense(1))
     model.compile(loss=mean_absolute_error,
                   optimizer=Adam(lr=lr),
-                  metrics=['cosine_similarity'])
+                  metrics=['mean_squared_error'])
     if optimizer == 'radam':
         model.compile(loss=mean_absolute_error,
                       optimizer=RAdamOptimizer(learning_rate=lr),
-                      metrics=['cosine_similarity'])
+                      metrics=['mean_squared_error'])
     # model.fit(X_train, y_train, epochs=500, batch_size=batch_size,
     #                     validation_data=(X_valid, y_valid), verbose=1,
     #                     shuffle=False, callbacks=[earlyStopping])
@@ -170,9 +170,9 @@ if __name__ == "__main__":
 
         with open('result.txt', 'a') as fp:
             fp.write(f'({model.best_score_}, {model.best_params_})\n')
-
         print(model.best_score_)
         print(model.best_params_)
+
         y_test = y_sc.inverse_transform(y_test)
         y_pred = y_sc.inverse_transform(y_pred)
         y_pred[y_pred < 1] = 0
