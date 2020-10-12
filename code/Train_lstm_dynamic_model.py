@@ -37,6 +37,8 @@ sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
+metric = 'mse'
+
 PREDICTED_STEP = 10
 if PREDICTED_STEP == 10:
     PATH = "..//Data//TrainedRes//sec10//"
@@ -73,14 +75,14 @@ def plot_history(history, result_dir):
     plt.close()
 
 
-def save_history(history, result_dir):
-    loss = history.history['loss']
-    acc = history.history['acc']
-    val_loss = history.history['val_loss']
-    val_acc = history.history['val_acc']
+def save_history(hist, metric):
+    loss = hist.history['loss']
+    acc = hist.history[metric]
+    val_loss = hist.history['val_loss']
+    val_acc = hist.history[f'val_{metric}']
     nb_epoch = len(acc)
 
-    with open('result.txt', 'w') as fp:
+    with open(f'result.txt', 'a') as fp:
         fp.write('epoch\tloss\tacc\tval_loss\tval_acc\n')
         for i in range(nb_epoch):
             fp.write('{}\t{}\t{}\t{}\t{}\n'.format(
@@ -95,13 +97,13 @@ if __name__ == "__main__":
     ls = LoadSave("..//Data//TrainedRes//sec" + str(PREDICTED_STEP) + "//TestResults.pkl")
     testData["target"] = ls.load_data()
 
-    print("Train shape:{}, Test shape:{} before dropping nan values.".format(trainData.shape, testData.shape))
+    print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")
     trainData.dropna(inplace=True)
     testData.dropna(inplace=True)
 
     trainData.drop("FLAG", axis=1, inplace=True)
     testData.drop("FLAG", axis=1, inplace=True)
-    print("Train shape:{}, Test shape:{} After dropping nan values.".format(trainData.shape, testData.shape))
+    print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} After dropping nan values.")
 
     numFolds = 10
     tscv = TimeSeriesSplit(n_splits=numFolds)
@@ -135,22 +137,30 @@ if __name__ == "__main__":
                        return_sequences=False,
                        input_shape=(X_train.shape[1], X_train.shape[2])))
         model.add(Dense(1))
-        model.compile(loss=mean_absolute_error, optimizer=Adam(lr=0.0005), metrics=['mae'])
-        # from radam import RAdam
-        # model.compile(loss=mean_absolute_error, optimizer=RAdam(), metrics=['mae']
-        history = model.fit(X_train, y_train, epochs=500, batch_size=64, validation_data=(X_valid, y_valid), verbose=1, shuffle=False, callbacks=[earlyStopping])
+        model.compile(loss=mean_absolute_error,
+                      optimizer=Adam(lr=0.002),
+                      metrics=['mse'])
+        history = model.fit(X_train, y_train,
+                            epochs=500, batch_size=64,
+                            validation_data=(X_valid, y_valid), verbose=1,
+                            shuffle=False, callbacks=[earlyStopping])
         model.evaluate(X_test, y_test, verbose=0)
 
         y_valid_pred = model.predict(X_valid)
         y_valid, y_valid_pred = y_sc.inverse_transform(y_valid), y_sc.inverse_transform(y_valid_pred)
         y_valid_pred[y_valid_pred < 1] = 0
-        score[ind, 0] = ind
-        score[ind, 1], score[ind, 2] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred), np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
 
         y_test_pred = model.predict(X_test)
         y_test, y_test_pred = y_sc.inverse_transform(y_test), y_sc.inverse_transform(y_test_pred)
         y_test_pred[y_test_pred < 1] = 0
-        score[ind, 3], score[ind, 4] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred), np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
+
+        score[ind, 0] = ind
+        score[ind, 1] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred)
+        score[ind, 2] = np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
+        score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred)
+        score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
+
+        save_history(history, metric)
 
         start, end = 0, len(y_test)
         plt.figure(figsize=(16, 10))
@@ -162,10 +172,10 @@ if __name__ == "__main__":
         plt.grid(True)
         if os.path.isdir('..//Plots'):
             os.makedirs('..//Plots')
-        plt.savefig(f"..//Plots//PredictedStepTest_{PREDICTED_STEP}_folds_{str(ind + 1)}_Original.png",
+        plt.savefig(f"..//Plots//PredictedStepTest_{str(PREDICTED_STEP)}_folds_{str(ind + 1)}_Original.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
-    score = pd.DataFrame(score, columns=["fold", "validRMSE", "validMAE", "testRMSE", "testMAE"])
+    score = pd.DataFrame(score, columns=["fold", "validMAE", "validRMSE", "testMAE", "testRMSE"])
     print(score)
 
 
