@@ -205,7 +205,7 @@ if __name__ == "__main__":
         X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
         # Start training the model
-        model = build_model()
+        #model = build_model()
         # history = model.fit(X_train, y_train, epochs=500, batch_size=64,
         #                     validation_data=(X_valid, y_valid), verbose=1,
         #                     shuffle=False, callbacks=[earlyStopping])
@@ -236,11 +236,9 @@ if __name__ == "__main__":
         }
 
         #search the best hp
-        model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=model, verbose=0)
-        model, y_pred = algorithm_pipeline(X_train, X_test,
-                                           y_train, y_test,
-                                           model, param_grid)
-
+        model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=build_model, verbose=0)
+        model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
+        
         # with open('result.txt', 'a') as fp:
         #     fp.write(f'({model.best_score_}, {model.best_params_})\n')
         #
