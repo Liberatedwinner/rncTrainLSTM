@@ -256,10 +256,10 @@ if __name__ == "__main__":
     # Saved all the data
     if PREDICTED_STEP == 10:
         PATH = "..//Data//TrainedRes//sec10//"
-    elif PREDICTED_STEP == 50:
-        PATH = "..//Data//TrainedRes//sec50//"    
     elif PREDICTED_STEP == 30:
         PATH = "..//Data//TrainedRes//sec30//"
+    elif PREDICTED_STEP == 50:
+        PATH = "..//Data//TrainedRes//sec50//"    
     else:
         PATH = "..//Data//TrainedRes//sec1//"
     os.makedirs(PATH)
