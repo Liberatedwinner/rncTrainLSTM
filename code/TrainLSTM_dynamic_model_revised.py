@@ -173,7 +173,7 @@ if __name__ == "__main__":
 
         print(model.best_score_)
         print(model.best_params_)
-
+        y_test = y_sc.inverse_transform(y_test)
         y_pred = y_sc.inverse_transform(y_pred)
         y_pred[y_pred < 1] = 0
 
