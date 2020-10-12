@@ -26,7 +26,8 @@ from keras.callbacks import EarlyStopping
 from radam import RAdamOptimizer
 import tensorflow as tf
 import argparse
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score, mean_absolute_error
+
 import keras.wrappers
 # import tensorflow_addons as tfa # pip install tensorflow-addons
 # import math
