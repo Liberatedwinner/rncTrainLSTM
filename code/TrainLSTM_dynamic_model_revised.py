@@ -168,11 +168,11 @@ if __name__ == "__main__":
         model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=build_model, verbose=0)
         model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
 
-        # with open('result.txt', 'a') as fp:
-        #     fp.write(f'({model.best_score_}, {model.best_params_})\n')
-        #
-        # print(model.best_score_)
-        # print(model.best_params_)
+        with open('result.txt', 'a') as fp:
+            fp.write(f'({model.best_score_}, {model.best_params_})\n')
+
+        print(model.best_score_)
+        print(model.best_params_)
 
         y_pred = y_sc.inverse_transform(y_pred)
         y_pred[y_pred < 1] = 0
