@@ -28,8 +28,7 @@ from keras.layers import Activation
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
-
-
+from sklearn.metrics import r2_score
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
 np.random.seed(2019)
@@ -154,7 +153,7 @@ if __name__ == "__main__":
         y_test, y_test_pred = y_sc.inverse_transform(y_test), y_sc.inverse_transform(y_test_pred)
         y_test_pred[y_test_pred < 1] = 0
 
-        score[ind, 0] = ind
+        score[ind, 0] = r2_score(y_test, y_test_pred)
         score[ind, 1] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred)
         score[ind, 2] = np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
         score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred)
@@ -175,7 +174,7 @@ if __name__ == "__main__":
         plt.savefig(f"..//Plots//PredictedStepTest_{str(PREDICTED_STEP)}_folds_{str(ind + 1)}_Original.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
-    score = pd.DataFrame(score, columns=["fold", "validMAE", "validRMSE", "testMAE", "testRMSE"])
+    score = pd.DataFrame(score, columns=["R-square", "validMAE", "validRMSE", "testMAE", "testRMSE"])
     print(score)
 
 
