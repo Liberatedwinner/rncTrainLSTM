@@ -170,7 +170,7 @@ if __name__ == "__main__":
         plt.xlim(0, end - start)
         plt.ylim(-500, 2600)
         plt.grid(True)
-        if os.path.exists('..//Plots'):
+        if not os.path.exists('..//Plots'):
             os.makedirs('..//Plots')
         plt.savefig(f"..//Plots//PredictedStepTest_{str(PREDICTED_STEP)}_folds_{str(ind + 1)}_Original.png",
                     dpi=50, bbox_inches="tight")
