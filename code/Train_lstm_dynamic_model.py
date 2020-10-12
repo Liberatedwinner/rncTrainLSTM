@@ -29,6 +29,7 @@ from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from sklearn.metrics import r2_score
+
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
 np.random.seed(2019)
