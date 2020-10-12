@@ -116,7 +116,7 @@ swish = tf.keras.activations.swish
 #     activation_f2 = mish
 
 
-def build_model(hidden_size=20,
+def build_model(hidden_size=18,
                 batch_size=128,
                 lr=0.002,
                 optimizer='adam',
@@ -136,9 +136,9 @@ def build_model(hidden_size=20,
         model.compile(loss=mean_absolute_error,
                       optimizer=RAdamOptimizer(learning_rate=lr),
                       metrics=['cosine_similarity'])
-    # model.fit(X_train, y_train, epochs=500, batch_size=batch_size,
-    #                     validation_data=(X_valid, y_valid), verbose=1,
-    #                     shuffle=False, callbacks=[earlyStopping])
+    model.fit(X_train, y_train, epochs=500, batch_size=batch_size,
+                        validation_data=(X_valid, y_valid), verbose=1,
+                        shuffle=False, callbacks=[earlyStopping])
     return model
 
 
@@ -182,8 +182,8 @@ if __name__ == "__main__":
         folds.append([trainInd, validInd])
 
     # Start the time series cross validation
-    # score = np.zeros((numFolds, 6))
-    score = np.zeros((numFolds, 4))
+    score = np.zeros((numFolds, 6))
+    # score = np.zeros((numFolds, 4))
     for ind, (train, valid) in enumerate(folds):
         X_train = trainData.iloc[train].drop(["target"], axis=1).values
         X_valid = trainData.iloc[valid].drop(["target"], axis=1).values
@@ -205,53 +205,33 @@ if __name__ == "__main__":
         X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
         # Start training the model
-        #model = build_model()
+        model = build_model()
         # history = model.fit(X_train, y_train, epochs=500, batch_size=64,
         #                     validation_data=(X_valid, y_valid), verbose=1,
         #                     shuffle=False, callbacks=[earlyStopping])
-        # model.evaluate(X_test, y_test, verbose=0)
+        model.evaluate(X_test, y_test, verbose=0)
 
-        # y_valid_pred = model.predict(X_valid)
-        # y_valid, y_valid_pred = y_sc.inverse_transform(y_valid), y_sc.inverse_transform(y_valid_pred)
-        # y_valid_pred[y_valid_pred < 1] = 0
-        #
-        # y_test_pred = model.predict(X_test)
-        # y_test, y_test_pred = y_sc.inverse_transform(y_test), y_sc.inverse_transform(y_test_pred)
-        # y_test_pred[y_test_pred < 1] = 0
+        y_valid_pred = model.predict(X_valid)
+        y_valid, y_valid_pred = y_sc.inverse_transform(y_valid), y_sc.inverse_transform(y_valid_pred)
+        y_valid_pred[y_valid_pred < 1] = 0
 
-        # score[ind, 0] = ind
-        # score[ind, 1] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred)
-        # score[ind, 2] = np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
-        # score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred)
-        # score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
-        # score[ind, 5] = r2_score(y_test, y_test_pred)
-
-        param_grid = {
-            'hidden_size': [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
-            'batch_size': [32, 64, 128, 256, 512, 1024],
-            'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
-            'optimizer': ['adam', 'radam'],
-            'activation_1': ['tanh', swish, mish],
-            'activation_2': ['sigmoid', swish, mish]
-        }
-
-        #search the best hp
-        model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=build_model, verbose=0)
-        model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
-        
-        # with open('result.txt', 'a') as fp:
-        #     fp.write(f'({model.best_score_}, {model.best_params_})\n')
-        #
-        # print(model.best_score_)
-        # print(model.best_params_)
-
-        y_pred = y_sc.inverse_transform(y_pred)
-        y_pred[y_pred < 1] = 0
+        y_test_pred = model.predict(X_test)
+        y_test, y_test_pred = y_sc.inverse_transform(y_test), y_sc.inverse_transform(y_test_pred)
+        y_test_pred[y_test_pred < 1] = 0
 
         score[ind, 0] = ind
-        score[ind, 1] = model.best_score_
-        score[ind, 2] = r2_score(y_test, y_pred)
-        score[ind, 3] = model.best_params_
+        score[ind, 1] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred)
+        score[ind, 2] = np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
+        score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred)
+        score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
+        score[ind, 5] = r2_score(y_test, y_test_pred)
+
+
+        with open('result.txt', 'a') as fp:
+            fp.write(f'({model.best_score_}, {model.best_params_})\n')
+
+        print(model.best_score_)
+        print(model.best_params_)
 
 
         start, end = 0, len(y_test)
@@ -269,8 +249,7 @@ if __name__ == "__main__":
         plt.savefig(f"..//Plots//PredictedStepTest_{PREDICTED_STEP}_folds_{ind + 1}_Original.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
-    # score = pd.DataFrame(score, columns=["fold", "validMAE", "validRMSE", "testMAE", "testRMSE", 'testRsqr'])
-    score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square', 'best_params'])
+    score = pd.DataFrame(score, columns=["fold", "validMAE", "validRMSE", "testMAE", "testRMSE", 'testRsqr'])
     print(score)
 
     #save
