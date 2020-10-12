@@ -140,7 +140,6 @@ def feature_engineering(dataAll, predictStep=[75]):
         print("----------------------------------------------------")
         print("Start with the file {}:".format(flag))
         data = dataAll[dataAll["FLAG"] == flag]
-        
 
         print("    Step 0. Forward fill nan, exclude the wrong times")
         data = data[(data["hour"] >= 5 ) & (data["hour"] < 23)]    # Only remain the non-stop data
@@ -151,21 +150,18 @@ def feature_engineering(dataAll, predictStep=[75]):
         data.reset_index(inplace=True, drop=True)
         data.reset_index(inplace=True)
         data.rename({"index":"timeStep"}, axis=1, inplace=True)     
-           
 
         print("    Step 1. Create basic lagging features for each time step")
         data = lagging_features(data, name="speed", laggingStep=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 50, 80])
         data = lagging_features(data, name="ATO_sim", laggingStep=[1, 3, 5, 20, 60])
-
 
         data["speed_cross_1"] = data["speed_lag_1"] * data["speed"]
         data["speed_cross_2"] = data["speed_lag_2"] * data["speed_lag_1"] * data["speed"]
         data["speed_cross_3"] = data["speed_lag_3"] * data["speed_lag_2"] * data["speed_lag_1"] * data["speed"]
         data["speed_cross_4"] = data["speed_lag_4"] * data["speed_lag_3"] * data["speed_lag_2"] * data["speed_lag_1"] * data["speed"]
         data["speed_cross_5"] = data["speed_lag_5"] * data["speed_lag_4"] * data["speed_lag_3"] * data["speed_lag_2"] * data["speed_lag_1"] * data["speed"]
+
         print("    Step 2. Create the statistical features for each time step")
-
-
         data = statistical_features(data, name="speed", timeRange=5)
         data = statistical_features(data, name="speed", timeRange=10)
         data = statistical_features(data, name="speed", timeRange=20)
@@ -272,4 +268,3 @@ if __name__ == "__main__":
 
     ls.save_data(path=PATH + "TestResults.pkl",
                      data=newData[(newData["FLAG"] == 1)]["target"].values)
-    
