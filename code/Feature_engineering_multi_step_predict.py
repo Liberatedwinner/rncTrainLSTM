@@ -146,7 +146,7 @@ def feature_engineering(dataAll, predictStep=[75]):
         data = data[(data["hour"] >= 5 ) & (data["hour"] < 23)]    # Only remain the non-stop data
         for name in list(data.columns):
             if data[name].isnull().sum() <= 100:
-                data[name].fillna(method="ffill", inplace=True)
+                data[name].fillna(method="ffill", inplace=True) # 결손 직전 값으로 이후 값을 채움
                 
         data.reset_index(inplace=True, drop=True)
         data.reset_index(inplace=True)
