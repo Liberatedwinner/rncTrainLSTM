@@ -30,8 +30,6 @@ import argparse
 from sklearn.metrics import r2_score
 import keras.wrappers
 
-# import tensorflow_addons as tfa # pip install tensorflow-addons
-# import math
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
@@ -41,10 +39,6 @@ warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
 parser = argparse.ArgumentParser()
-# parser.add_argument('--activation1', type=str, default='tanh',
-#                     help='choose the activation function instead of tanh: swish, mish')
-# parser.add_argument('--activation2', type=str, default='sigmoid',
-#                     help='choose the activation function instead of sigmoid: swish, mish')
 parser.add_argument('--predictstep', type=int, default=1,
                     help='choose the predicted step: 1, 10, 30, 50, 100')
 args = parser.parse_args()
@@ -59,31 +53,6 @@ def load_train_test_data():
     ls._fileName = PATH + "Test.pkl"
     testData = ls.load_data()
     return trainData, testData
-
-
-# def plot_history(history, result_dir):
-#     plt.figure()
-#     plt.plot(history.history['loss'], marker='.')
-#     plt.plot(history.history['val_loss'], marker='.')
-#     plt.title('Model Mean Absoluted Error')
-#     plt.xlabel('epoch')
-#     plt.ylabel('MAE')
-#     plt.grid()
-#     plt.legend(['mae', 'val_loss'], loc='upper right')
-#     plt.savefig(result_dir, dpi=500, bbox_inches="tight")
-#     plt.close()
-
-# def swish(x):
-#     swish_value = x * sigmoid(x)
-#     if swish_value < 1:
-#         swish_value = 1
-#     return swish_value
-#
-# def mish(x):
-#     mish_value = x * math.tanh(math.log((1 + math.exp(x))))
-#     if mish_value < 1:
-#         mish_value = 1
-#     return mish_va
 
 
 def mish(x):
@@ -225,7 +194,6 @@ if __name__ == "__main__":
         plt.savefig(f"..//Plots//PredictedStepTest_{PREDICTED_STEP}_folds_{ind + 1}_Original.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
-    # score = pd.DataFrame(score, columns=["fold", "validMAE", "validRMSE", "testMAE", "testRMSE", 'testRsqr'])
     score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square', 'best_params'])
     print(score)
 
