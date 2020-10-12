@@ -29,6 +29,10 @@ from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 
+from radam import RAdamOptimizer
+import tensorflow as tf
+import argparse
+from sklearn.metrics import r2_score, mean_absolute_error
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
@@ -112,7 +116,7 @@ if __name__ == "__main__":
         folds.append([trainInd, validInd])
 
     # Start the time series cross validation
-    score = np.zeros((numFolds, 5))
+    score = np.zeros((numFolds, 6))
     for ind, (train, valid) in enumerate(folds):
         X_train, X_valid = trainData.iloc[train].drop(["target"], axis=1).values, trainData.iloc[valid].drop(["target"], axis=1).values
         y_train, y_valid = trainData.iloc[train]["target"].values.reshape(len(X_train), 1), trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
@@ -159,6 +163,7 @@ if __name__ == "__main__":
         score[ind, 2] = np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
         score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred)
         score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
+        score[ind, 5] = r2_score(y_test, y_test_pred)
 
         save_history(history, metric)
 
