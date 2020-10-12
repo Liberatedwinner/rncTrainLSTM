@@ -132,14 +132,14 @@ def build_model(hidden_size=18,
     model.add(Dense(1))
     model.compile(loss=mean_absolute_error,
                   optimizer=Adam(lr=lr),
-                  metrics=['cosine_similarity'])
+                  metrics=['mean_square_error'])
     if optimizer == 'radam':
         model.compile(loss=mean_absolute_error,
                       optimizer=RAdamOptimizer(learning_rate=lr),
-                      metrics=['cosine_similarity'])
-    model.fit(X_train, y_train, epochs=500, batch_size=batch_size,
-                        validation_data=(X_valid, y_valid), verbose=1,
-                        shuffle=False, callbacks=[earlyStopping])
+                      metrics=['mean_square_error'])
+    # model.fit(X_train, y_train, epochs=500, batch_size=batch_size,
+    #                     validation_data=(X_valid, y_valid), verbose=1,
+    #                     shuffle=False, callbacks=[earlyStopping])
     return model
 
 
@@ -207,9 +207,9 @@ if __name__ == "__main__":
 
         # Start training the model
         model = build_model()
-        # history = model.fit(X_train, y_train, epochs=500, batch_size=64,
-        #                     validation_data=(X_valid, y_valid), verbose=1,
-        #                     shuffle=False, callbacks=[earlyStopping])
+        history = model.fit(X_train, y_train, epochs=500, batch_size=64,
+                            validation_data=(X_valid, y_valid), verbose=1,
+                            shuffle=False, callbacks=[earlyStopping])
         model.evaluate(X_test, y_test, verbose=0)
 
         y_valid_pred = model.predict(X_valid)
@@ -237,7 +237,7 @@ if __name__ == "__main__":
 
         start, end = 0, len(y_test)
         plt.figure(figsize=(16, 10))
-        plt.plot(y_pred[start:end], linewidth=2, linestyle="-", color="r")
+        plt.plot(y_test_pred[start:end], linewidth=2, linestyle="-", color="r")
         plt.plot(y_test[start:end], linewidth=2, linestyle="-", color="b")
         plt.legend(["Prediction", "Ground Truth"])
         plt.xlim(0, end - start)
