@@ -180,7 +180,7 @@ if __name__ == "__main__":
         plt.savefig(f"..//Plots//PredictedStepTest_{str(PREDICTED_STEP)}_folds_{str(ind + 1)}_Original.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
-    score = pd.DataFrame(score, columns=["fold", "validMAE", "validRMSE", "testMAE", "testRMSE"])
+    score = pd.DataFrame(score, columns=["fold", "validMAE", "validRMSE", "testMAE", "testRMSE", 'R-square'])
     print(score)
 
 
