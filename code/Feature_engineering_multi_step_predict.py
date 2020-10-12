@@ -108,7 +108,7 @@ def preprocessing(nrows=None):
 
     data["hour"] = data["time"].dt.hour
     data["dayOfWeek"] = data["time"].dt.dayofweek
-    data["rest"] = data["dayOfWeek"] > 4
+    data["rest"] = data["dayOfWeek"] > 4 # 0-mon
     data["day"] = data["time"].dt.day
     data.drop(["time"], axis=1, inplace=True)
     
