@@ -116,10 +116,10 @@ if __name__ == "__main__":
         folds.append([trainInd, validInd])
 
     # Start the time series cross validation
-    score = np.zeros((numFolds, 5))
     for hidden_size in hidden_sizes:
         for lr in lrs:
             for batch_size in batch_sizes:
+                score = np.zeros((numFolds, 5))
                 for ind, (train, valid) in enumerate(folds):
                     X_train, X_valid = trainData.iloc[train].drop(["target"], axis=1).values, trainData.iloc[valid].drop(["target"], axis=1).values
                     y_train, y_valid = trainData.iloc[train]["target"].values.reshape(len(X_train), 1), trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
