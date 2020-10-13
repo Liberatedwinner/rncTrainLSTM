@@ -159,8 +159,8 @@ if __name__ == "__main__":
             # 'hidden_size': [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
             #'hidden_size': [10, 14, 18, 22, 26, 30],
             #'batch_size': [32, 64, 128, 256, 512],
-            'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
-            #'optimizer': ['adam', 'radam'],
+            #'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
+            'optimizer': ['adam', 'radam'],
             #'activation_1': ['tanh', swish, mish],
             #'activation_2': ['sigmoid', swish, mish]
         }
