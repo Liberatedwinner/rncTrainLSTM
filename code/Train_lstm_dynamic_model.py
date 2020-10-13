@@ -164,7 +164,7 @@ if __name__ == "__main__":
         score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred)
         score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
 
-        save_history(history, metric)
+        #save_history(history, metric)
 
         start, end = 0, len(y_test)
         plt.figure(figsize=(16, 10))
@@ -181,5 +181,5 @@ if __name__ == "__main__":
         plt.close("all")
     score = pd.DataFrame(score, columns=["R-square", "validMAE", "validRMSE", "testMAE", "testRMSE"])
     print(score)
-    score.to_pickle('score.pkl')
+    score.to_pickle(f'..//Plots//{hidden_size}-{lr}-{batch_size}//score.pkl')
 
