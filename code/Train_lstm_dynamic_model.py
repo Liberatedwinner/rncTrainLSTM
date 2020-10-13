@@ -41,7 +41,11 @@ earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 hidden_sizes = [10, 14, 18, 22, 26, 30]
 lrs = [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
 batch_sizes = [32, 64, 128, 256, 512]
-metric = 'mse'
+#hidden_sizes = [18]
+#lrs = [1e-3]
+#batch_sizes = [64, 128]
+
+metric = 'mae'
 
 PREDICTED_STEP = 10
 if PREDICTED_STEP == 10:
@@ -185,4 +189,4 @@ if __name__ == "__main__":
                 score = pd.DataFrame(score, columns=["R-square", "validMAE", "validRMSE", "testMAE", "testRMSE"])
                 print(score)
                 score.to_pickle(f'..//Plots//{hidden_size}-{lr}-{batch_size}//score-{hidden_size}-{lr}-{batch_size}.pkl')
-
+                score.to_csv(f'..//Plots//{hidden_size}-{lr}-{batch_size}//score-{hidden_size}-{lr}-{batch_size}.csv')
