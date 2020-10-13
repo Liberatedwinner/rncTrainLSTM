@@ -62,9 +62,9 @@ def mish(x):
 swish = tf.keras.activations.swish
 
 
-def build_model(hidden_size=20,
+def build_model(hidden_size=18,
                 # batch_size=128,
-                lr=0.002,
+                lr=0.001,
                 optimizer='adam',
                 activation_1='tanh',
                 activation_2='sigmoid'):
@@ -160,9 +160,9 @@ if __name__ == "__main__":
             #'hidden_size': [10, 14, 18, 22, 26, 30],
             'batch_size': [32, 64, 128, 256, 512],
             #'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
-            'optimizer': ['adam', 'radam'],
+            #'optimizer': ['adam', 'radam'],
             #'activation_1': ['tanh', swish, mish],
-            'activation_2': ['sigmoid', swish, mish]
+            #'activation_2': ['sigmoid', swish, mish]
         }
 
         # search the best hp

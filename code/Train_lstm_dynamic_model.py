@@ -37,6 +37,10 @@ sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
+
+hidden_size = 18 
+lr = 0.002
+batch_size = 64
 metric = 'mse'
 
 PREDICTED_STEP = 10
@@ -133,15 +137,15 @@ if __name__ == "__main__":
 
         # Start training the model
         model = Sequential()
-        model.add(LSTM(20,
+        model.add(LSTM(hidden_size,
                        return_sequences=False,
                        input_shape=(X_train.shape[1], X_train.shape[2])))
         model.add(Dense(1))
         model.compile(loss=mean_absolute_error,
-                      optimizer=Adam(lr=0.002),
+                      optimizer=Adam(lr=lr),
                       metrics=['mse'])
         history = model.fit(X_train, y_train,
-                            epochs=500, batch_size=64,
+                            epochs=500, batch_size=batch_size,
                             validation_data=(X_valid, y_valid), verbose=1,
                             shuffle=False, callbacks=[earlyStopping])
         model.evaluate(X_test, y_test, verbose=0)
@@ -170,21 +174,12 @@ if __name__ == "__main__":
         plt.xlim(0, end - start)
         plt.ylim(-500, 2600)
         plt.grid(True)
-        if not os.path.exists('..//Plots'):
-            os.makedirs('..//Plots')
-        plt.savefig(f"..//Plots//PredictedStepTest_{str(PREDICTED_STEP)}_folds_{str(ind + 1)}_Original.png",
+        if not os.path.exists(f'..//Plots//{hidden_size}-{lr}-{batch_size}'):
+            os.makedirs(f'..//Plots//{hidden_size}-{lr}-{batch_size}')
+        plt.savefig(f"..//Plots//{hidden_size}-{lr}-{batch_size}//PredictedStepTest_{str(PREDICTED_STEP)}_folds_{str(ind + 1)}.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
     score = pd.DataFrame(score, columns=["R-square", "validMAE", "validRMSE", "testMAE", "testRMSE"])
     print(score)
-
-
-
-    # plt.figure()
-    # sns.distplot(trainData["target"].values, kde=True, bins=100)
-    # sns.distplot(testData["target"].values, kde=True, color="green", bins=100)
-    # plt.legend(["Train", "Test"])
-    #
-    # plt.figure()
-    # sns.boxplot(data=[trainData["target"].values, testData["target"].values], color="green")
+    score.to_pickle('score.pkl')
 
