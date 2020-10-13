@@ -77,11 +77,11 @@ def build_model(hidden_size=18,
     model.add(Dense(1))
     model.compile(loss=mean_absolute_error,
                   optimizer=Adam(lr=lr),
-                  metrics=['mean_squared_error'])
+                  metrics=['mae'])
     if optimizer == 'radam':
         model.compile(loss=mean_absolute_error,
                       optimizer=RAdamOptimizer(learning_rate=lr),
-                      metrics=['mean_squared_error'])
+                      metrics=['mae'])
     # model.fit(X_train, y_train, epochs=500, batch_size=batch_size,
     #                     validation_data=(X_valid, y_valid), verbose=1,
     #                     shuffle=False, callbacks=[earlyStopping])
@@ -89,7 +89,7 @@ def build_model(hidden_size=18,
 
 
 def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
-                       model, param_grid, cv=10, scoring_fit='neg_mean_squared_error',
+                       model, param_grid, cv=10, scoring_fit='neg_mean_absolute_error',
                        do_probabilities=False):
     gs = GridSearchCV(estimator=model,
                       param_grid=param_grid,
