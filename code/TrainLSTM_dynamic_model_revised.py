@@ -199,15 +199,24 @@ if __name__ == "__main__":
         plt.savefig(f"..//Plots//PredictedStepTest_{PREDICTED_STEP}_folds_{ind + 1}_Original.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
+    # from ast import literal_eval
+    # for dct in best_hp:
+    #     st = '-'
+    #     for key, value in literal_eval(dct):
+    #         st += f'{value}-'
     score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square'])
     best_hp = pd.DataFrame(best_hp, columns=['best_params'])
-    the_result_table = pd.concat([score, best_hp], axis=1)
-    print(the_result_table)
+
+    result_table = pd.concat([score, best_hp], axis=1)
+    print(result_table)
     #print(score)
     #print(best_hp)
 
     # save
     #score.to_pickle("score.pkl")
-    the_result_table.to_pickle('result_table.pkl')
+    result_table.to_pickle('result_table.pkl')
+    result_table.to_csv('result_table.csv')
+
     # #load
     # df = pd.read_pickle("score.pkl")
+    # df = pd.read_csv('sample.csv')
