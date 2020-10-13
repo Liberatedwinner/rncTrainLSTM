@@ -131,7 +131,8 @@ if __name__ == "__main__":
 
     # Start the time series cross validation
     # score = np.zeros((numFolds, 6))
-    score = np.zeros((numFolds, 4))
+    score = np.zeros((numFolds, 3))
+    best_hp = []
     for ind, (train, valid) in enumerate(folds):
         X_train = trainData.iloc[train].drop(["target"], axis=1).values
         X_valid = trainData.iloc[valid].drop(["target"], axis=1).values
@@ -156,11 +157,11 @@ if __name__ == "__main__":
 
         param_grid = {
             # 'hidden_size': [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
-            'hidden_size': [10, 14, 18, 22, 26, 30],
+            #'hidden_size': [10, 14, 18, 22, 26, 30],
             'batch_size': [32, 64, 128, 256, 512],
-            'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
+            #'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
             'optimizer': ['adam', 'radam'],
-            'activation_1': ['tanh', swish, mish],
+            #'activation_1': ['tanh', swish, mish],
             'activation_2': ['sigmoid', swish, mish]
         }
 
@@ -173,15 +174,18 @@ if __name__ == "__main__":
         print(model.best_score_)
         print(model.best_params_)
 
-        y_test = y_sc.inverse_transform(y_test) # [[]] or y_test = y_test.reshape(-1, 1) 등
+        y_test = y_sc.inverse_transform(y_test)
+        #print(y_test.shape)
+        y_pred = y_pred.reshape((-1, 1))
+        #print(y_pred.shape)
         y_pred = y_sc.inverse_transform(y_pred)
         y_pred[y_pred < 1] = 0
 
         score[ind, 0] = ind
         score[ind, 1] = model.best_score_
         score[ind, 2] = r2_score(y_test, y_pred)
-        score[ind, 3] = model.best_params_
-
+        best_hp.append(str(model.best_params_))
+        
         start, end = 0, len(y_test)
         plt.figure(figsize=(16, 10))
         plt.plot(y_pred[start:end], linewidth=2, linestyle="-", color="r")
@@ -195,11 +199,15 @@ if __name__ == "__main__":
         plt.savefig(f"..//Plots//PredictedStepTest_{PREDICTED_STEP}_folds_{ind + 1}_Original.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
-    score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square', 'best_params'])
-    print(score)
+    score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square'])
+    best_hp = pd.DataFrame(best_hp, columns=['best_params'])
+    the_result_table = pd.concat([score, best_hp], axis=1)
+    print(the_result_table)
+    #print(score)
+    #print(best_hp)
 
     # save
-    score.to_pickle("score.pkl")
-
+    #score.to_pickle("score.pkl")
+    the_result_table.to_pickle('result_table.pkl')
     # #load
     # df = pd.read_pickle("score.pkl")
