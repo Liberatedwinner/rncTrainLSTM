@@ -184,5 +184,5 @@ if __name__ == "__main__":
                     plt.close("all")
                 score = pd.DataFrame(score, columns=["R-square", "validMAE", "validRMSE", "testMAE", "testRMSE"])
                 print(score)
-                score.to_pickle(f'..//Plots//{hidden_size}-{lr}-{batch_size}//score.pkl')
+                score.to_pickle(f'..//Plots//{hidden_size}-{lr}-{batch_size}//score-{hidden_size}-{lr}-{batch_size}.pkl')
 
