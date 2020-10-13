@@ -154,15 +154,14 @@ if __name__ == "__main__":
         X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
         # Start training the model
-
         param_grid = {
             # 'hidden_size': [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
-            #'hidden_size': [10, 14, 18, 22, 26, 30],
-            #'batch_size': [32, 64, 128, 256, 512],
-            #'lr': [1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
-            'optimizer': ['adam', 'radam'],
-            #'activation_1': ['tanh', swish, mish],
-            #'activation_2': ['sigmoid', swish, mish]
+            #'hidden_size': [18], #[10, 14, 18, 22, 26, 30],
+            'batch_size': [2,6,8,12,16,20,24,28] #[32, 64, 128, 256, 512],
+            #'lr': [2e-3], #[1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
+            #'optimizer': ['adam'], #['adam', 'radam'],
+            #'activation_1': ['tanh'], #['tanh', swish, mish],
+            #'activation_2': [mish] #['sigmoid', swish, mish]
         }
 
         # search the best hp
