@@ -156,13 +156,14 @@ if __name__ == "__main__":
         # Start training the model
         param_grid = {
             # 'hidden_size': [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
-            #'hidden_size': [18], #[10, 14, 18, 22, 26, 30],
-            'batch_size': [2,6,8,12,16,20,24,28] #[32, 64, 128, 256, 512],
-            #'lr': [2e-3], #[1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
-            #'optimizer': ['adam'], #['adam', 'radam'],
-            #'activation_1': ['tanh'], #['tanh', swish, mish],
-            #'activation_2': [mish] #['sigmoid', swish, mish]
+            'hidden_size': [18], #[10, 14, 18, 22, 26, 30],
+            'batch_size': [12], #[2,6,8,12,16,20,24,28] #[32, 64, 128, 256, 512],
+            'lr': [2e-3], #[1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
+            'optimizer': ['adam'], #['adam', 'radam'],
+            'activation_1': ['tanh'], #['tanh', swish, mish],
+            'activation_2': [mish] #['sigmoid', swish, mish]
         }
+        #bestparam = {'activation_1': 'tanh', 'activation_2': <function mish at 0x7f9bda6d0598>, 'batch_size': 12, 'hidden_size': 18, 'lr': 0.002, 'optimizer': 'adam'}
 
         # search the best hp
         model = KerasRegressor(build_fn=build_model, verbose=0)
