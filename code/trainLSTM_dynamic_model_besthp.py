@@ -155,24 +155,25 @@ if __name__ == "__main__":
 
         # Start training the model
         param_grid = {
-            # 'hidden_size': [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
-            'hidden_size': [18],#[10, 14, 18, 22, 26, 30],
+            'hidden_size': [18], #[10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
             'batch_size': [24], #[2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32, 64, 128, 256, 512],
-            'lr': [1e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2],
+            'lr': [1e-3], #[1e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2],
             'optimizer': ['adam'], #['adam', 'radam'],
             'activation_1': ['tanh'], #['tanh', swish, mish],
-            'activation_2': [mish] #['sigmoid', swish, mish]
+            'activation_2': [mish], #['sigmoid', swish, mish]
         }
-        #bestparam = {'activation_1': 'tanh', 'activation_2': <function mish at 0x7f9bda6d0598>, 'batch_size': 10, 'hidden_size': 18, 'lr': 0.002, 'optimizer': 'adam'}
+        #bestparam = {'activation_1': 'tanh', 'activation_2': <function mish at 0x7f9bda6d0598>, 'batch_size': 24, 'hidden_size': 18, 'lr': 0.001, 'optimizer': 'adam'}
 
         # search the best hp
         model = KerasRegressor(build_fn=build_model, verbose=0)
         model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
 
-        with open('result.txt', 'a') as fp:
-            fp.write(f'({model.best_score_}, {model.best_params_})\n')
+        #with open('result.txt', 'a') as fp:
+        #    fp.write(f'({model.best_score_}, {model.best_params_})\n')
+        print('=====')
         print(model.best_score_)
         print(model.best_params_)
+        print('=====')
 
         y_test = y_sc.inverse_transform(y_test)
         #print(y_test.shape)
