@@ -63,8 +63,8 @@ swish = tf.keras.activations.swish
 
 
 def build_model(hidden_size=18,
-                # batch_size=128,
-                lr=0.001,
+                # batch_size=12,
+                lr=0.002,
                 optimizer='adam',
                 activation_1='tanh',
                 activation_2='sigmoid'):
@@ -157,7 +157,7 @@ if __name__ == "__main__":
         param_grid = {
             # 'hidden_size': [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
             'hidden_size': [18], #[10, 14, 18, 22, 26, 30],
-            'batch_size': [12], #[2,6,8,12,16,20,24,28] #[32, 64, 128, 256, 512],
+            'batch_size': [10], #[2,4,6,8,10,12,14,16,18,20], #[32, 64, 128, 256, 512],
             'lr': [2e-3], #[1e-4, 5e-4, 1e-3, 2e-3, 5e-3],
             'optimizer': ['adam'], #['adam', 'radam'],
             'activation_1': ['tanh'], #['tanh', swish, mish],
@@ -194,9 +194,9 @@ if __name__ == "__main__":
         plt.xlim(0, end - start)
         plt.ylim(-500, 2600)
         plt.grid(True)
-        if not os.path.exists('..//Plots'):
-            os.makedirs('..//Plots')
-        plt.savefig(f"..//Plots//PredictedStepTest_{PREDICTED_STEP}_folds_{ind + 1}_Original.png",
+        if not os.path.exists('..//Plots2'):
+            os.makedirs('..//Plots2')
+        plt.savefig(f"..//Plots2//PredictedStepTest_{PREDICTED_STEP}_folds_{ind + 1}_.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
     # from ast import literal_eval
@@ -214,8 +214,8 @@ if __name__ == "__main__":
 
     # save
     #score.to_pickle("score.pkl")
-    result_table.to_pickle('result_table.pkl')
-    result_table.to_csv('result_table.csv')
+    result_table.to_pickle('..//Plots2//result_table.pkl')
+    result_table.to_csv('..//Plots2//result_table.csv')
 
     # #load
     # df = pd.read_pickle("score.pkl")
