@@ -29,7 +29,6 @@ from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from sklearn.metrics import r2_score
-import keras.backend.tensorflow_backend as K
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
@@ -144,15 +143,14 @@ if __name__ == "__main__":
                     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
                     # Start training the model
-                    with K.tf_ops.device('/device:GPU:0'):
-                        model = Sequential()
-                        model.add(LSTM(hidden_size, ###TODO
-                                       return_sequences=False,
-                                       input_shape=(X_train.shape[1], X_train.shape[2])))
-                        model.add(Dense(1))
-                        model.compile(loss=mean_absolute_error,
-                                      optimizer=Adam(lr=lr), ###TODO
-                                      metrics=['mae'])
+                    model = Sequential()
+                    model.add(LSTM(hidden_size, ###TODO
+                                   return_sequences=False,
+                                   input_shape=(X_train.shape[1], X_train.shape[2])))
+                    model.add(Dense(1))
+                    model.compile(loss=mean_absolute_error,
+                                  optimizer=Adam(lr=lr), ###TODO
+                                  metrics=['mae'])
                     history = model.fit(X_train, y_train,
                                         epochs=500, batch_size=batch_size, ###TODO
                                         validation_data=(X_valid, y_valid), verbose=1,
