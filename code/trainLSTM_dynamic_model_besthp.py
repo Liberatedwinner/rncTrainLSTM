@@ -29,6 +29,7 @@ import tensorflow as tf
 import argparse
 from sklearn.metrics import r2_score
 from keras.wrappers.scikit_learn import KerasRegressor
+import keras.backend.tensorflow_backend as K
 
 
 rcParams['patch.force_edgecolor'] = True
@@ -68,20 +69,21 @@ def build_model(hidden_size=18,
                 optimizer='adam',
                 activation_1='tanh',
                 activation_2='sigmoid'):
-    model = Sequential()
-    model.add(LSTM(hidden_size,
-                   activation=activation_1,
-                   recurrent_activation=activation_2,
-                   return_sequences=False,
-                   input_shape=(X_train.shape[1], X_train.shape[2])))
-    model.add(Dense(1))
-    model.compile(loss=mean_absolute_error,
-                  optimizer=Adam(lr=lr),
-                  metrics=['mae'])
-    if optimizer == 'radam':
+    with K.tf_ops.device('/device:GPU:0'):
+        model = Sequential()
+        model.add(LSTM(hidden_size,
+                       activation=activation_1,
+                       recurrent_activation=activation_2,
+                       return_sequences=False,
+                       input_shape=(X_train.shape[1], X_train.shape[2])))
+        model.add(Dense(1))
         model.compile(loss=mean_absolute_error,
-                      optimizer=RAdamOptimizer(learning_rate=lr),
+                      optimizer=Adam(lr=lr),
                       metrics=['mae'])
+        if optimizer == 'radam':
+            model.compile(loss=mean_absolute_error,
+                          optimizer=RAdamOptimizer(learning_rate=lr),
+                          metrics=['mae'])
     # model.fit(X_train, y_train, epochs=500, batch_size=batch_size,
     #                     validation_data=(X_valid, y_valid), verbose=1,
     #                     shuffle=False, callbacks=[earlyStopping])
