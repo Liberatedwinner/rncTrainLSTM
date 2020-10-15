@@ -139,19 +139,28 @@ if __name__ == "__main__":
         y_train = trainData.iloc[train]["target"].values.reshape(len(X_train), 1)
         y_valid = trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
 
-        # Access the normalized data
-        X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
-        X_train = X_sc.fit_transform(X_train)
-        X_valid = X_sc.transform(X_valid)  # fit 기준으로 transform하는
-        X_test = X_sc.transform(testData.drop(["target"], axis=1).values)
-
-        y_train = y_sc.fit_transform(y_train)
-        y_valid = y_sc.transform(y_valid)
-        y_test = y_sc.transform(testData["target"].values.reshape(len(X_test), 1))
+        ### TODO
+        X_test = testData.drop(["target"], axis=1).values
+        y_test = testData["target"].values.reshape(len(X_test), 1)
 
         X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
         X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
         X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+        ### TODO
+
+        # # Access the normalized data
+        # X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+        # X_train = X_sc.fit_transform(X_train)
+        # X_valid = X_sc.transform(X_valid)  # fit 기준으로 transform하는
+        # X_test = X_sc.transform(testData.drop(["target"], axis=1).values)
+        #
+        # y_train = y_sc.fit_transform(y_train)
+        # y_valid = y_sc.transform(y_valid)
+        # y_test = y_sc.transform(testData["target"].values.reshape(len(X_test), 1))
+        #
+        # X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+        # X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
+        # X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
         # Start training the model
         param_grid = {
@@ -175,10 +184,17 @@ if __name__ == "__main__":
         print(model.best_params_)
         print('=====')
 
+        ### TODO
+        # Access the normalized data
+        X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+
+        y_train = y_sc.fit_transform(y_train)
+        y_valid = y_sc.transform(y_valid)
+        y_test = y_sc.transform(y_test)
+        ### TODO
+
         y_test = y_sc.inverse_transform(y_test)
-        #print(y_test.shape)
         y_pred = y_pred.reshape((-1, 1))
-        #print(y_pred.shape)
         y_pred = y_sc.inverse_transform(y_pred)
         y_pred[y_pred < 1] = 0
 
