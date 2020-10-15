@@ -140,32 +140,32 @@ if __name__ == "__main__":
         y_valid = trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
 
         ### TODO
-        X_test = testData.drop(["target"], axis=1).values
-        y_test = testData["target"].values.reshape(len(X_test), 1)
+        #X_test = testData.drop(["target"], axis=1).values
+        #y_test = testData["target"].values.reshape(len(X_test), 1)
 
+        #X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+        #X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
+        #X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+        ### TODO
+
+        # Access the normalized data
+        X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+        X_train = X_sc.fit_transform(X_train)
+        X_valid = X_sc.transform(X_valid)  # fit 기준으로 transform하는
+        X_test = X_sc.transform(testData.drop(["target"], axis=1).values)
+        
+        y_train = y_sc.fit_transform(y_train)
+        y_valid = y_sc.transform(y_valid)
+        y_test = y_sc.transform(testData["target"].values.reshape(len(X_test), 1))
+        
         X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
         X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
         X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
-        ### TODO
-
-        # # Access the normalized data
-        # X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
-        # X_train = X_sc.fit_transform(X_train)
-        # X_valid = X_sc.transform(X_valid)  # fit 기준으로 transform하는
-        # X_test = X_sc.transform(testData.drop(["target"], axis=1).values)
-        #
-        # y_train = y_sc.fit_transform(y_train)
-        # y_valid = y_sc.transform(y_valid)
-        # y_test = y_sc.transform(testData["target"].values.reshape(len(X_test), 1))
-        #
-        # X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-        # X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
-        # X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
         # Start training the model
         param_grid = {
             'hidden_size': [18], #[10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
-            'batch_size': [2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32, 64, 128, 256, 512],
+            'batch_size': [16], #[2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32, 64, 128, 256, 512],
             'lr': [1e-3], #[1e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2],
             'optimizer': ['adam'], #['adam', 'radam'],
             'activation_1': ['tanh'], #['tanh', swish, mish],
@@ -185,12 +185,12 @@ if __name__ == "__main__":
         print('=====')
 
         ### TODO
-        # Access the normalized data
-        X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+        ## Access the normalized data
+        #X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
 
-        y_train = y_sc.fit_transform(y_train)
-        y_valid = y_sc.transform(y_valid)
-        y_test = y_sc.transform(y_test)
+        #y_train = y_sc.fit_transform(y_train)
+        #y_valid = y_sc.transform(y_valid)
+        #y_test = y_sc.transform(y_test)
         ### TODO
 
         y_test = y_sc.inverse_transform(y_test)
