@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
 import numpy as np
@@ -156,7 +156,7 @@ if __name__ == "__main__":
         # Start training the model
         param_grid = {
             'hidden_size': [18], #[10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
-            'batch_size': [24], #[2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32, 64, 128, 256, 512],
+            'batch_size': [2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32, 64, 128, 256, 512],
             'lr': [1e-3], #[1e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2],
             'optimizer': ['adam'], #['adam', 'radam'],
             'activation_1': ['tanh'], #['tanh', swish, mish],
