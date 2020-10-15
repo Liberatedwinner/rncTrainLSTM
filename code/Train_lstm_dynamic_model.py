@@ -41,25 +41,26 @@ earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 hidden_sizes = [10, 14, 18, 22, 26, 30]
 lrs = [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
 batch_sizes = [32, 64, 128, 256, 512]
-#hidden_sizes = [18]
-#lrs = [1e-3]
-#batch_sizes = [64, 128]
-
 metric = 'mae'
 
-PREDICTED_STEP = 10
-if PREDICTED_STEP == 10:
-    PATH = "..//Data//TrainedRes//sec10//"
-elif PREDICTED_STEP == 50:
-    PATH = "..//Data//TrainedRes//sec50//"
-elif PREDICTED_STEP == 100:
-    PATH = "..//Data//TrainedRes//sec100//"
-elif PREDICTED_STEP == 30:
-    PATH = "..//Data//TrainedRes//sec30//"
-else:
-    PATH = "..//Data//TrainedRes//sec1//"
+parser = argparse.ArgumentParser()
+parser.add_argument('--predictstep', type=int, default=10,
+                    help='choose the predicted step: 1, 10, 30, 50, 100')
+args = parser.parse_args()
+PREDICTED_STEP = args.predictstep
+PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
 
-
+# PREDICTED_STEP = 10
+# if PREDICTED_STEP == 10:
+#     PATH = "..//Data//TrainedRes//sec10//"
+# elif PREDICTED_STEP == 50:
+#     PATH = "..//Data//TrainedRes//sec50//"
+# elif PREDICTED_STEP == 100:
+#     PATH = "..//Data//TrainedRes//sec100//"
+# elif PREDICTED_STEP == 30:
+#     PATH = "..//Data//TrainedRes//sec30//"
+# else:
+#     PATH = "..//Data//TrainedRes//sec1//"
 ###############################################################################
 def load_train_test_data():
     ls = LoadSave(PATH + "Train.pkl")
@@ -125,8 +126,10 @@ if __name__ == "__main__":
             for batch_size in batch_sizes:
                 score = np.zeros((numFolds, 5))
                 for ind, (train, valid) in enumerate(folds):
-                    X_train, X_valid = trainData.iloc[train].drop(["target"], axis=1).values, trainData.iloc[valid].drop(["target"], axis=1).values
-                    y_train, y_valid = trainData.iloc[train]["target"].values.reshape(len(X_train), 1), trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
+                    X_train = trainData.iloc[train].drop(["target"], axis=1).values
+                    X_valid = trainData.iloc[valid].drop(["target"], axis=1).values
+                    y_train = trainData.iloc[train]["target"].values.reshape(len(X_train), 1),
+                    y_valid = trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
 
                     # Access the normalized data
                     X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
@@ -158,11 +161,13 @@ if __name__ == "__main__":
                     model.evaluate(X_test, y_test, verbose=0)
 
                     y_valid_pred = model.predict(X_valid)
-                    y_valid, y_valid_pred = y_sc.inverse_transform(y_valid), y_sc.inverse_transform(y_valid_pred)
+                    y_valid = y_sc.inverse_transform(y_valid)
+                    y_valid_pred = y_sc.inverse_transform(y_valid_pred)
                     y_valid_pred[y_valid_pred < 1] = 0
 
                     y_test_pred = model.predict(X_test)
-                    y_test, y_test_pred = y_sc.inverse_transform(y_test), y_sc.inverse_transform(y_test_pred)
+                    y_test = y_sc.inverse_transform(y_test),
+                    y_test_pred = y_sc.inverse_transform(y_test_pred)
                     y_test_pred[y_test_pred < 1] = 0
 
                     score[ind, 0] = r2_score(y_test, y_test_pred)
