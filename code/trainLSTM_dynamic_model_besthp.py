@@ -174,10 +174,13 @@ if __name__ == "__main__":
 
         # search the best hp
         model = KerasRegressor(build_fn=build_model, verbose=0)
-        model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
-        ### TODO
-        #model, _ = algorithm_pipeline(X_train, X_valid, y_train, y_valid, model, param_grid)
         #model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
+        ### TODO
+        model.fit(X_train, y_train,
+                    epochs=500, batch_size=batch_size, ###TODO
+                    validation_data=(X_valid, y_valid), verbose=1,
+                    shuffle=False, callbacks=[earlyStopping])
+        model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
         ### TODO
 
         #with open('result.txt', 'a') as fp:
