@@ -174,12 +174,18 @@ if __name__ == "__main__":
 
         # search the best hp
         model = KerasRegressor(build_fn=build_model, verbose=0)
+        #model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
+        ### TODO
+        model, _ = algorithm_pipeline(X_train, X_valid, y_train, y_valid, model, param_grid)
         model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
+        ### TODO
 
         #with open('result.txt', 'a') as fp:
         #    fp.write(f'({model.best_score_}, {model.best_params_})\n')
         print('=====')
-        print(model.best_score_)
+        mdl_bs = model.best_score_
+        mdl_bs = y_sc.inverse_transform(mdl_bs)
+        print(mdl_bs)
         print(model.best_params_)
         print('=====')
 
