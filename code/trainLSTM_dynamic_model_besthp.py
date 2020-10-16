@@ -164,7 +164,7 @@ if __name__ == "__main__":
         # Start training the model
         param_grid = {
             'hidden_size': [18], #[10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
-            'batch_size': [24], #[2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32, 64, 128, 256, 512],
+            'batch_size': [2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32, 64, 128, 256, 512],
             'lr': [1e-3], #[1e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2],
             'optimizer': ['adam'], #['adam', 'radam'],
             'activation_1': ['tanh'], #['tanh', swish, mish],
@@ -174,17 +174,17 @@ if __name__ == "__main__":
 
         # search the best hp
         model = KerasRegressor(build_fn=build_model, verbose=0)
-        #model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
-        ### TODO
-        model, _ = algorithm_pipeline(X_train, X_valid, y_train, y_valid, model, param_grid)
         model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
+        ### TODO
+        #model, _ = algorithm_pipeline(X_train, X_valid, y_train, y_valid, model, param_grid)
+        #model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
         ### TODO
 
         #with open('result.txt', 'a') as fp:
         #    fp.write(f'({model.best_score_}, {model.best_params_})\n')
         print('=====')
         mdl_bs = model.best_score_
-        mdl_bs = y_sc.inverse_transform(mdl_bs)
+        mdl_bs = y_sc.inverse_transform(mdl_bs.reshape((-1, 1)))
         print(mdl_bs)
         print(model.best_params_)
         print('=====')
@@ -204,7 +204,7 @@ if __name__ == "__main__":
         y_pred[y_pred < 1] = 0
 
         score[ind, 0] = ind
-        score[ind, 1] = model.best_score_
+        score[ind, 1] = mdl_bs
         score[ind, 2] = r2_score(y_test, y_pred)
         best_hp.append(str(model.best_params_))
         
