@@ -96,7 +96,9 @@ def save_history(hist, metric):
             fp.write('{}\t{}\t{}\t{}\t{}\n'.format(
                 i, loss[i], acc[i], val_loss[i], val_acc[i]))
 
-
+def save_chkpt():
+  with open('chkpt_best.pkl', 'wb') as f:
+    pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
 ###############################################################################
 if __name__ == "__main__":
     trainData, testData = load_train_test_data()
@@ -143,6 +145,20 @@ if __name__ == "__main__":
                     X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
                     X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
                     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+
+                    chkpt = ModelCheckpoint(filepath='model.{epoch:02d}-{val_loss:.4f}.h5',
+                                            monitor='val_loss',
+                                            verbose=1,
+                                            save_best_only=True)
+
+                    if os.path.exists('chkpt_best.pkl'):
+                        with open('chkpt_best.pkl', 'rb') as f:
+                            best = pickle.load(f)
+                            chkpt.best = best
+
+                    save_chkpt_callback = tf.keras.callbacks.LambdaCallback(
+                        on_epoch_end=lambda epoch, logs: save_chkpt()
+                    )
 
                     # Start training the model
                     model = Sequential()
