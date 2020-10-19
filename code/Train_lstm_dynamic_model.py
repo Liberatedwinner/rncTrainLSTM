@@ -25,7 +25,7 @@ from keras.layers import LSTM
 from keras.layers import Activation
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
-from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
 from sklearn.metrics import r2_score
 import argparse
 
@@ -156,7 +156,7 @@ if __name__ == "__main__":
                             best = pickle.load(f)
                             chkpt.best = best
 
-                    save_chkpt_callback = tf.keras.callbacks.LambdaCallback(
+                    save_chkpt_callback = LambdaCallback(
                         on_epoch_end=lambda epoch, logs: save_chkpt()
                     )
 
