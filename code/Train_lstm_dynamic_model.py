@@ -127,7 +127,7 @@ if __name__ == "__main__":
                 for ind, (train, valid) in enumerate(folds):
                     X_train = trainData.iloc[train].drop(["target"], axis=1).values
                     X_valid = trainData.iloc[valid].drop(["target"], axis=1).values
-                    y_train = trainData.iloc[train]["target"].values.reshape(len(X_train), 1),
+                    y_train = trainData.iloc[train]["target"].values.reshape(len(X_train), 1)
                     y_valid = trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
 
                     # Access the normalized data

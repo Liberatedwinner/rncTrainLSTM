@@ -224,7 +224,7 @@ if __name__ == "__main__":
     dataAll = load_data()
 
 
-    PREDICTED_STEP = 1
+    PREDICTED_STEP = 10
     dataAll = feature_engineering(dataAll, predictStep=[PREDICTED_STEP])
     print("\nMerging the data:")
     print("=============================================================")

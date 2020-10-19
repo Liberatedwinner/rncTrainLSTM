@@ -258,7 +258,8 @@ if __name__ == "__main__":
         PATH = "..//Data//TrainedRes//sec50//"    
     else:
         PATH = "..//Data//TrainedRes//sec1//"
-    os.makedirs(PATH)
+    if not os.path.exists(PATH):
+        os.makedirs(PATH)
     ls = LoadSave()
     ls.save_data(data=newData[(newData["FLAG"] == 0)],
                      path=PATH + "Train.pkl")
