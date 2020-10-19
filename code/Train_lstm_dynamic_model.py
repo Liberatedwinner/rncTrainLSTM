@@ -25,7 +25,7 @@ from keras.layers import LSTM
 from keras.layers import Activation
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.metrics import r2_score
 import argparse
 
