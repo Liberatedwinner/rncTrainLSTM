@@ -177,7 +177,7 @@ if __name__ == "__main__":
         #model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
         ### TODO
         model.fit(X_train, y_train,
-                    epochs=500, batch_size=batch_size, ###TODO
+                    epochs=500, batch_size=22, ###TODO
                     validation_data=(X_valid, y_valid), verbose=1,
                     shuffle=False, callbacks=[earlyStopping])
         model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
