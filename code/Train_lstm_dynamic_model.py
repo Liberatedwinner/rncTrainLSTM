@@ -146,7 +146,7 @@ if __name__ == "__main__":
                     X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
                     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
-                    chkpt = ModelCheckpoint(filepath='model.{epoch:02d}-{val_loss:.4f}.h5',
+                    chkpt = ModelCheckpoint(filepath=f'model-{ind}.h5',
                                             monitor='val_loss',
                                             verbose=1,
                                             save_best_only=True)
@@ -172,7 +172,8 @@ if __name__ == "__main__":
                     history = model.fit(X_train, y_train,
                                         epochs=500, batch_size=batch_size, ###TODO
                                         validation_data=(X_valid, y_valid), verbose=1,
-                                        shuffle=False, callbacks=[earlyStopping])
+                                        shuffle=False,
+                                        callbacks=[earlyStopping, chkpt, save_chkpt_callback])
                     model.evaluate(X_test, y_test, verbose=0)
 
                     y_valid_pred = model.predict(X_valid)
