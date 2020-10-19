@@ -28,6 +28,7 @@ from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
 from sklearn.metrics import r2_score
 import argparse
+import pickle
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
@@ -173,7 +174,7 @@ if __name__ == "__main__":
                                         epochs=500, batch_size=batch_size, ###TODO
                                         validation_data=(X_valid, y_valid), verbose=1,
                                         shuffle=False,
-                                        callbacks=[earlyStopping, chkpt, save_chkpt_callback])
+                                        callbacks=[earlyStopping]#, chkpt, save_chkpt_callback])
                     model.evaluate(X_test, y_test, verbose=0)
 
                     y_valid_pred = model.predict(X_valid)
