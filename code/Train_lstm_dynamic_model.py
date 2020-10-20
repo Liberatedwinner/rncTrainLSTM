@@ -112,7 +112,7 @@ def save_history(hist, metric):
                 i, loss[i], acc[i], val_loss[i], val_acc[i]))
 
 def save_chkpt():
-  with open('chkpt_best.pkl', 'wb') as f:
+  with open(filepath + 'chkpt_best.pkl', 'wb') as f:
     pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
 ###############################################################################
 if __name__ == "__main__":
@@ -225,7 +225,7 @@ if __name__ == "__main__":
                     plt.grid(True)
                     if not os.path.exists(filepath):
                         os.makedirs(filepath)
-                    plt.savefig(filepath + '//PredictedStepTest_{str(PREDICTED_STEP)}_folds_{str(ind + 1)}.png',
+                    plt.savefig(filepath + f'//PredictedStepTest_{(PREDICTED_STEP)}_folds_{ind + 1}.png',
                                 dpi=50, bbox_inches="tight")
                     plt.close("all")
                 score = pd.DataFrame(score, columns=["R-square", "validMAE", "validRMSE", "testMAE", "testRMSE"])
