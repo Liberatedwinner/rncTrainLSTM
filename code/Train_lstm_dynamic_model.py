@@ -53,8 +53,8 @@ parser.add_argument('--activation2', type=str, default='sigmoid',
                     help='choose the activation function instead of sigmoid: swish, mish')
 args = parser.parse_args()
 PREDICTED_STEP = args.predictstep
-activationf1 = args.activation1
-activationf2 = args.activation2
+activation1 = args.activation1
+activation2 = args.activation2
 
 PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
 
@@ -65,14 +65,14 @@ def mish(x):
     return x * tf.nn.tanh(tf.nn.softplus(x))
 
 
-if activationf1 == 'swish':
+if activation1 == 'swish':
     activation1 = swish
-elif activationf1 == 'mish':
+elif activation1 == 'mish':
     activation1 = mish
 
-if activationf2 == 'swish':
+if activation2 == 'swish':
     activation2 = swish
-elif activationf2 == 'mish':
+elif activation2 == 'mish':
     activation2 = mish
 
 ###############################################################################
@@ -141,7 +141,9 @@ if __name__ == "__main__":
         for lr in lrs:
             for batch_size in batch_sizes:
                 score = np.zeros((numFolds, 5))
-                filepath = f'..//Plots-tanh_{activationf2}//{hidden_size}-{lr}-{batch_size}'
+                filepath = f'..//Plots-tanh_{activation2}//{hidden_size}-{lr}-{batch_size}'
+                if not os.path.exists(filepath):
+                    os.makedirs(filepath)
 
                 for ind, (train, valid) in enumerate(folds):
                     X_train = trainData.iloc[train].drop(["target"], axis=1).values
@@ -168,8 +170,8 @@ if __name__ == "__main__":
                                             verbose=1,
                                             save_best_only=True)
 
-                    if os.path.exists('chkpt_best.pkl') and os.path.getsize('chkpt_best.pkl') > 0:
-                        with open('chkpt_best.pkl', 'rb') as f:
+                    if os.path.exists(filepath + 'chkpt_best.pkl') and os.path.getsize(filepath + 'chkpt_best.pkl') > 0:
+                        with open(filepath + 'chkpt_best.pkl', 'rb') as f:
                             best = pickle.load(f)
                             chkpt.best = best
 
@@ -180,8 +182,8 @@ if __name__ == "__main__":
                     # Start training the model
                     model = Sequential()
                     model.add(LSTM(hidden_size, ###TODO
-                                   activation=activation1,
-                                   recurrent_activation=activation2,
+                                   activation=activation1, ###TODO
+                                   recurrent_activation=activation2, ###TODO
                                    return_sequences=False,
                                    input_shape=(X_train.shape[1], X_train.shape[2])))
                     model.add(Dense(1))
@@ -201,10 +203,10 @@ if __name__ == "__main__":
                     y_valid_pred[y_valid_pred < 1] = 0
 
                     y_test_pred = model.predict(X_test)
-                    y_test = y_sc.inverse_transform(y_test),
+                    y_test = y_sc.inverse_transform(y_test)
                     y_test_pred = y_sc.inverse_transform(y_test_pred)
                     y_test_pred[y_test_pred < 1] = 0
-
+                    
                     score[ind, 0] = r2_score(y_test, y_test_pred)
                     score[ind, 1] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred)
                     score[ind, 2] = np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
