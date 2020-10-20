@@ -1,7 +1,7 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
 import numpy as np
@@ -50,17 +50,6 @@ args = parser.parse_args()
 PREDICTED_STEP = args.predictstep
 PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
 
-# PREDICTED_STEP = 10
-# if PREDICTED_STEP == 10:
-#     PATH = "..//Data//TrainedRes//sec10//"
-# elif PREDICTED_STEP == 50:
-#     PATH = "..//Data//TrainedRes//sec50//"
-# elif PREDICTED_STEP == 100:
-#     PATH = "..//Data//TrainedRes//sec100//"
-# elif PREDICTED_STEP == 30:
-#     PATH = "..//Data//TrainedRes//sec30//"
-# else:
-#     PATH = "..//Data//TrainedRes//sec1//"
 ###############################################################################
 def load_train_test_data():
     ls = LoadSave(PATH + "Train.pkl")
@@ -147,12 +136,12 @@ if __name__ == "__main__":
                     X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
                     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
-                    chkpt = ModelCheckpoint(filepath=f'model-{ind}.h5',
+                    chkpt = ModelCheckpoint(filepath=f'..//Plots//{hidden_size}-{lr}-{batch_size}//model-{ind}.h5',
                                             monitor='val_loss',
                                             verbose=1,
                                             save_best_only=True)
 
-                    if os.path.exists('chkpt_best.pkl'):
+                    if os.path.exists('chkpt_best.pkl') and os.path.getsize('chkpt_best.pkl') > 0:
                         with open('chkpt_best.pkl', 'rb') as f:
                             best = pickle.load(f)
                             chkpt.best = best
@@ -174,7 +163,7 @@ if __name__ == "__main__":
                                         epochs=500, batch_size=batch_size, ###TODO
                                         validation_data=(X_valid, y_valid), verbose=1,
                                         shuffle=False,
-                                        callbacks=[earlyStopping]#, chkpt, save_chkpt_callback])
+                                        callbacks=[earlyStopping, chkpt, save_chkpt_callback])
                     model.evaluate(X_test, y_test, verbose=0)
 
                     y_valid_pred = model.predict(X_valid)
