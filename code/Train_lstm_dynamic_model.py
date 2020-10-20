@@ -53,8 +53,8 @@ parser.add_argument('--activation2', type=str, default='sigmoid',
                     help='choose the activation function instead of sigmoid: swish, mish')
 args = parser.parse_args()
 PREDICTED_STEP = args.predictstep
-activationf1 = args.activationf1
-activationf2 = args.activationf2
+activationf1 = args.activation1
+activationf2 = args.activation2
 
 PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
 
