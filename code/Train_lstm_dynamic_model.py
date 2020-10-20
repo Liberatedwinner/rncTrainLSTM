@@ -65,16 +65,6 @@ def mish(x):
     return x * tf.nn.tanh(tf.nn.softplus(x))
 
 
-if activation1 == 'swish':
-    activation1 = swish
-elif activation1 == 'mish':
-    activation1 = mish
-
-if activation2 == 'swish':
-    activation2 = swish
-elif activation2 == 'mish':
-    activation2 = mish
-
 ###############################################################################
 def load_train_test_data():
     ls = LoadSave(PATH + "Train.pkl")
@@ -170,7 +160,7 @@ if __name__ == "__main__":
                                             verbose=1,
                                             save_best_only=True)
 
-                    if os.path.exists(filepath + '//chkpt_best.pkl') and os.path.getsize(filepath + 'chkpt_best.pkl') > 0:
+                    if os.path.exists(filepath + '//chkpt_best.pkl') and os.path.getsize(filepath + '//chkpt_best.pkl') > 0:
                         with open(filepath + '//chkpt_best.pkl', 'rb') as f:
                             best = pickle.load(f)
                             chkpt.best = best
@@ -178,6 +168,16 @@ if __name__ == "__main__":
                     save_chkpt_callback = LambdaCallback(
                         on_epoch_end=lambda epoch, logs: save_chkpt()
                     )
+
+                    if activation1 == 'swish':
+                        activation1 = swish
+                    elif activation1 == 'mish':
+                        activation1 = mish
+
+                    if activation2 == 'swish':
+                        activation2 = swish
+                    elif activation2 == 'mish':
+                        activation2 = mish
 
                     # Start training the model
                     model = Sequential()
