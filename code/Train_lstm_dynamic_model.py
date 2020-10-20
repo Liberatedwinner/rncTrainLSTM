@@ -112,7 +112,7 @@ def save_history(hist, metric):
                 i, loss[i], acc[i], val_loss[i], val_acc[i]))
 
 def save_chkpt():
-  with open(filepath + 'chkpt_best.pkl', 'wb') as f:
+  with open(filepath + '//chkpt_best.pkl', 'wb') as f:
     pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
 ###############################################################################
 if __name__ == "__main__":
@@ -170,8 +170,8 @@ if __name__ == "__main__":
                                             verbose=1,
                                             save_best_only=True)
 
-                    if os.path.exists(filepath + 'chkpt_best.pkl') and os.path.getsize(filepath + 'chkpt_best.pkl') > 0:
-                        with open(filepath + 'chkpt_best.pkl', 'rb') as f:
+                    if os.path.exists(filepath + '//chkpt_best.pkl') and os.path.getsize(filepath + 'chkpt_best.pkl') > 0:
+                        with open(filepath + '//chkpt_best.pkl', 'rb') as f:
                             best = pickle.load(f)
                             chkpt.best = best
 
