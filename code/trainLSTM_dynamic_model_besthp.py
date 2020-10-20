@@ -54,11 +54,11 @@ def load_train_test_data():
     return trainData, testData
 
 
+swish = tf.keras.activations.swish
+
+
 def mish(x):
     return x * tf.nn.tanh(tf.nn.softplus(x))
-
-
-swish = tf.keras.activations.swish
 
 
 def build_model(hidden_size=18,

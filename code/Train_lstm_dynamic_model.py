@@ -29,6 +29,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
 from sklearn.metrics import r2_score
 import argparse
 import pickle
+import tensorflow as tf
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
@@ -46,9 +47,33 @@ metric = 'mae'
 parser = argparse.ArgumentParser()
 parser.add_argument('--predictstep', type=int, default=10,
                     help='choose the predicted step: 1, 10, 30, 50, 100')
+parser.add_argument('--activation1', type=str, default='tanh',
+                    help='choose the activation function instead of tanh: swish, mish')
+parser.add_argument('--activation2', type=str, default='sigmoid',
+                    help='choose the activation function instead of sigmoid: swish, mish')
 args = parser.parse_args()
 PREDICTED_STEP = args.predictstep
+activationf1 = args.activationf1
+activationf2 = args.activationf2
+
 PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
+
+swish = tf.keras.activations.swish
+
+
+def mish(x):
+    return x * tf.nn.tanh(tf.nn.softplus(x))
+
+
+if activationf1 == 'swish':
+    activation1 = swish
+elif activationf1 == 'mish':
+    activation1 = mish
+
+if activationf2 == 'swish':
+    activation2 = swish
+elif activationf2 == 'mish':
+    activation2 = mish
 
 ###############################################################################
 def load_train_test_data():
@@ -116,6 +141,8 @@ if __name__ == "__main__":
         for lr in lrs:
             for batch_size in batch_sizes:
                 score = np.zeros((numFolds, 5))
+                filepath = f'..//Plots-tanh_{activationf2}//{hidden_size}-{lr}-{batch_size}'
+
                 for ind, (train, valid) in enumerate(folds):
                     X_train = trainData.iloc[train].drop(["target"], axis=1).values
                     X_valid = trainData.iloc[valid].drop(["target"], axis=1).values
@@ -136,7 +163,7 @@ if __name__ == "__main__":
                     X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
                     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
-                    chkpt = ModelCheckpoint(filepath=f'..//Plots//{hidden_size}-{lr}-{batch_size}//model-{ind}.h5',
+                    chkpt = ModelCheckpoint(filepath=filepath + f'//model-{ind}.h5',
                                             monitor='val_loss',
                                             verbose=1,
                                             save_best_only=True)
@@ -153,6 +180,8 @@ if __name__ == "__main__":
                     # Start training the model
                     model = Sequential()
                     model.add(LSTM(hidden_size, ###TODO
+                                   activation=activation1,
+                                   recurrent_activation=activation2,
                                    return_sequences=False,
                                    input_shape=(X_train.shape[1], X_train.shape[2])))
                     model.add(Dense(1))
@@ -192,9 +221,9 @@ if __name__ == "__main__":
                     plt.xlim(0, end - start)
                     plt.ylim(-500, 2600)
                     plt.grid(True)
-                    if not os.path.exists(f'..//Plots//{hidden_size}-{lr}-{batch_size}'):
-                        os.makedirs(f'..//Plots//{hidden_size}-{lr}-{batch_size}')
-                    plt.savefig(f"..//Plots//{hidden_size}-{lr}-{batch_size}//PredictedStepTest_{str(PREDICTED_STEP)}_folds_{str(ind + 1)}.png",
+                    if not os.path.exists(filepath):
+                        os.makedirs(filepath)
+                    plt.savefig(filepath + '//PredictedStepTest_{str(PREDICTED_STEP)}_folds_{str(ind + 1)}.png',
                                 dpi=50, bbox_inches="tight")
                     plt.close("all")
                 score = pd.DataFrame(score, columns=["R-square", "validMAE", "validRMSE", "testMAE", "testRMSE"])
