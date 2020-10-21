@@ -207,10 +207,9 @@ if __name__ == "__main__":
             plt.xlim(0, end - start)
             plt.ylim(-500, 2600)
             plt.grid(True)
-            if not os.path.exists('..//Plots2'):
-                os.makedirs('..//Plots2')
-            plt.savefig(f"..//Plots2//batch_{batch_size}//Test_{PREDICTED_STEP}_folds_{ind + 1}.png",
-                        dpi=50, bbox_inches="tight")
+            if not os.path.exists(f'..//Plots2//batch_{batch_size}//'):
+                os.makedirs(f'..//Plots2//batch_{batch_size}//')
+            plt.savefig(f"..//Plots2//batch_{batch_size}//Test_{PREDICTED_STEP}_folds_{ind + 1}.png", dpi=50, bbox_inches="tight")
             plt.close("all")
 
         score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square', 'batch_size'])
