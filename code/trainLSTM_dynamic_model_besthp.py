@@ -62,7 +62,7 @@ def mish(x):
 
 
 def build_model(hidden_size=18,
-                # batch_size=12,
+                batch_size=22,
                 lr=0.002,
                 optimizer='adam',
                 activation_1='tanh',
@@ -81,9 +81,9 @@ def build_model(hidden_size=18,
         model.compile(loss=mean_absolute_error,
                       optimizer=RAdamOptimizer(learning_rate=lr),
                       metrics=['mae'])
-    # model.fit(X_train, y_train, epochs=500, batch_size=batch_size,
-    #                     validation_data=(X_valid, y_valid), verbose=1,
-    #                     shuffle=False, callbacks=[earlyStopping])
+    #model.fit(X_train, y_train, epochs=500, batch_size=batch_size,
+     #                   validation_data=(X_valid, y_valid), verbose=1,
+      #                  shuffle=False, callbacks=[earlyStopping])
     return model
 
 
@@ -129,7 +129,6 @@ if __name__ == "__main__":
         folds.append([trainInd, validInd])
 
     # Start the time series cross validation
-    # score = np.zeros((numFolds, 6))
     score = np.zeros((numFolds, 3))
     best_hp = []
     for ind, (train, valid) in enumerate(folds):
@@ -137,15 +136,6 @@ if __name__ == "__main__":
         X_valid = trainData.iloc[valid].drop(["target"], axis=1).values
         y_train = trainData.iloc[train]["target"].values.reshape(len(X_train), 1)
         y_valid = trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
-
-        ### TODO
-        #X_test = testData.drop(["target"], axis=1).values
-        #y_test = testData["target"].values.reshape(len(X_test), 1)
-
-        #X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-        #X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
-        #X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
-        ### TODO
 
         # Access the normalized data
         X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
@@ -174,12 +164,11 @@ if __name__ == "__main__":
 
         # search the best hp
         model = KerasRegressor(build_fn=build_model, verbose=0)
-        #model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
         ### TODO
         model.fit(X_train, y_train,
-                    epochs=500, batch_size=22, ###TODO
-                    validation_data=(X_valid, y_valid), verbose=1,
-                    shuffle=False, callbacks=[earlyStopping])
+                  epochs=500, batch_size=22, ###TODO
+                  validation_data=(X_valid, y_valid), verbose=1,
+                  shuffle=False, callbacks=[earlyStopping])
         model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
         ### TODO
 
@@ -191,15 +180,6 @@ if __name__ == "__main__":
         print(mdl_bs)
         print(model.best_params_)
         print('=====')
-
-        ### TODO
-        ## Access the normalized data
-        #X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
-
-        #y_train = y_sc.fit_transform(y_train)
-        #y_valid = y_sc.transform(y_valid)
-        #y_test = y_sc.transform(y_test)
-        ### TODO
 
         y_test = y_sc.inverse_transform(y_test)
         y_pred = y_pred.reshape((-1, 1))
@@ -224,11 +204,7 @@ if __name__ == "__main__":
         plt.savefig(f"..//Plots2//PredictedStepTest_{PREDICTED_STEP}_folds_{ind + 1}_.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
-    # from ast import literal_eval
-    # for dct in best_hp:
-    #     st = '-'
-    #     for key, value in literal_eval(dct):
-    #         st += f'{value}-'
+
     score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square'])
     best_hp = pd.DataFrame(best_hp, columns=['best_params'])
 
