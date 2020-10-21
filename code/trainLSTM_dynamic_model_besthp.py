@@ -102,7 +102,6 @@ def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
 
     return fitted_model, pred
 
-
 ###############################################################################
 if __name__ == "__main__":
     trainData, testData = load_train_test_data()
@@ -214,8 +213,6 @@ if __name__ == "__main__":
 
     result_table = pd.concat([score, best_hp], axis=1)
     print(result_table)
-    #print(score)
-    #print(best_hp)
 
     # save
     #score.to_pickle("score.pkl")

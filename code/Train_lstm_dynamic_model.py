@@ -213,8 +213,6 @@ if __name__ == "__main__":
                     score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred)
                     score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
 
-                    #save_history(history, metric)
-
                     start, end = 0, len(y_test)
                     plt.figure(figsize=(16, 10))
                     plt.plot(y_test_pred[start:end], linewidth=2, linestyle="-", color="r")

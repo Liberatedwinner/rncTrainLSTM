@@ -29,6 +29,12 @@ rcParams['patch.facecolor'] = 'b'
 
 np.random.seed(2019)
 sns.set(style="ticks", font_scale=1.2, palette='deep', color_codes=True)
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--predictstep', type=int, default=10,
+                    help='choose the predicted step: 1, 10, 30, 50, 100')
+args = parser.parse_args()
+
 ###############################################################################
 ###############################################################################
 @timefn
@@ -228,9 +234,9 @@ def statistical_features(data, name=None, operation=["mean", "std"], timeRange=5
 if __name__ == "__main__":
     dataAll, nameDict = preprocessing(nrows=None)
     dataAll = load_data()
-    
 
-    PREDICTED_STEP = 10
+    PREDICTED_STEP = args.predictstep
+
     dataAll = feature_engineering(dataAll, predictStep=[PREDICTED_STEP])
     print("\nMerging the data:")
     print("=============================================================")
@@ -250,14 +256,15 @@ if __name__ == "__main__":
 
 
     # Saved all the data
-    if PREDICTED_STEP == 10:
-        PATH = "..//Data//TrainedRes//sec10//"
-    elif PREDICTED_STEP == 30:
-        PATH = "..//Data//TrainedRes//sec30//"
-    elif PREDICTED_STEP == 50:
-        PATH = "..//Data//TrainedRes//sec50//"    
-    else:
-        PATH = "..//Data//TrainedRes//sec1//"
+    PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
+    # if PREDICTED_STEP == 10:
+    #     PATH = "..//Data//TrainedRes//sec10//"
+    # elif PREDICTED_STEP == 30:
+    #     PATH = "..//Data//TrainedRes//sec30//"
+    # elif PREDICTED_STEP == 50:
+    #     PATH = "..//Data//TrainedRes//sec50//"
+    # else:
+    #     PATH = "..//Data//TrainedRes//sec1//"
     if not os.path.exists(PATH):
         os.makedirs(PATH)
     ls = LoadSave()

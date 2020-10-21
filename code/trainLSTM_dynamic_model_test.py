@@ -44,7 +44,6 @@ args = parser.parse_args()
 PREDICTED_STEP = args.predictstep
 PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
 
-
 ###############################################################################
 def load_train_test_data():
     ls = LoadSave(PATH + "Train.pkl")
@@ -217,8 +216,6 @@ if __name__ == "__main__":
 
         result_table = pd.concat([score, best_hp], axis=1)
         print(result_table)
-        # print(score)
-        # print(best_hp)
 
         # save
         # score.to_pickle("score.pkl")
