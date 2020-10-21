@@ -228,7 +228,18 @@ if __name__ == "__main__":
                     plt.savefig(filepath + f'//PredictedStepTest_{(PREDICTED_STEP)}_folds_{ind + 1}.png',
                                 dpi=50, bbox_inches="tight")
                     plt.close("all")
+
+                if activation1 == swish:
+                    activation1 = 'swish'
+                elif activation1 == mish:
+                    activation1 = 'mish'
+
+                if activation2 == swish:
+                    activation2 = 'swish'
+                elif activation2 == mish:
+                    activation2 = 'mish'
+
                 score = pd.DataFrame(score, columns=["R-square", "validMAE", "validRMSE", "testMAE", "testRMSE"])
                 print(score)
-                score.to_pickle(f'..//Plots//{hidden_size}-{lr}-{batch_size}//score-{hidden_size}-{lr}-{batch_size}.pkl')
-                score.to_csv(f'..//Plots//{hidden_size}-{lr}-{batch_size}//score-{hidden_size}-{lr}-{batch_size}.csv')
+                score.to_pickle(f'..//Plots-tanh_{activation2}//{hidden_size}-{lr}-{batch_size}//score-{hidden_size}-{lr}-{batch_size}.pkl')
+                score.to_csv(f'..//Plots-tanh_{activation2}//{hidden_size}-{lr}-{batch_size}//score-{hidden_size}-{lr}-{batch_size}.csv')
