@@ -62,7 +62,7 @@ def mish(x):
 
 
 def build_model(hidden_size=18,
-                batch_size=22,
+                #batch_size=22,
                 lr=0.002,
                 optimizer='adam',
                 activation_1='tanh',
@@ -86,7 +86,14 @@ def build_model(hidden_size=18,
       #                  shuffle=False, callbacks=[earlyStopping])
     return model
 
-
+def validated_model(model_info=build_model, batchsize_info=22):
+    model = KerasRegressor(build_fn=model_info, verbose=0) 
+    model.fit(X_train, y_train,
+              epochs=500, batch_size=batchsize_info,
+              validation_data=(X_valid, y_valid), verbose=1,
+              shuffle=False, callbacks=[earlyStopping])
+    return model
+    
 def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
                        model, param_grid, cv=10, scoring_fit='neg_mean_absolute_error',
                        do_probabilities=False):
@@ -160,26 +167,29 @@ if __name__ == "__main__":
             'activation_1': ['tanh'], #['tanh', swish, mish],
             'activation_2': [mish], #['sigmoid', swish, mish]
         }
-        #bestparam = {'activation_1': 'tanh', 'activation_2': <function mish at 0x7f9bda6d0598>, 'batch_size': 24, 'hidden_size': 18, 'lr': 0.001, 'optimizer': 'adam'}
+        #bestparam = {'activation_1': 'tanh', 'activation_2': <function mish at 0x7f9bda6d0598>, 'batch_size': 22, 'hidden_size': 18, 'lr': 0.001, 'optimizer': 'adam'}
 
         # search the best hp
-        model = KerasRegressor(build_fn=build_model, verbose=0)
+        #model = KerasRegressor(build_fn=build_model, verbose=0)
+        
+        #model.fit(X_train, y_train,
+         #         epochs=500, batch_size=22, ###TODO
+          #        validation_data=(X_valid, y_valid), verbose=1,
+           #       shuffle=False, callbacks=[earlyStopping])
         ### TODO
-        model.fit(X_train, y_train,
-                  epochs=500, batch_size=22, ###TODO
-                  validation_data=(X_valid, y_valid), verbose=1,
-                  shuffle=False, callbacks=[earlyStopping])
+        model = validated_model(build_model, batchsize_info=batch_size)
+        ### TODO
         model, y_pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid)
-        ### TODO
+        
 
         #with open('result.txt', 'a') as fp:
         #    fp.write(f'({model.best_score_}, {model.best_params_})\n')
-        print('=====')
+        print('\n=====')
         mdl_bs = model.best_score_
         mdl_bs = y_sc.inverse_transform(mdl_bs.reshape((-1, 1)))
         print(mdl_bs)
         print(model.best_params_)
-        print('=====')
+        print('=====\n')
 
         y_test = y_sc.inverse_transform(y_test)
         y_pred = y_pred.reshape((-1, 1))
