@@ -140,7 +140,8 @@ if __name__ == "__main__":
     # Start the time series cross validation
     score = np.zeros((numFolds, 4))
     best_hp = []
-    batchsizes = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 64, 128, 256, 512]
+    #batchsizes = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 64, 128, 256, 512]
+    batchsizes = [10, 14, 18, 22, 26, 32, 64, 128]
     for batch_size in batchsizes:
         for ind, (train, valid) in enumerate(folds):
             X_train = trainData.iloc[train].drop(["target"], axis=1).values
@@ -208,7 +209,7 @@ if __name__ == "__main__":
             plt.grid(True)
             if not os.path.exists('..//Plots2'):
                 os.makedirs('..//Plots2')
-            plt.savefig(f"..//Plots2//PredictedStepTest_{PREDICTED_STEP}_folds_{ind + 1}_.png",
+            plt.savefig(f"..//Plots2//Test_{PREDICTED_STEP}_folds_{ind + 1}_batch_{batch_size}.png",
                         dpi=50, bbox_inches="tight")
             plt.close("all")
 
