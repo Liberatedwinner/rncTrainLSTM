@@ -209,7 +209,7 @@ if __name__ == "__main__":
             plt.grid(True)
             if not os.path.exists('..//Plots2'):
                 os.makedirs('..//Plots2')
-            plt.savefig(f"..//Plots2//Test_{PREDICTED_STEP}_folds_{ind + 1}_batch_{batch_size}.png",
+            plt.savefig(f"..//Plots2//batch_{batch_size}//Test_{PREDICTED_STEP}_folds_{ind + 1}.png",
                         dpi=50, bbox_inches="tight")
             plt.close("all")
 
@@ -223,8 +223,8 @@ if __name__ == "__main__":
 
         # save
         # score.to_pickle("score.pkl")
-        result_table.to_pickle(f'..//Plots2//result_table-bs-{batch_size}.pkl')
-        result_table.to_csv(f'..//Plots2//result_table-bs-{batch_size}.csv')
+        result_table.to_pickle(f'..//Plots2//batch_{batch_size}//result_table.pkl')
+        result_table.to_csv(f'..//Plots2//batch_{batch_size}//result_table.csv')
 
         # #load
         # df = pd.read_pickle("score.pkl")
