@@ -40,8 +40,11 @@ earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 parser = argparse.ArgumentParser()
 parser.add_argument('--predictstep', type=int, default=10,
                     help='choose the predicted step: 1, 10, 30, 50, 100')
+parser.add_argument('--validation_fit', type=bool, default=False,
+                    help='turn the valid fitting on or off, default is off')
 args = parser.parse_args()
 PREDICTED_STEP = args.predictstep
+valid_fit = args.validation_fit
 PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
 
 ###############################################################################
@@ -167,10 +170,11 @@ if __name__ == "__main__":
 
         # search the best hp
         model = KerasRegressor(build_fn=build_model, verbose=0)
-        model.fit(X_train, y_train,
-                  epochs=500, batch_size=22, ###TODO
-                  validation_data=(X_valid, y_valid), verbose=1,
-                  shuffle=False, callbacks=[earlyStopping])
+        if valid_fit:
+            model.fit(X_train, y_train,
+                      epochs=500, batch_size=22, ###TODO
+                      validation_data=(X_valid, y_valid), verbose=1,
+                      shuffle=False, callbacks=[earlyStopping])
         model, y_pred = algorithm_pipeline(X_train, X_test,
                                            y_train, y_test,
                                            model, param_grid)
