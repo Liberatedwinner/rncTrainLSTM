@@ -187,7 +187,7 @@ if __name__ == "__main__":
                                    return_sequences=False,
                                    input_shape=(X_train.shape[1], X_train.shape[2])))
                     model.add(Dense(1))
-                    model.compile(loss=mean_absolute_error,
+                    model.compile(loss=mean_squared_error, #mean_absolute_error,
                                   optimizer=Adam(lr=lr), ###TODO
                                   metrics=['mae'])
                     history = model.fit(X_train, y_train,

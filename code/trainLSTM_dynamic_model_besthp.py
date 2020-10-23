@@ -81,7 +81,7 @@ def build_model(hidden_size=18,
                   optimizer=Adam(lr=lr),
                   metrics=['mae'])
     if optimizer == 'radam':
-        model.compile(loss=mean_absolute_error,
+        model.compile(loss=mean_squared_error,
                       optimizer=RAdamOptimizer(learning_rate=lr),
                       metrics=['mae'])
     return model

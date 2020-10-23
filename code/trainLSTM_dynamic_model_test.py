@@ -74,7 +74,7 @@ def build_model(hidden_size=18,
                    return_sequences=False,
                    input_shape=(X_train.shape[1], X_train.shape[2])))
     model.add(Dense(1))
-    model.compile(loss=mean_absolute_error,
+    model.compile(loss=mean_squared_error,
                   optimizer=Adam(lr=lr),
                   metrics=['mae'])
     if optimizer == 'radam':
