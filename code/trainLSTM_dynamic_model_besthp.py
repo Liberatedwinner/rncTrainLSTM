@@ -41,7 +41,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--predictstep', type=int, default=10,
                     help='choose the predicted step: 1, 10, 30, 50, 100')
 parser.add_argument('--validation_fit', type=bool, default=False,
-                    help='turn the valid fitting on or off, default is off')
+                    help='turn the valid fitting on(True) or off(False), default is False')
 args = parser.parse_args()
 PREDICTED_STEP = args.predictstep
 valid_fit = args.validation_fit
