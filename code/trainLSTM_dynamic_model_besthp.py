@@ -128,7 +128,7 @@ if __name__ == "__main__":
         folds.append([trainInd, validInd])
 
     # Start the time series cross validation
-    score = np.zeros((numFolds, 3))
+    score = np.zeros((numFolds, 5))
     best_hp = []
     for ind, (train, valid) in enumerate(folds):
         X_train = trainData.iloc[train].drop(["target"], axis=1).values
@@ -196,6 +196,8 @@ if __name__ == "__main__":
         score[ind, 0] = ind + 1
         score[ind, 1] = mdl_bs
         score[ind, 2] = r2_score(y_test, y_pred)
+        score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_pred)
+        score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_pred))
         best_hp.append(str(model.best_params_))
         
         start, end = 0, len(y_test)
