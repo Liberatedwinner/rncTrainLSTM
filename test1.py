@@ -81,3 +81,24 @@ model, pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model,
 
 print(model.best_score_)
 print(model.best_params_)
+
+
+
+
+
+
+
+
+chkpt = ModelCheckpoint(filepath='model.{epoch:02d}-{val_loss:.4f}.h5',
+                                           monitor='val_loss',
+                                           verbose=1,
+                                           save_best_only=True)
+
+if os.path.exists('chkpt_best.pkl'):
+  with open('chkpt_best.pkl', 'rb') as f:
+    best = pickle.load(f)
+    chkpt.best = best
+
+save_chkpt_callback = tf.keras.callbacks.LambdaCallback(
+    on_epoch_end=lambda epoch, logs: save_chkpt()
+)

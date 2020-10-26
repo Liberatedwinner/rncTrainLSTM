@@ -1,7 +1,7 @@
 import pandas as pd
 
 #df = pd.read_excel('..//Data//trainKOR//180713_2.xlsx')
-df = pd.read_csv('..//Data//trainKOR//180713_2.csv')
+df = pd.read_csv('..//Data//metroKOR//180713_2.csv')
 
 df.drop(['번호',
          'OP Mode',
