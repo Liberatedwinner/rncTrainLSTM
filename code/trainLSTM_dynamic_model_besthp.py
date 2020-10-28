@@ -28,7 +28,7 @@ import tensorflow as tf
 import argparse
 from sklearn.metrics import r2_score
 from keras.wrappers.scikit_learn import KerasRegressor
-
+import sklearn
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
@@ -153,11 +153,11 @@ if __name__ == "__main__":
         # Start training the model
         param_grid = {
             'hidden_size': [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
-            'batch_size': [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 64, 128, 256, 512],
+            'batch_size': [10, 14, 18, 22, 24, 28, 32, 64, 128, 256, 512],
             'lr': [1e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2],
             'optimizer': ['adam'], #['adam', 'radam'],
             'activation_1': ['tanh'], #['tanh', swish, mish],
-            'activation_2': ['sigmoid', swish, mish]
+            'activation_2': ['sigmoid', mish] #['sigmoid', swish, mish]
         }
         #bestparam = {
         #               'activation_1': 'tanh',
@@ -214,7 +214,7 @@ if __name__ == "__main__":
                     dpi=50, bbox_inches="tight")
         plt.close("all")
 
-    score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square'])
+    score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square', 'MAE', 'RMSE'])
     best_hp = pd.DataFrame(best_hp, columns=['best_params'])
 
     result_table = pd.concat([score, best_hp], axis=1)
