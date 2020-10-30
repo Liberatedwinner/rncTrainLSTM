@@ -83,20 +83,20 @@ def feature_engineering(dataAll, predictStep=[10]):
         data.rename({"index": "timeStep"}, axis=1, inplace=True)
 
         print("lagging features")
-        df = lagging_features(df, name="actual speed", laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
-        df = lagging_features(df, name="p/b", laggingStep=list(range(1, 6)) + [20, 60])
+        data = lagging_features(data, name="actual speed", laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+        data = lagging_features(data, name="p/b", laggingStep=list(range(1, 6)) + [20, 60])
 
-        df['train speed_mult_0'] = df['actual speed']
+        data['train speed_mult_0'] = data['actual speed']
         for k in range(1, 6):
-            df[f'train speed_mult_{k}'] = df[f'train speed_mult_{k - 1}'] * df[f'lagged_speed_{k}']
+            data[f'train speed_mult_{k}'] = data[f'train speed_mult_{k - 1}'] * data[f'lagged_speed_{k}']
 
         print("statistical features")
         for k in [5, 10, 20]:
-            df = statistical_features(df, name='actual speed', timeRange=k)
-            df = statistical_features(df, name='p/b', timeRange=k)
+            data = statistical_features(data, name='actual speed', timeRange=k)
+            data = statistical_features(data, name='p/b', timeRange=k)
 
         print("the time step flag with the target")
-        df = create_target(df, predictStep=predicted_step, targetName="actual speed")
+        data = create_target(data, predictStep=predicted_step, targetName="actual speed")
 
         data = data[~data["target"].isnull()]
         data.reset_index(inplace=True, drop=True)
@@ -159,20 +159,20 @@ def create_target(data, predictStep=None, targetName="actual speed"):
 
 if __name__ == "__main__":
     df = preprocessing()
-    dataAll = feature_engineering(dataAll, predictStep=[PREDICTED_STEP])
+    dataAll = feature_engineering(dataAll, predictStep=[predicted_step])
     print("\nMerging the data:")
     print("=======")
     shapeList = [len(df) for df in dataAll]
     print(f"Total shape is {sum(shapeList)}")
     newData = pd.DataFrame(None, columns=list(dataAll[0].columns))
     for data in dataAll:
-        print(f"Now the shape is {len(data)}.")
+        print(f"Now is {len(data)}.")
         newData = pd.concat([newData, data], axis=0, ignore_index=True)
     print("=======")
 
 
     # Saved all the data
-    PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
+    PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
 
     if not os.path.exists(PATH):
         os.makedirs(PATH)
