@@ -65,7 +65,9 @@ def preprocessing(nrows=None):
     for i in range(1, 7):
         df[f'bc{i}'] = df[f'bc{i}'].str[:-5]
         df[f'bc{i}'] = df[f'bc{i}'].astype('float64')
-
+    # p/b, motoring, braking,
+    # permitted speed, actual speed, train speed,
+    # bc1, bc2, bc3, bc4, bc5, bc6
     return df
 
 ### TODO
@@ -86,9 +88,9 @@ def feature_engineering(dataAll, predictStep=[10]):
         data = lagging_features(data, name="actual speed", laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
         data = lagging_features(data, name="p/b", laggingStep=list(range(1, 6)) + [20, 60])
 
-        data['train speed_mult_0'] = data['actual speed']
+        data['speed_mult_0'] = data['actual speed']
         for k in range(1, 6):
-            data[f'train speed_mult_{k}'] = data[f'train speed_mult_{k - 1}'] * data[f'lagged_speed_{k}']
+            data[f'speed_mult_{k}'] = data[f'speed_mult_{k - 1}'] * data[f'lagged_speed_{k}']
 
         print("statistical features")
         for k in [5, 10, 20]:
@@ -104,8 +106,6 @@ def feature_engineering(dataAll, predictStep=[10]):
 
     print("=======")
     return newData
-
-
 
 ### TODO
 
