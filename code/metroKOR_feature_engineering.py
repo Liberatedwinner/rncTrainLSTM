@@ -11,6 +11,7 @@ parser.add_argument('--predictstep', type=int, default=10,
 args = parser.parse_args()
 predicted_step = args.predictstep
 
+
 def save_data(data, filename=None):
     assert filename, "Invalid file name."
     print("=======")
@@ -85,20 +86,30 @@ def feature_engineering(dataAll, predictStep=[10]):
         data.rename({"index": "timeStep"}, axis=1, inplace=True)
 
         print("lagging features")
-        data = lagging_features(data, name="actual speed", laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
-        data = lagging_features(data, name="p/b", laggingStep=list(range(1, 6)) + [20, 60])
+        data = lagging_features(data,
+                                name="actual speed",
+                                laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+        data = lagging_features(data,
+                                name="p/b",
+                                laggingStep=list(range(1, 6)) + [20, 60])
 
         data['speed_mult_0'] = data['actual speed']
         for k in range(1, 6):
-            data[f'speed_mult_{k}'] = data[f'speed_mult_{k - 1}'] * data[f'lagged_speed_{k}']
+            data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_speed_{k}']
 
         print("statistical features")
         for k in [5, 10, 20]:
-            data = statistical_features(data, name='actual speed', timeRange=k)
-            data = statistical_features(data, name='p/b', timeRange=k)
+            data = statistical_features(data,
+                                        name='actual speed',
+                                        timeRange=k)
+            data = statistical_features(data,
+                                        name='p/b',
+                                        timeRange=k)
 
         print("the time step flag with the target")
-        data = create_target(data, predictStep=predicted_step, targetName="actual speed")
+        data = create_target(data,
+                             predictStep=predicted_step,
+                             targetName="actual speed")
 
         data = data[~data["target"].isnull()]
         data.reset_index(inplace=True, drop=True)
@@ -110,7 +121,9 @@ def feature_engineering(dataAll, predictStep=[10]):
 ### TODO
 
 
-def lagging_features(data, name=None, laggingStep=[1, 2, 3]):
+def lagging_features(data,
+                     name=None,
+                     laggingStep=[1, 2, 3]):
     assert name, "Invalid feature name!"
 
     for step in laggingStep:
@@ -121,7 +134,9 @@ def lagging_features(data, name=None, laggingStep=[1, 2, 3]):
     return data
 
 
-def statistical_features(data, name=None, timeRange=5):
+def statistical_features(data,
+                         name=None,
+                         timeRange=5):
     assert name, "Invalid feature name!"
     index = list(data.index)
     featureValues = data[name].values
@@ -141,7 +156,9 @@ def statistical_features(data, name=None, timeRange=5):
     return data
 
 
-def create_target(data, predictStep=None, targetName="actual speed"):
+def create_target(data,
+                  predictStep=None,
+                  targetName="actual speed"):
     target = data[targetName].copy()
     newData = pd.DataFrame(None, columns=list(data.columns), dtype=np.float64)
     newData["target"] = None
