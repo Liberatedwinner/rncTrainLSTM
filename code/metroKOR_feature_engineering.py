@@ -229,7 +229,7 @@ if __name__ == "__main__":
         newData = pd.concat([newData, data], axis=0, ignore_index=True)
     print("=======")
 
-    dropList = ["timeStep", "hour", "dayOfWeek", "rest", "day", "timeFlag"]
+    dropList = ["timeStep", "hour", "dayOfWeek", "rest", "day", "timeFlag", 'speed_mult_0']
     newData.drop(dropList, axis=1, inplace=True)
 
     # Save all the data
