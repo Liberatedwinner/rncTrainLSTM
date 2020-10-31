@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import os
 import argparse
 import pickle
 
@@ -33,9 +34,8 @@ def load_data(filename=None):
     return data
 
 
-def preprocessing(nrows=None):
-    filenames = ['20180713.csv', '20180717.csv']
-    filename = '20180713.csv'
+def preprocessing(filename):
+    # filenames = ['20180713.csv', '20180717.csv']
     df = pd.read_csv(f'..//Data//metroKOR//{filename}')
 
     df.rename({'BC ＃1': 'BC1', 'BC ＃2': 'BC2', 'BC ＃3': 'BC3',
@@ -54,6 +54,12 @@ def preprocessing(nrows=None):
     df.rename(columns={'시간': 'time'}, inplace=True)
     df.columns = df.columns.str.lower()
     df['time'] = pd.to_datetime(filename[:-4] + df['time'].str.replace(':', ''))
+    df["hour"] = df["time"].dt.hour
+    df["dayOfWeek"] = df["time"].dt.dayofweek
+    df["rest"] = df["dayOfWeek"] > 4 # 0-mon
+    df["day"] = df["time"].dt.day
+    df.drop(["time"], axis=1, inplace=True)
+
 
     df['p/b'] = df['p/b'].str[:-3]
     df['p/b'] = df['p/b'].astype('int64')
@@ -70,6 +76,21 @@ def preprocessing(nrows=None):
     # permitted speed, actual speed, train speed,
     # bc1, bc2, bc3, bc4, bc5, bc6
     return df
+
+
+def flag_setting(df_lst):
+    for ind, df in enumerate(df_lst):
+        df['FLAG'] = ind
+    return df_lst
+
+
+def data_concat(df_lst):
+    concatd_data = pd.concat(df_lst, ignore_index=True, axis=0)
+    with open('..//Data//concatd_data.pkl', 'wb') as f:
+        pickle.dump(concatd_data, f)
+    return concatd_data
+
+
 
 ### TODO
 def feature_engineering(dataAll, predictStep=[10]):
@@ -95,20 +116,21 @@ def feature_engineering(dataAll, predictStep=[10]):
 
         data['speed_mult_0'] = data['actual speed']
         for k in range(1, 6):
-            data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_speed_{k}']
+            data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
 
         print("statistical features")
         for k in [5, 10, 20]:
             data = statistical_features(data,
                                         name='actual speed',
                                         timeRange=k)
+        for k in [5, 10, 20]:
             data = statistical_features(data,
                                         name='p/b',
                                         timeRange=k)
 
         print("the time step flag with the target")
         data = create_target(data,
-                             predictStep=predicted_step,
+                             predictStep=predictStep,
                              targetName="actual speed")
 
         data = data[~data["target"].isnull()]
@@ -173,10 +195,16 @@ def create_target(data,
     return newData
 
 
-
 if __name__ == "__main__":
-    df = preprocessing()
-    dataAll = feature_engineering(dataAll, predictStep=[predicted_step])
+    filenames = ['20180713.csv', '20180717.csv']
+    dfs = []
+    for filename in filenames:
+        df = preprocessing(filename)
+        dfs.append(df)
+    dfs = flag_setting(dfs)
+    dataframe = data_concat(dfs)
+
+    dataAll = feature_engineering(dataframe, predictStep=[predicted_step])
     print("\nMerging the data:")
     print("=======")
     shapeList = [len(df) for df in dataAll]
@@ -187,26 +215,19 @@ if __name__ == "__main__":
         newData = pd.concat([newData, data], axis=0, ignore_index=True)
     print("=======")
 
+    dropList = ["timeStep", "hour", "dayOfWeek", "rest", "day", "timeFlag"]
+    newData.drop(dropList, axis=1, inplace=True)
 
-    # Saved all the data
+    # Save all the data
     PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
 
     if not os.path.exists(PATH):
         os.makedirs(PATH)
-    ls = LoadSave()
-    ls.save_data(data=newData[(newData["FLAG"] == 0)],
-                 path=PATH + "Train.pkl")
 
-    ls.save_data(path=PATH + "Test.pkl",
-                 data=newData[(newData["FLAG"] == 1)].drop("target", axis=1))
+    train_data = newData[(newData['FLAG'] == 0)]
+    test_data = newData[(newData["FLAG"] == 1)].drop("target", axis=1)
+    test_result = newData[(newData["FLAG"] == 1)]["target"].values
 
-    ls.save_data(path=PATH + "TestResults.pkl",
-                 data=newData[(newData["FLAG"] == 1)]["target"].values)
-
-
-
-
-
-
-
-
+    save_data(data=train_data, filename=PATH + 'train.pkl')
+    save_data(data=test_data, filename=PATH + 'test.pkl')
+    save_data(data=test_result, filename=PATH + 'test_results.pkl')
