@@ -3,7 +3,9 @@ import pandas as pd
 import os
 import argparse
 import pickle
+import warnings
 
+warnings.filterwarnings('ignore')
 np.random.seed(20201005)
 
 parser = argparse.ArgumentParser()
@@ -110,10 +112,16 @@ def feature_engineering(dataAll, predictStep=[10]):
         data = lagging_features(data,
                                 name="actual speed",
                                 laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+        print('.')
         data = lagging_features(data,
                                 name="p/b",
                                 laggingStep=list(range(1, 6)) + [20, 60])
-
+        print('..')
+        for i in range(1, 7):
+            data = lagging_features(data,
+                                    name=f"bc{i}",
+                                    laggingStep=list(range(1, 6)) + [20, 60])
+        print('...')
         data['speed_mult_0'] = data['actual speed']
         for k in range(1, 6):
             data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
@@ -123,10 +131,16 @@ def feature_engineering(dataAll, predictStep=[10]):
             data = statistical_features(data,
                                         name='actual speed',
                                         timeRange=k)
-        for k in [5, 10, 20]:
+            print('.')
             data = statistical_features(data,
                                         name='p/b',
                                         timeRange=k)
+            print('..')
+            for i in range(1, 7):
+                data = statistical_features(data,
+                                            name=f'bc{i}',
+                                            timeRange=k)
+
 
         print("the time step flag with the target")
         data = create_target(data,
