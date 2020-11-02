@@ -49,7 +49,7 @@ parser.add_argument('--predictstep', type=int, default=10,
                     help='choose the predicted step: 1, 10, 30, 50, 100')
 parser.add_argument('--activation1', type=str, default='tanh',
                     help='choose the activation function instead of tanh: swish, mish')
-parser.add_argument('--activation2', type=str, default='sigmoid',
+parser.add_argument('--activation2', type=str, default='mish',
                     help='choose the activation function instead of sigmoid: swish, mish')
 args = parser.parse_args()
 PREDICTED_STEP = args.predictstep
@@ -67,10 +67,10 @@ def mish(x):
 
 ###############################################################################
 def load_train_test_data():
-    ls = LoadSave(PATH + "Train.pkl")
+    ls = LoadSave(PATH + "train.pkl")
     trainData = ls.load_data()
 
-    ls._fileName = PATH + "Test.pkl"
+    ls._fileName = PATH + "test.pkl"
     testData = ls.load_data()
     return trainData, testData
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     trainData, testData = load_train_test_data()
 
     # Exclude
-    ls = LoadSave("..//Data//TrainedRes//sec" + str(PREDICTED_STEP) + "//TestResults.pkl")
+    ls = LoadSave("..//Data//TrainedRes//sec" + str(PREDICTED_STEP) + "//test_results.pkl")
     testData["target"] = ls.load_data()
 
     print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")

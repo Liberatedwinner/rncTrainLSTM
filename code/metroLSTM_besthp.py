@@ -49,10 +49,10 @@ PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
 
 ###############################################################################
 def load_train_test_data():
-    ls = LoadSave(PATH + "Train.pkl")
+    ls = LoadSave(PATH + "train.pkl")
     trainData = ls.load_data()
 
-    ls._fileName = PATH + "Test.pkl"
+    ls._fileName = PATH + "test.pkl"
     testData = ls.load_data()
     return trainData, testData
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     trainData, testData = load_train_test_data()
 
     # Exclude
-    ls = LoadSave("..//Data//TrainedRes//sec" + str(PREDICTED_STEP) + "//TestResults.pkl")
+    ls = LoadSave("..//Data//TrainedRes//sec" + str(PREDICTED_STEP) + "//test_results.pkl")
     testData["target"] = ls.load_data()
 
     print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")
