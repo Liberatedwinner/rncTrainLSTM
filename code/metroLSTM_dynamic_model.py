@@ -52,11 +52,11 @@ parser.add_argument('--activation1', type=str, default='tanh',
 parser.add_argument('--activation2', type=str, default='mish',
                     help='choose the activation function instead of sigmoid: swish, mish')
 args = parser.parse_args()
-PREDICTED_STEP = args.predictstep
+predicted_step = args.predictstep
 activation1 = args.activation1
 activation2 = args.activation2
 
-PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
+PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
 
 swish = tf.keras.activations.swish
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     trainData, testData = load_train_test_data()
 
     # Exclude
-    ls = LoadSave("..//Data//TrainedRes//sec" + str(PREDICTED_STEP) + "//test_results.pkl")
+    ls = LoadSave("..//Data//TrainedRes//sec" + str(predicted_step) + "//test_results.pkl")
     testData["target"] = ls.load_data()
 
     print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")
@@ -225,7 +225,7 @@ if __name__ == "__main__":
                     plt.grid(True)
                     if not os.path.exists(filepath):
                         os.makedirs(filepath)
-                    plt.savefig(filepath + f'//PredictedStepTest_{(PREDICTED_STEP)}_folds_{ind + 1}.png',
+                    plt.savefig(filepath + f'//PredictedStepTest_{(predicted_step)}_folds_{ind + 1}.png',
                                 dpi=50, bbox_inches="tight")
                     plt.close("all")
 
