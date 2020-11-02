@@ -43,9 +43,9 @@ parser.add_argument('--predictstep', type=int, default=10,
 parser.add_argument('--validation_fit', type=bool, default=False,
                     help='turn the valid fitting on(True) or off(False), default is False')
 args = parser.parse_args()
-PREDICTED_STEP = args.predictstep
+predicted_step = args.predictstep
 valid_fit = args.validation_fit
-PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
+PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
 
 ###############################################################################
 def load_train_test_data():
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     trainData, testData = load_train_test_data()
 
     # Exclude
-    ls = LoadSave("..//Data//TrainedRes//sec" + str(PREDICTED_STEP) + "//test_results.pkl")
+    ls = LoadSave("..//Data//TrainedRes//sec" + str(predicted_step) + "//test_results.pkl")
     testData["target"] = ls.load_data()
 
     print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")
@@ -152,18 +152,18 @@ if __name__ == "__main__":
 
         # Start training the model
         param_grid = {
-            'hidden_size': [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
+            'hidden_size': [24], #[10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
             'batch_size': [10, 14, 18, 22, 24, 28, 32, 64, 128, 256, 512],
-            'lr': [1e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2],
+            'lr': [1e-3], #[1e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2],
             'optimizer': ['adam'], #['adam', 'radam'],
             'activation_1': ['tanh'], #['tanh', swish, mish],
-            'activation_2': ['sigmoid', mish] #['sigmoid', swish, mish]
+            'activation_2': [mish] #['sigmoid', swish, mish]
         }
         #bestparam = {
         #               'activation_1': 'tanh',
         #               'activation_2': mish,
-        #               'batch_size': 22,
-        #               'hidden_size': 18,
+        #               'batch_size': 10,
+        #               'hidden_size': 24,
         #               'lr': 0.001,
         #               'optimizer': 'adam'
         #            }
@@ -210,7 +210,7 @@ if __name__ == "__main__":
         plt.grid(True)
         if not os.path.exists('..//Plots2'):
             os.makedirs('..//Plots2')
-        plt.savefig(f"..//Plots2//PredictedStepTest_{PREDICTED_STEP}_folds_{ind + 1}_.png",
+        plt.savefig(f"..//Plots2//PredictedStepTest_{predicted_step}_folds_{ind + 1}_.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
 
