@@ -39,9 +39,9 @@ warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
 
-hidden_sizes = [10, 14, 18, 22, 26, 30]
-lrs = [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
-batch_sizes = [32, 64, 128, 256, 512]
+hidden_sizes = [24]#[10, 14, 18, 22, 26, 30]
+lrs = [1e-3]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+batch_sizes = [32]#[32, 64, 128, 256, 512]
 metric = 'mae'
 
 parser = argparse.ArgumentParser()
@@ -218,8 +218,10 @@ if __name__ == "__main__":
                     plt.plot(y_test_pred[start:end], linewidth=2, linestyle="-", color="r")
                     plt.plot(y_test[start:end], linewidth=2, linestyle="-", color="b")
                     plt.legend(["Predition", "Ground Truth"])
-                    plt.xlim(0, end - start)
-                    plt.ylim(-500, 2600)
+                    plt.xlim(0, 500)
+                    plt.ylim(1000, 2000)
+                    #plt.xlim(0, end - start)
+                    #plt.ylim(-500, 2600)
                     plt.grid(True)
                     if not os.path.exists(filepath):
                         os.makedirs(filepath)
