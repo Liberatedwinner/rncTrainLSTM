@@ -112,6 +112,9 @@ def feature_engineering(dataAll, predictStep=[10]):
         data = lagging_features(data,
                                 name="actual speed",
                                 laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+        data = lagging_features(data,
+                                name='permitted speed',
+                                laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
         print('.')
         data = lagging_features(data,
                                 name="p/b",
@@ -130,6 +133,9 @@ def feature_engineering(dataAll, predictStep=[10]):
         for k in [5, 10, 20]:
             data = statistical_features(data,
                                         name='actual speed',
+                                        timeRange=k)
+            data = statistical_features(data,
+                                        name='permitted speed',
                                         timeRange=k)
             print('.')
             data = statistical_features(data,
@@ -230,6 +236,8 @@ if __name__ == "__main__":
     print("=======")
 
     dropList = ['train speed', "timeStep", "hour", "dayOfWeek", "rest", "day", "timeFlag", 'speed_mult_0']
+    for i in range(1, 7):
+        dropList.append(f'bc{i}')
     newData.drop(dropList, axis=1, inplace=True)
 
     # Save all the data

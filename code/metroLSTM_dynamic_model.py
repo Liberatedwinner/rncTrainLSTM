@@ -1,7 +1,7 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
 import numpy as np
@@ -39,9 +39,9 @@ warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
 
-hidden_sizes = [24]#[10, 14, 18, 22, 26, 30]
-lrs = [1e-3]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
-batch_sizes = [32]#[32, 64, 128, 256, 512]
+hidden_sizes = [22, 26, 30]#[10, 14, 18, 22, 26, 30]
+lrs = [1e-4, 1e-3, 2e-3]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+batch_sizes = [32, 128, 512]#[32, 64, 128, 256, 512]
 metric = 'mae'
 
 parser = argparse.ArgumentParser()
