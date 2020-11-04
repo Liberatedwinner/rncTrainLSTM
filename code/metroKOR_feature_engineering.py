@@ -126,11 +126,11 @@ def feature_engineering(dataAll, predictStep=[10]):
            #                         laggingStep=list(range(1, 6)) + [20, 60])
         print('.')
         data['speed_mult_0'] = data['actual speed']
-        for k in range(1, 6):
-            data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
+        #for k in range(1, 6):
+         #   data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
         print('complete')
         print("statistical features")
-        for k in [5, 10, 20]:
+        for k in [2, 3, 5, 10, 20]:
             data = statistical_features(data,
                                         name='actual speed',
                                         timeRange=k)

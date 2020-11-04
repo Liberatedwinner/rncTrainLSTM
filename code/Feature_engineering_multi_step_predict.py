@@ -23,7 +23,7 @@ from WeaponLib import basic_feature_report
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-
+import argparse
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
 
