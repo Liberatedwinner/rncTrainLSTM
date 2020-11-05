@@ -33,9 +33,9 @@ sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
 
-hidden_sizes = [22, 26, 30]#[10, 14, 18, 22, 26, 30]
-lrs = [1e-4, 1e-3, 2e-3]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
-batch_sizes = [32, 128, 512]#[32, 64, 128, 256, 512]
+hidden_sizes = [30]#[10, 14, 18, 22, 26, 30]
+lrs = [1e-3]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+batch_sizes = [256]#[32, 64, 128, 256, 512]
 metric = 'mae'
 
 parser = argparse.ArgumentParser()
@@ -97,7 +97,8 @@ def save_chkpt():
 
 
 if __name__ == "__main__":
-    trainData, testData = SaveNLoad.load_train_test_data()
+    snl = SaveNLoad(None, PATH)
+    trainData, testData = snl.load_train_test_data()
 
     # Exclude
     snl = SaveNLoad(PATH + "//test_results.pkl")
@@ -166,6 +167,8 @@ if __name__ == "__main__":
                         rcr_activation = swish
                     elif rcr_activation == 'sigmoid':
                         rcr_activation = 'sigmoid'
+                    else:
+                        rcr_activation = mish
 
                     # Start training the model
                     model = Sequential()
@@ -226,6 +229,8 @@ if __name__ == "__main__":
                     rcr_activation = 'swish'
                 elif rcr_activation == 'sigmoid':
                     rcr_activation = 'sigmoid'
+                else:
+                    rcr_activation = 'mish'
 
                 score = pd.DataFrame(score,
                                      columns=["R-square", "validMAE", "validRMSE", "testMAE", "testRMSE"])

@@ -135,14 +135,14 @@ def feature_engineering(dataAll, predictStep=[10]):
                                 name="p/b",
                                 laggingStep=list(range(1, 6)) + [20, 60])
         print('.')
-        #for i in range(1, 7):
-         #   data = lagging_features(data,
-          #                          name=f"bc{i}",
-           #                         laggingStep=list(range(1, 6)) + [20, 60])
+        for i in range(1, 7):
+            data = lagging_features(data,
+                                    name=f"bc{i}",
+                                    laggingStep=list(range(1, 6)) + [20, 60])
         print('.')
         data['speed_mult_0'] = data['actual speed']
-        #for k in range(1, 6):
-         #   data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
+        for k in range(1, 6):
+            data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
         print('complete')
         print("statistical features")
         for k in [2, 3, 5, 10, 20]:
@@ -230,7 +230,7 @@ def create_target(data,
 
 
 if __name__ == "__main__":
-    filenames = ['20180713.csv', '20180717.csv']
+    filenames = ['20180717.csv', '20180713.csv']
     dfs = []
     for filename in filenames:
         dtf = preprocessing(filename)
