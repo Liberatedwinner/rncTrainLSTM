@@ -5,11 +5,11 @@ np.random.seed(20201005)
 
 
 class SaveNLoad(object):
-    def __init__(self, filename=None, filepath=None):
-        self._fileName = filename
+    def __init__(self, filepath=None, filename=None):
         self._filePath = filepath
+        self._fileName = filename
 
-    def save_data(self, data=None, path=None):
+    def save_data(self, path=None, data=None):
         if path is None:
             assert self._fileName, 'Invalid file path.'
             self.__save_data(data)
