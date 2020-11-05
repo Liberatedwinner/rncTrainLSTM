@@ -144,7 +144,7 @@ def feature_engineering(dataAll, predictStep=[10]):
                                             name=f'bc{i}',
                                             timeRange=k)
         print('complete')
-        print("the time step flag with the target")
+        print("Marking the timestep flag with the target")
         data = create_target(data,
                              predictStep=predictStep,
                              targetName="actual speed")
@@ -160,7 +160,7 @@ def feature_engineering(dataAll, predictStep=[10]):
 def lagging_features(data,
                      name=None,
                      laggingStep=[1, 2, 3]):
-    assert name, "Invalid feature name!"
+    assert name, "Invalid feature name."
 
     for step in laggingStep:
         tmpframe = data[[name, "timeStep"]].copy()
@@ -173,7 +173,7 @@ def lagging_features(data,
 def statistical_features(data,
                          name=None,
                          timeRange=5):
-    assert name, "Invalid feature name!"
+    assert name, "Invalid feature name."
     index = list(data.index)
     featureValues = data[name].values
     Means = []

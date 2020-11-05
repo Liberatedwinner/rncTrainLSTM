@@ -68,19 +68,6 @@ def plot_history(history, result_dir):
     plt.close()
 
 
-def save_history(hist, metric):
-    loss = hist.history['loss']
-    acc = hist.history[metric]
-    val_loss = hist.history['val_loss']
-    val_acc = hist.history[f'val_{metric}']
-    nb_epoch = len(acc)
-
-    with open('result.txt', 'a') as fp:
-        fp.write('epoch\tloss\tacc\tval_loss\tval_acc\n')
-        for i in range(nb_epoch):
-            fp.write(f'{i}\t{loss[i]}\t{acc[i]}\t{val_loss[i]}\t{val_acc[i]}\n')
-
-
 def save_chkpt():
   with open(filepath + '//chkpt_best.pkl', 'wb') as f:
     pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
@@ -179,13 +166,13 @@ if __name__ == "__main__":
                                         callbacks=[earlyStopping, chkpt, save_chkpt_callback])
                     model.evaluate(X_test, y_test, verbose=0)
 
-                    y_valid_pred = model.predict(X_valid)
                     y_valid = y_sc.inverse_transform(y_valid)
+                    y_valid_pred = model.predict(X_valid)
                     y_valid_pred = y_sc.inverse_transform(y_valid_pred)
                     y_valid_pred[y_valid_pred < 1] = 0
 
-                    y_test_pred = model.predict(X_test)
                     y_test = y_sc.inverse_transform(y_test)
+                    y_test_pred = model.predict(X_test)
                     y_test_pred = y_sc.inverse_transform(y_test_pred)
                     y_test_pred[y_test_pred < 1] = 0
                     
@@ -196,20 +183,6 @@ if __name__ == "__main__":
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
                                            ])
                     ModelCore(filepath).graph_drawing(y_test_pred, y_test, ind, predicted_step)
-
-                    # start, end = 0, len(y_test)
-                    # plt.figure(figsize=(16, 10))
-                    # plt.plot(y_test_pred[start:end], linewidth=2, linestyle="-", color="r")
-                    # plt.plot(y_test[start:end], linewidth=2, linestyle="-", color="b")
-                    # plt.legend(["Prediction", "Ground Truth"])
-                    # plt.xlim(1000, 2000) #plt.xlim(0, end - start)
-                    # plt.ylim(0, 120) #plt.ylim(-500, 2600)
-                    # plt.grid(True)
-                    # if not os.path.exists(filepath):
-                    #     os.makedirs(filepath)
-                    # plt.savefig(filepath + f'PredictedStepTest_{predicted_step}_folds_{ind + 1}.png',
-                    #             dpi=50, bbox_inches="tight")
-                    # plt.close("all")
                     print('The graph has been saved.\n')
 
                 if rcr_activation == swish:
@@ -226,4 +199,6 @@ if __name__ == "__main__":
                 # saving the results
                 filename = f'score-{hidden_size}-{lr}-{batch_size}'
                 score.to_pickle(filepath + filename + '.pkl')
+                print(f'The result has been saved as {filename}.pkl')
                 score.to_csv(filepath + filename + '.csv')
+                print(f'The result has been saved as {filename}.csv')
