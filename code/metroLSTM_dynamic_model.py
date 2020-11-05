@@ -1,7 +1,7 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-from MetroLSTMCore import SaveNLoad
+from MetroLSTMCore import ModelCore
 import numpy as np
 import pandas as pd
 import warnings
@@ -88,12 +88,11 @@ def save_chkpt():
 
 
 if __name__ == "__main__":
-    snl = SaveNLoad(None, PATH)
-    trainData, testData = snl.load_train_test_data()
+    mdc = ModelCore(PATH)
+    trainData, testData = mdc.load_train_test_data()
 
     # Exclude
-    snl = SaveNLoad(PATH + "//test_results.pkl")
-    testData["target"] = snl.load_data()
+    testData["target"] = mdc.load_data('test_results.pkl')
 
     print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")
     trainData.dropna(inplace=True)
@@ -114,7 +113,7 @@ if __name__ == "__main__":
         for lr in lrs:
             for batch_size in batch_sizes:
                 score = np.zeros((numFolds, 5))
-                filepath = f'..//Plots-tanh_{rcr_activation}//{hidden_size}-{lr}-{batch_size}'
+                filepath = f'..//Plots-tanh_{rcr_activation}//{hidden_size}-{lr}-{batch_size}//'
                 if not os.path.exists(filepath):
                     os.makedirs(filepath)
 
@@ -145,8 +144,8 @@ if __name__ == "__main__":
                                             verbose=1,
                                             save_best_only=True)
 
-                    if os.path.exists(filepath + '//chkpt_best.pkl') and os.path.getsize(filepath + '//chkpt_best.pkl') > 0:
-                        with open(filepath + '//chkpt_best.pkl', 'rb') as f:
+                    if os.path.exists(filepath + 'chkpt_best.pkl') and os.path.getsize(filepath + 'chkpt_best.pkl') > 0:
+                        with open(filepath + 'chkpt_best.pkl', 'rb') as f:
                             best = pickle.load(f)
                             chkpt.best = best
 
@@ -196,20 +195,20 @@ if __name__ == "__main__":
                                            sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
                                            ])
-
-                    start, end = 0, len(y_test)
-                    plt.figure(figsize=(16, 10))
-                    plt.plot(y_test_pred[start:end], linewidth=2, linestyle="-", color="r")
-                    plt.plot(y_test[start:end], linewidth=2, linestyle="-", color="b")
-                    plt.legend(["Prediction", "Ground Truth"])
-                    plt.xlim(1000, 2000) #plt.xlim(0, end - start)
-                    plt.ylim(0, 120) #plt.ylim(-500, 2600)
-                    plt.grid(True)
-                    if not os.path.exists(filepath):
-                        os.makedirs(filepath)
-                    plt.savefig(filepath + f'//PredictedStepTest_{(predicted_step)}_folds_{ind + 1}.png',
-                                dpi=50, bbox_inches="tight")
-                    plt.close("all")
+                    mdc.graph_drawing(y_test_pred, y_test, ind, predicted_step)
+                    # start, end = 0, len(y_test)
+                    # plt.figure(figsize=(16, 10))
+                    # plt.plot(y_test_pred[start:end], linewidth=2, linestyle="-", color="r")
+                    # plt.plot(y_test[start:end], linewidth=2, linestyle="-", color="b")
+                    # plt.legend(["Prediction", "Ground Truth"])
+                    # plt.xlim(1000, 2000) #plt.xlim(0, end - start)
+                    # plt.ylim(0, 120) #plt.ylim(-500, 2600)
+                    # plt.grid(True)
+                    # if not os.path.exists(filepath):
+                    #     os.makedirs(filepath)
+                    # plt.savefig(filepath + f'PredictedStepTest_{predicted_step}_folds_{ind + 1}.png',
+                    #             dpi=50, bbox_inches="tight")
+                    # plt.close("all")
 
                 if rcr_activation == swish:
                     rcr_activation = 'swish'
@@ -223,6 +222,6 @@ if __name__ == "__main__":
                 print(score)
 
                 # saving the results
-                filename = f'//score-{hidden_size}-{lr}-{batch_size}'
+                filename = f'score-{hidden_size}-{lr}-{batch_size}'
                 score.to_pickle(filepath + filename + '.pkl')
                 score.to_csv(filepath + filename + '.csv')

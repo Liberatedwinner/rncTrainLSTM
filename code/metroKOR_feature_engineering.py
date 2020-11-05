@@ -4,7 +4,7 @@ import os
 import argparse
 import pickle
 import warnings
-from MetroLSTMCore import SaveNLoad
+from MetroLSTMCore import ModelCore
 
 warnings.filterwarnings('ignore')
 np.random.seed(20201005)
@@ -264,10 +264,7 @@ if __name__ == "__main__":
     test_data = newData[(newData["FLAG"] == 1)].drop("target", axis=1)
     test_result = newData[(newData["FLAG"] == 1)]["target"].values
 
-    snl = SaveNLoad()
-    snl.save_data(data=train_data,
-                  path=PATH + 'train.pkl')
-    snl.save_data(data=test_data,
-                 path=PATH + 'test.pkl')
-    snl.save_data(data=test_result,
-                 path=PATH + 'test_results.pkl')
+    mdc = ModelCore(PATH)
+    mdc.save_data('train.pkl', data=train_data)
+    mdc.save_data('test.pkl', data=test_data)
+    mdc.save_data('test_results.pkl', data=test_result)

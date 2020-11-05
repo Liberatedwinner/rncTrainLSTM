@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import warnings
 
-from MetroLSTMCore import SaveNLoad
+from MetroLSTMCore import ModelCore
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -46,14 +46,6 @@ predicted_step = args.predictstep
 valid_fit = args.validation_fit
 PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
 ###############################################################################
-# def load_train_test_data():
-#     snl = SaveNLoad(PATH + "train.pkl")
-#     trainData = snl.load_data()
-#
-#     snl._fileName = PATH + "test.pkl"
-#     testData = snl.load_data()
-#     return trainData, testData
-
 
 swish = tf.keras.activations.swish
 
@@ -103,11 +95,11 @@ def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
 
 
 if __name__ == "__main__":
-    trainData, testData = SaveNLoad.load_train_test_data()
+    mdc = ModelCore(PATH)
+    trainData, testData = mdc.load_train_test_data()
 
     # Exclude
-    snl = SaveNLoad(PATH + "//test_results.pkl")
-    testData["target"] = snl.load_data()
+    testData["target"] = mdc.load_data('test_results.pkl')
 
     print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")
     trainData.dropna(inplace=True)
@@ -201,20 +193,21 @@ if __name__ == "__main__":
         # score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_pred)
         # score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_pred))
         best_hp.append(str(model.best_params_))
-        
-        start, end = 0, len(y_test)
-        plt.figure(figsize=(16, 10))
-        plt.plot(y_pred[start:end], linewidth=2, linestyle="-", color="r")
-        plt.plot(y_test[start:end], linewidth=2, linestyle="-", color="b")
-        plt.legend(["Prediction", "Ground Truth"])
-        plt.xlim(1000, 2000) #plt.xlim(0, end - start)
-        plt.ylim(0, 120) #plt.ylim(-500, 2600)
-        plt.grid(True)
-        if not os.path.exists('..//Plots2'):
-            os.makedirs('..//Plots2')
-        plt.savefig(f"..//Plots2//PredictedStepTest_{predicted_step}_folds_{ind + 1}_.png",
-                    dpi=50, bbox_inches="tight")
-        plt.close("all")
+
+        mdc.graph_drawing(y_pred, y_test, ind, predicted_step)
+        # start, end = 0, len(y_test)
+        # plt.figure(figsize=(16, 10))
+        # plt.plot(y_pred[start:end], linewidth=2, linestyle="-", color="r")
+        # plt.plot(y_test[start:end], linewidth=2, linestyle="-", color="b")
+        # plt.legend(["Prediction", "Ground Truth"])
+        # plt.xlim(1000, 2000) #plt.xlim(0, end - start)
+        # plt.ylim(0, 120) #plt.ylim(-500, 2600)
+        # plt.grid(True)
+        # if not os.path.exists('..//Plots2'):
+        #     os.makedirs('..//Plots2')
+        # plt.savefig(f"..//Plots2//PredictedStepTest_{predicted_step}_folds_{ind + 1}_.png",
+        #             dpi=50, bbox_inches="tight")
+        # plt.close("all")
 
     score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square', 'MAE', 'RMSE'])
     best_hp = pd.DataFrame(best_hp, columns=['best_params'])
