@@ -194,7 +194,7 @@ if __name__ == "__main__":
         # score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_pred))
         best_hp.append(str(model.best_params_))
 
-        mdc.graph_drawing(y_pred, y_test, ind, predicted_step)
+        mdc('..//Plots2').graph_drawing(y_pred, y_test, ind, predicted_step)
         # start, end = 0, len(y_test)
         # plt.figure(figsize=(16, 10))
         # plt.plot(y_pred[start:end], linewidth=2, linestyle="-", color="r")
@@ -208,6 +208,7 @@ if __name__ == "__main__":
         # plt.savefig(f"..//Plots2//PredictedStepTest_{predicted_step}_folds_{ind + 1}_.png",
         #             dpi=50, bbox_inches="tight")
         # plt.close("all")
+        print('The graph has been saved.')
 
     score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square', 'MAE', 'RMSE'])
     best_hp = pd.DataFrame(best_hp, columns=['best_params'])

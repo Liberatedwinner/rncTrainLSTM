@@ -195,7 +195,7 @@ if __name__ == "__main__":
                                            sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
                                            ])
-                    prediction_graph = mdc.graph_drawing(y_test_pred, y_test, ind, predicted_step)
+                    mdc(filepath).graph_drawing(y_test_pred, y_test, ind, predicted_step)
 
                     # start, end = 0, len(y_test)
                     # plt.figure(figsize=(16, 10))
@@ -210,6 +210,7 @@ if __name__ == "__main__":
                     # plt.savefig(filepath + f'PredictedStepTest_{predicted_step}_folds_{ind + 1}.png',
                     #             dpi=50, bbox_inches="tight")
                     # plt.close("all")
+                    print('The graph has been saved.')
 
                 if rcr_activation == swish:
                     rcr_activation = 'swish'
