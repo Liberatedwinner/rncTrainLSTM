@@ -210,7 +210,7 @@ if __name__ == "__main__":
                     # plt.savefig(filepath + f'PredictedStepTest_{predicted_step}_folds_{ind + 1}.png',
                     #             dpi=50, bbox_inches="tight")
                     # plt.close("all")
-                    print('The graph has been saved.')
+                    print('The graph has been saved.\n')
 
                 if rcr_activation == swish:
                     rcr_activation = 'swish'

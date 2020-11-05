@@ -208,7 +208,7 @@ if __name__ == "__main__":
         # plt.savefig(f"..//Plots2//PredictedStepTest_{predicted_step}_folds_{ind + 1}_.png",
         #             dpi=50, bbox_inches="tight")
         # plt.close("all")
-        print('The graph has been saved.')
+        print('The graph has been saved.\n')
 
     score = pd.DataFrame(score, columns=['fold', 'best_score', 'R-square', 'MAE', 'RMSE'])
     best_hp = pd.DataFrame(best_hp, columns=['best_params'])
