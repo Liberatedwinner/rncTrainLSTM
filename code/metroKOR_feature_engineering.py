@@ -16,26 +16,6 @@ args = parser.parse_args()
 predicted_step = args.predictstep
 #######
 
-# def save_data(data, filename=None):
-#     assert filename, "Invalid file name."
-#     print("=======")
-#     print(f'Saving the data to a filename {filename}...')
-#     with open(filename, 'wb') as f:
-#         pickle.dump(data, f)
-#     print("The data has been saved.")
-#     print("=======")
-#
-#
-# def load_data(filename=None):
-#     assert filename, "Invalid file name."
-#     print("=======")
-#     print('Now loading...')
-#     with open(filename, 'rb') as f:
-#         data = pickle.load(f)
-#     print("Complete.")
-#     print("=======")
-#     return data
-
 
 def preprocessing(file_name):
     """
@@ -116,7 +96,7 @@ def feature_engineering(dataAll, predictStep=[10]):
 
     print("=======")
     for flag in FLAG:
-        print("Start with the file {}:".format(flag))
+        print("Running with the file {}:".format(flag))
         data = dataAll[dataAll["FLAG"] == flag]
 
         data.reset_index(inplace=True, drop=True)
@@ -127,6 +107,7 @@ def feature_engineering(dataAll, predictStep=[10]):
         data = lagging_features(data,
                                 name="actual speed",
                                 laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+        print('.')
         data = lagging_features(data,
                                 name='permitted speed',
                                 laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
@@ -149,6 +130,7 @@ def feature_engineering(dataAll, predictStep=[10]):
             data = statistical_features(data,
                                         name='actual speed',
                                         timeRange=k)
+            print('.')
             data = statistical_features(data,
                                         name='permitted speed',
                                         timeRange=k)
@@ -161,13 +143,11 @@ def feature_engineering(dataAll, predictStep=[10]):
                 data = statistical_features(data,
                                             name=f'bc{i}',
                                             timeRange=k)
-
         print('complete')
         print("the time step flag with the target")
         data = create_target(data,
                              predictStep=predictStep,
                              targetName="actual speed")
-
         data = data[~data["target"].isnull()]
         data.reset_index(inplace=True, drop=True)
         newData.append(data)
@@ -244,8 +224,8 @@ if __name__ == "__main__":
     shapeList = [len(df) for df in dataAll]
     print(f"Total shape is {sum(shapeList)}")
     newData = pd.DataFrame(None, columns=list(dataAll[0].columns))
-    for data in dataAll:
-        print(f"Now is {len(data)}.")
+    for idx, data in enumerate(dataAll):
+        print(f"{idx}: {len(data)}.")
         newData = pd.concat([newData, data], axis=0, ignore_index=True)
     print("=======")
 
