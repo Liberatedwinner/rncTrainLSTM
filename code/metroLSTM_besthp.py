@@ -23,7 +23,6 @@ from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 #
-from radam import RAdamOptimizer
 import tensorflow as tf
 import argparse
 from sklearn.metrics import r2_score
@@ -32,10 +31,10 @@ import sklearn
 
 np.random.seed(20201005)
 
+warnings.filterwarnings('ignore')
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
 sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
-warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
 parser = argparse.ArgumentParser()
@@ -44,10 +43,9 @@ parser.add_argument('--predictstep', type=int, default=10,
 parser.add_argument('--validation_fit', type=bool, default=False,
                     help='turn the valid fitting on(True) or off(False). Default switch is False.')
 args = parser.parse_args()
-PREDICTED_STEP = args.predictstep
+predicted_step = args.predictstep
 valid_fit = args.validation_fit
-PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
-
+PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
 ###############################################################################
 def load_train_test_data():
     ls = LoadSave(PATH + "train.pkl")
@@ -68,7 +66,6 @@ def mish(x):
 def build_model(hidden_size=18,
                 #batch_size=22,
                 lr=0.002,
-                optimizer='adam',
                 activation_1='tanh',
                 activation_2='mish'):
     model = Sequential()
@@ -109,7 +106,7 @@ if __name__ == "__main__":
     trainData, testData = load_train_test_data()
 
     # Exclude
-    ls = LoadSave("..//Data//TrainedRes//sec" + str(PREDICTED_STEP) + "//test_results.pkl")
+    ls = LoadSave("..//Data//TrainedRes//sec" + str(predicted_step) + "//test_results.pkl")
     testData["target"] = ls.load_data()
 
     print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")
@@ -156,7 +153,6 @@ if __name__ == "__main__":
             'hidden_size': [10, 20, 30],#[10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
             'batch_size': [32, 64, 128, 256, 512], #[10, 14, 18, 22, 24, 28, 32, 64, 128, 256, 512],
             'lr': [1e-4, 2e-3],#[1e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2],
-            'optimizer': ['adam'], #['adam', 'radam'],
             'activation_1': ['tanh'], #['tanh', swish, mish],
             'activation_2': [mish] #['sigmoid', swish, mish]
         }
@@ -180,8 +176,6 @@ if __name__ == "__main__":
                                            y_train, y_test,
                                            model, param_grid)
 
-        #with open('result.txt', 'a') as fp:
-        #    fp.write(f'({model.best_score_}, {model.best_params_})\n')
         print('\n=====')
         mdl_bs = model.best_score_
         mdl_bs = y_sc.inverse_transform(mdl_bs.reshape((-1, 1)))
@@ -194,11 +188,18 @@ if __name__ == "__main__":
         y_pred = y_sc.inverse_transform(y_pred)
         y_pred[y_pred < 1] = 0
 
-        score[ind, 0] = ind + 1
-        score[ind, 1] = mdl_bs
-        score[ind, 2] = r2_score(y_test, y_pred)
-        score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_pred)
-        score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_pred))
+        score[ind] = np.array([ind + 1,
+                               mdl_bs,
+                               r2_score(y_test, y_pred),
+                               sklearn.metrics.mean_absolute_error(y_test, y_pred),
+                               np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_pred))
+                               ])
+
+        # score[ind, 0] = ind + 1
+        # score[ind, 1] = mdl_bs
+        # score[ind, 2] = r2_score(y_test, y_pred)
+        # score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_pred)
+        # score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_pred))
         best_hp.append(str(model.best_params_))
         
         start, end = 0, len(y_test)
@@ -206,14 +207,12 @@ if __name__ == "__main__":
         plt.plot(y_pred[start:end], linewidth=2, linestyle="-", color="r")
         plt.plot(y_test[start:end], linewidth=2, linestyle="-", color="b")
         plt.legend(["Prediction", "Ground Truth"])
-        plt.xlim(1000, 2000)
-        plt.ylim(0, 120)
-        #plt.xlim(0, end - start) 
-        #plt.ylim(-500, 2600)
+        plt.xlim(1000, 2000) #plt.xlim(0, end - start)
+        plt.ylim(0, 120) #plt.ylim(-500, 2600)
         plt.grid(True)
         if not os.path.exists('..//Plots2'):
             os.makedirs('..//Plots2')
-        plt.savefig(f"..//Plots2//PredictedStepTest_{PREDICTED_STEP}_folds_{ind + 1}_.png",
+        plt.savefig(f"..//Plots2//PredictedStepTest_{predicted_step}_folds_{ind + 1}_.png",
                     dpi=50, bbox_inches="tight")
         plt.close("all")
 
@@ -224,7 +223,6 @@ if __name__ == "__main__":
     print(result_table)
 
     # save
-    #score.to_pickle("score.pkl")
     result_table.to_pickle('..//Plots2//result_table.pkl')
     result_table.to_csv('..//Plots2//result_table.csv')
 

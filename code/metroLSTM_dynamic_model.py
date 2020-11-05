@@ -7,9 +7,6 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 import numpy as np
 import pandas as pd
 import warnings
-import gc
-
-from WeaponLib import ReduceMemoryUsage
 from WeaponLib import LoadSave
 
 import seaborn as sns
@@ -22,7 +19,6 @@ import sklearn
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
-from keras.layers import Activation
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
@@ -33,10 +29,10 @@ import tensorflow as tf
 
 np.random.seed(20201005)
 
+warnings.filterwarnings('ignore')
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
 sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
-warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
 
@@ -61,8 +57,6 @@ swish = tf.keras.activations.swish
 
 def mish(x):
     return x * tf.nn.tanh(tf.nn.softplus(x))
-
-
 ###############################################################################
 def load_train_test_data():
     ls = LoadSave(PATH + "train.pkl")
@@ -93,7 +87,7 @@ def save_history(hist, metric):
     val_acc = hist.history[f'val_{metric}']
     nb_epoch = len(acc)
 
-    with open(f'result.txt', 'a') as fp:
+    with open('result.txt', 'a') as fp:
         fp.write('epoch\tloss\tacc\tval_loss\tval_acc\n')
         for i in range(nb_epoch):
             fp.write(f'{i}\t{loss[i]}\t{acc[i]}\t{val_loss[i]}\t{val_acc[i]}\n')
@@ -183,7 +177,7 @@ if __name__ == "__main__":
                                    return_sequences=False,
                                    input_shape=(X_train.shape[1], X_train.shape[2])))
                     model.add(Dense(1))
-                    model.compile(loss=mean_squared_error, #mean_absolute_error,
+                    model.compile(loss=mean_squared_error,
                                   optimizer=Adam(lr=lr),
                                   metrics=['mae'])
                     history = model.fit(X_train, y_train,
@@ -203,21 +197,25 @@ if __name__ == "__main__":
                     y_test_pred = y_sc.inverse_transform(y_test_pred)
                     y_test_pred[y_test_pred < 1] = 0
                     
-                    score[ind, 0] = r2_score(y_test, y_test_pred)
-                    score[ind, 1] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred)
-                    score[ind, 2] = np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
-                    score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred)
-                    score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
+                    score[ind] = np.array([r2_score(y_test, y_test_pred),
+                                           sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred),
+                                           np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred)),
+                                           sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
+                                           np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
+                                           ])
+                    # score[ind, 0] = r2_score(y_test, y_test_pred)
+                    # score[ind, 1] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred)
+                    # score[ind, 2] = np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
+                    # score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred)
+                    # score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
 
                     start, end = 0, len(y_test)
                     plt.figure(figsize=(16, 10))
                     plt.plot(y_test_pred[start:end], linewidth=2, linestyle="-", color="r")
                     plt.plot(y_test[start:end], linewidth=2, linestyle="-", color="b")
                     plt.legend(["Prediction", "Ground Truth"])
-                    plt.xlim(1000, 2000)
-                    plt.ylim(0, 120)
-                    #plt.xlim(0, end - start)
-                    #plt.ylim(-500, 2600)
+                    plt.xlim(1000, 2000) #plt.xlim(0, end - start)
+                    plt.ylim(0, 120) #plt.ylim(-500, 2600)
                     plt.grid(True)
                     if not os.path.exists(filepath):
                         os.makedirs(filepath)
@@ -237,4 +235,4 @@ if __name__ == "__main__":
                 # saving the results
                 filename = f'//score-{hidden_size}-{lr}-{batch_size}'
                 score.to_pickle(filepath + filename + '.pkl')
-                score.to_csv(filepath + filename +'.csv')
+                score.to_csv(filepath + filename + '.csv')
