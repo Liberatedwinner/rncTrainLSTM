@@ -195,7 +195,7 @@ if __name__ == "__main__":
                                            sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
                                            ])
-                    mdc(filepath).graph_drawing(y_test_pred, y_test, ind, predicted_step)
+                    ModelCore(filepath).graph_drawing(y_test_pred, y_test, ind, predicted_step)
 
                     # start, end = 0, len(y_test)
                     # plt.figure(figsize=(16, 10))
