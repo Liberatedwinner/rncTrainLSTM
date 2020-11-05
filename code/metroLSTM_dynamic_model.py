@@ -1,35 +1,32 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-
+from MetroLSTMCore import SaveNLoad
 import numpy as np
 import pandas as pd
 import warnings
-from WeaponLib import LoadSave
-
+import argparse
+import pickle
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
+import sklearn
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import TimeSeriesSplit
-import sklearn
-
+from sklearn.metrics import r2_score
+import tensorflow as tf
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
-from sklearn.metrics import r2_score
-import argparse
-import pickle
-import tensorflow as tf
 
 np.random.seed(20201005)
-
+os.environ["CUDA_VISIBLE_DEVICES"] = "1" # GPU No.
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 warnings.filterwarnings('ignore')
+
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
 sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
@@ -58,13 +55,13 @@ swish = tf.keras.activations.swish
 def mish(x):
     return x * tf.nn.tanh(tf.nn.softplus(x))
 ###############################################################################
-def load_train_test_data():
-    ls = LoadSave(PATH + "train.pkl")
-    trainData = ls.load_data()
-
-    ls._fileName = PATH + "test.pkl"
-    testData = ls.load_data()
-    return trainData, testData
+# def load_train_test_data():
+#     snl = SaveNLoad(PATH + "train.pkl")
+#     trainData = snl.load_data()
+#
+#     snl._fileName = PATH + "test.pkl"
+#     testData = snl.load_data()
+#     return trainData, testData
 
 
 def plot_history(history, result_dir):
@@ -92,16 +89,19 @@ def save_history(hist, metric):
         for i in range(nb_epoch):
             fp.write(f'{i}\t{loss[i]}\t{acc[i]}\t{val_loss[i]}\t{val_acc[i]}\n')
 
+
 def save_chkpt():
   with open(filepath + '//chkpt_best.pkl', 'wb') as f:
     pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
 ###############################################################################
+
+
 if __name__ == "__main__":
-    trainData, testData = load_train_test_data()
+    trainData, testData = SaveNLoad.load_train_test_data()
 
     # Exclude
-    ls = LoadSave(PATH + "//test_results.pkl")
-    testData["target"] = ls.load_data()
+    snl = SaveNLoad(PATH + "//test_results.pkl")
+    testData["target"] = snl.load_data()
 
     print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")
     trainData.dropna(inplace=True)
@@ -116,7 +116,6 @@ if __name__ == "__main__":
     folds = []
     for trainInd, validInd in tscv.split(trainData):
         folds.append([trainInd, validInd])
-
 
     # Start the time series cross validation
     for hidden_size in hidden_sizes:

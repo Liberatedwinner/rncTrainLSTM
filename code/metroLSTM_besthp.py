@@ -1,14 +1,11 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-
 import numpy as np
 import pandas as pd
 import warnings
 
-from WeaponLib import LoadSave
+from MetroLSTMCore import SaveNLoad
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -30,8 +27,10 @@ from keras.wrappers.scikit_learn import KerasRegressor
 import sklearn
 
 np.random.seed(20201005)
-
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 warnings.filterwarnings('ignore')
+
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
 sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
@@ -47,13 +46,13 @@ predicted_step = args.predictstep
 valid_fit = args.validation_fit
 PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
 ###############################################################################
-def load_train_test_data():
-    ls = LoadSave(PATH + "train.pkl")
-    trainData = ls.load_data()
-
-    ls._fileName = PATH + "test.pkl"
-    testData = ls.load_data()
-    return trainData, testData
+# def load_train_test_data():
+#     snl = SaveNLoad(PATH + "train.pkl")
+#     trainData = snl.load_data()
+#
+#     snl._fileName = PATH + "test.pkl"
+#     testData = snl.load_data()
+#     return trainData, testData
 
 
 swish = tf.keras.activations.swish
@@ -100,14 +99,15 @@ def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
         pred = fitted_model.predict(X_test_data)
 
     return fitted_model, pred
-
 ###############################################################################
+
+
 if __name__ == "__main__":
-    trainData, testData = load_train_test_data()
+    trainData, testData = SaveNLoad.load_train_test_data()
 
     # Exclude
-    ls = LoadSave("..//Data//TrainedRes//sec" + str(predicted_step) + "//test_results.pkl")
-    testData["target"] = ls.load_data()
+    snl = SaveNLoad(PATH + "//test_results.pkl")
+    testData["target"] = snl.load_data()
 
     print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")
     trainData.dropna(inplace=True)

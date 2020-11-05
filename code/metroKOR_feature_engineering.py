@@ -4,6 +4,7 @@ import os
 import argparse
 import pickle
 import warnings
+from MetroLSTMCore import SaveNLoad
 
 warnings.filterwarnings('ignore')
 np.random.seed(20201005)
@@ -13,32 +14,39 @@ parser.add_argument('--predictstep', type=int, default=10,
                     help='choose the predicted step: 1, 10, 30, 50, 100')
 args = parser.parse_args()
 predicted_step = args.predictstep
+#######
+
+# def save_data(data, filename=None):
+#     assert filename, "Invalid file name."
+#     print("=======")
+#     print(f'Saving the data to a filename {filename}...')
+#     with open(filename, 'wb') as f:
+#         pickle.dump(data, f)
+#     print("The data has been saved.")
+#     print("=======")
+#
+#
+# def load_data(filename=None):
+#     assert filename, "Invalid file name."
+#     print("=======")
+#     print('Now loading...')
+#     with open(filename, 'rb') as f:
+#         data = pickle.load(f)
+#     print("Complete.")
+#     print("=======")
+#     return data
 
 
-def save_data(data, filename=None):
-    assert filename, "Invalid file name."
-    print("=======")
-    print(f'Saving the data to a filename {filename}...')
-    with open(filename, 'wb') as f:
-        pickle.dump(data, f)
-    print("The data has been saved.")
-    print("=======")
-
-
-def load_data(filename=None):
-    assert filename, "Invalid file name."
-    print("=======")
-    print('Now loading...')
-    with open(filename, 'rb') as f:
-        data = pickle.load(f)
-    print("Complete.")
-    print("=======")
-    return data
-
-
-def preprocessing(filename):
-    # filenames = ['20180713.csv', '20180717.csv']
-    df = pd.read_csv(f'..//Data//metroKOR//{filename}')
+def preprocessing(file_name):
+    """
+    :If you use this part, you need to convert .xlsx file to .csv file.:
+    :param 'file_name.csv':
+    :return dataframe which has features below:
+    :p/b, motoring, braking,:
+    :permitted speed, actual speed, train speed,:
+    :bc1, bc2, bc3, bc4, bc5, bc6:
+    """
+    df = pd.read_csv(f'..//Data//metroKOR//{file_name}')
 
     df.rename({'BC ＃1': 'BC1', 'BC ＃2': 'BC2', 'BC ＃3': 'BC3',
                'BC ＃4': 'BC4', 'BC ＃7': 'BC5', 'BC ＃0': 'BC6'},
@@ -55,13 +63,12 @@ def preprocessing(filename):
 
     df.rename(columns={'시간': 'time'}, inplace=True)
     df.columns = df.columns.str.lower()
-    df['time'] = pd.to_datetime(filename[:-4] + df['time'].str.replace(':', ''))
+    df['time'] = pd.to_datetime(file_name[:-4] + df['time'].str.replace(':', ''))
     df["hour"] = df["time"].dt.hour
     df["dayOfWeek"] = df["time"].dt.dayofweek
     df["rest"] = df["dayOfWeek"] > 4 # 0-mon
     df["day"] = df["time"].dt.day
     df.drop(["time"], axis=1, inplace=True)
-
 
     df['p/b'] = df['p/b'].str[:-3]
     df['p/b'] = df['p/b'].astype('int64')
@@ -74,24 +81,32 @@ def preprocessing(filename):
     for i in range(1, 7):
         df[f'bc{i}'] = df[f'bc{i}'].str[:-5]
         df[f'bc{i}'] = df[f'bc{i}'].astype('float64')
-    # p/b, motoring, braking,
-    # permitted speed, actual speed, train speed,
-    # bc1, bc2, bc3, bc4, bc5, bc6
+
     return df
 
 
 def flag_setting(df_lst):
+    """
+    :This part is for flag setting, as you know from the name.:
+    :param df_lst - array of dataframe:
+    :return df_lst - with 'flag':
+    """
     for ind, df in enumerate(df_lst):
         df['FLAG'] = ind
     return df_lst
 
 
 def data_concat(df_lst):
+    """
+    :This part is for 'pd.concat' of dataframes.:
+    :As you can see, please import pandas as pd.
+    :param df_lst:
+    :return concatenated dataframe:
+    """
     concatd_data = pd.concat(df_lst, ignore_index=True, axis=0)
     with open('..//Data//concatd_data.pkl', 'wb') as f:
         pickle.dump(concatd_data, f)
     return concatd_data
-
 
 
 ### TODO
@@ -159,7 +174,6 @@ def feature_engineering(dataAll, predictStep=[10]):
         print('complete')
     print("=======")
     return newData
-
 ### TODO
 
 
@@ -219,8 +233,8 @@ if __name__ == "__main__":
     filenames = ['20180713.csv', '20180717.csv']
     dfs = []
     for filename in filenames:
-        df = preprocessing(filename)
-        dfs.append(df)
+        dtf = preprocessing(filename)
+        dfs.append(dtf)
     dfs = flag_setting(dfs)
     dataframe = data_concat(dfs)
 
@@ -250,6 +264,10 @@ if __name__ == "__main__":
     test_data = newData[(newData["FLAG"] == 1)].drop("target", axis=1)
     test_result = newData[(newData["FLAG"] == 1)]["target"].values
 
-    save_data(data=train_data, filename=PATH + 'train.pkl')
-    save_data(data=test_data, filename=PATH + 'test.pkl')
-    save_data(data=test_result, filename=PATH + 'test_results.pkl')
+    snl = SaveNLoad()
+    snl.save_data(data=train_data,
+                  path=PATH + 'train.pkl')
+    snl.save_data(data=test_data,
+                 path=PATH + 'test.pkl')
+    snl.save_data(data=test_result,
+                 path=PATH + 'test_results.pkl')
