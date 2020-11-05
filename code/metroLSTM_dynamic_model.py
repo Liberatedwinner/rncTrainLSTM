@@ -184,6 +184,8 @@ if __name__ == "__main__":
                     model.add(LSTM(hidden_size, ###TODO
                                    activation=activation1, ###TODO
                                    recurrent_activation=activation2, ###TODO
+                                   kernel_initializer="he_uniform",
+                                   recurrent_initializer="orthogonal",
                                    return_sequences=False,
                                    input_shape=(X_train.shape[1], X_train.shape[2])))
                     model.add(Dense(1))

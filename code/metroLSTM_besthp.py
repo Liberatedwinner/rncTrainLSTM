@@ -75,15 +75,13 @@ def build_model(hidden_size=18,
                    activation=activation_1,
                    recurrent_activation=activation_2,
                    return_sequences=False,
+                   kernel_initializer="he_uniform",
+                   recurrent_initializer="orthogonal",
                    input_shape=(X_train.shape[1], X_train.shape[2])))
     model.add(Dense(1))
-    model.compile(loss=mean_absolute_error,
+    model.compile(loss=mean_squared_error,
                   optimizer=Adam(lr=lr),
                   metrics=['mae'])
-    if optimizer == 'radam':
-        model.compile(loss=mean_squared_error,
-                      optimizer=RAdamOptimizer(learning_rate=lr),
-                      metrics=['mae'])
     return model
 
     
