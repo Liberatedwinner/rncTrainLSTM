@@ -55,15 +55,6 @@ swish = tf.keras.activations.swish
 def mish(x):
     return x * tf.nn.tanh(tf.nn.softplus(x))
 ###############################################################################
-# def load_train_test_data():
-#     snl = SaveNLoad(PATH + "train.pkl")
-#     trainData = snl.load_data()
-#
-#     snl._fileName = PATH + "test.pkl"
-#     testData = snl.load_data()
-#     return trainData, testData
-
-
 def plot_history(history, result_dir):
     plt.figure()
     plt.plot(history.history['loss'], marker='.')
@@ -205,11 +196,6 @@ if __name__ == "__main__":
                                            sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
                                            ])
-                    # score[ind, 0] = r2_score(y_test, y_test_pred)
-                    # score[ind, 1] = sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred)
-                    # score[ind, 2] = np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred))
-                    # score[ind, 3] = sklearn.metrics.mean_absolute_error(y_test, y_test_pred)
-                    # score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
 
                     start, end = 0, len(y_test)
                     plt.figure(figsize=(16, 10))
