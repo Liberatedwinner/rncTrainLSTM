@@ -30,18 +30,19 @@ from sklearn.metrics import r2_score
 from keras.wrappers.scikit_learn import KerasRegressor
 import sklearn
 
+np.random.seed(20201005)
+
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
-np.random.seed(2019)
 sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--predictstep', type=int, default=10,
-                    help='choose the predicted step: 1, 10, 30, 50, 100')
+                    help='choose the predicted step: 1, 10, 30, 50, 100. Default value is 10.')
 parser.add_argument('--validation_fit', type=bool, default=False,
-                    help='turn the valid fitting on(True) or off(False), default is False')
+                    help='turn the valid fitting on(True) or off(False). Default switch is False.')
 args = parser.parse_args()
 PREDICTED_STEP = args.predictstep
 valid_fit = args.validation_fit
@@ -69,7 +70,7 @@ def build_model(hidden_size=18,
                 lr=0.002,
                 optimizer='adam',
                 activation_1='tanh',
-                activation_2='sigmoid'):
+                activation_2='mish'):
     model = Sequential()
     model.add(LSTM(hidden_size,
                    activation=activation_1,
@@ -131,11 +132,13 @@ if __name__ == "__main__":
     for ind, (train, valid) in enumerate(folds):
         X_train = trainData.iloc[train].drop(["target"], axis=1).values
         X_valid = trainData.iloc[valid].drop(["target"], axis=1).values
+
         y_train = trainData.iloc[train]["target"].values.reshape(len(X_train), 1)
         y_valid = trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
 
         # Access the normalized data
         X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+
         X_train = X_sc.fit_transform(X_train)
         X_valid = X_sc.transform(X_valid)  # fit 기준으로 transform하는
         X_test = X_sc.transform(testData.drop(["target"], axis=1).values)
