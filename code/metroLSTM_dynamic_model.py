@@ -157,7 +157,8 @@ if __name__ == "__main__":
                                    kernel_initializer="he_uniform",
                                    recurrent_initializer="orthogonal",
                                    return_sequences=False,
-                                   input_shape=(X_train.shape[1], X_train.shape[2])))
+                                   input_shape=(X_train.shape[1], X_train.shape[2]),
+                                   dropout=0.2, recurrent_dropout=0.2))
                     model.add(Dense(1))
                     model.compile(loss=mean_squared_error,
                                   optimizer=Adam(lr=lr),
