@@ -165,9 +165,9 @@ if __name__ == "__main__":
                                         validation_data=(X_valid, y_valid), verbose=1,
                                         shuffle=False,
                                         callbacks=[earlyStopping, chkpt, save_chkpt_callback])
-                    model.save('lastmodel.h5')
+                    model.save(filepath + 'lastmodel.h5')
                     del model
-                    model = load_model('lastmodel.h5', custom_objects={'mish': mish})
+                    model = load_model(filepath + 'lastmodel.h5', custom_objects={'mish': mish})
                     model.evaluate(X_test, y_test, verbose=1)
                     #model.evaluate(X_test, y_test, verbose=0)
 
