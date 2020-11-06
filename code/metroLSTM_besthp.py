@@ -194,7 +194,7 @@ if __name__ == "__main__":
         # score[ind, 4] = np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_pred))
         best_hp.append(str(model.best_params_))
 
-        ModelCore('..//Plots2').graph_drawing(y_pred, y_test, ind, predicted_step)
+        ModelCore('..//Plots2').pred_drawing(y_pred, y_test, ind, predicted_step)
         # start, end = 0, len(y_test)
         # plt.figure(figsize=(16, 10))
         # plt.plot(y_pred[start:end], linewidth=2, linestyle="-", color="r")
