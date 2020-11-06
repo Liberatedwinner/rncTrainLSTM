@@ -21,7 +21,7 @@ from keras.layers import LSTM
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
-
+from keras.utils import get_custom_objects
 np.random.seed(20201005)
 os.environ["CUDA_VISIBLE_DEVICES"] = "1" # GPU No.
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -33,7 +33,7 @@ sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
 
-hidden_sizes = [30]#[10, 14, 18, 22, 26, 30]
+hidden_sizes = [20]#[10, 14, 18, 22, 26, 30]
 lrs = [1e-3]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
 batch_sizes = [256]#[32, 64, 128, 256, 512]
 metric = 'mae'
@@ -54,6 +54,7 @@ swish = tf.keras.activations.swish
 
 def mish(x):
     return x * tf.nn.tanh(tf.nn.softplus(x))
+get_custom_objects().update({'mish': mish})
 ###############################################################################
 def plot_history(history, result_dir):
     plt.figure()
@@ -166,7 +167,7 @@ if __name__ == "__main__":
                                         callbacks=[earlyStopping, chkpt, save_chkpt_callback])
                     model.save('lastmodel.h5')
                     del model
-                    model = load_model('lastmodel.h5')
+                    model = load_model('lastmodel.h5', custom_objects={'mish': mish})
                     model.evaluate(X_test, y_test, verbose=1)
                     #model.evaluate(X_test, y_test, verbose=0)
 
