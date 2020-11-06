@@ -15,7 +15,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import r2_score
 import tensorflow as tf
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.losses import mean_absolute_error, mean_squared_error
@@ -59,7 +59,7 @@ def plot_history(history, result_dir):
     plt.figure()
     plt.plot(history.history['loss'], marker='.')
     plt.plot(history.history['val_loss'], marker='.')
-    plt.title('Model Mean Absoluted Error')
+    plt.title('Model')# Mean Absolute Error')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.grid()
@@ -69,7 +69,7 @@ def plot_history(history, result_dir):
 
 
 def save_chkpt():
-  with open(filepath + '//chkpt_best.pkl', 'wb') as f:
+  with open(filepath + 'chkpt_best.pkl', 'wb') as f:
     pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
 ###############################################################################
 
@@ -164,7 +164,11 @@ if __name__ == "__main__":
                                         validation_data=(X_valid, y_valid), verbose=1,
                                         shuffle=False,
                                         callbacks=[earlyStopping, chkpt, save_chkpt_callback])
+                    model.save('lastmodel.h5')
+                    del model
+                    model = load_model('lastmodel.h5')
                     model.evaluate(X_test, y_test, verbose=0)
+                    #model.evaluate(X_test, y_test, verbose=0)
 
                     y_valid = y_sc.inverse_transform(y_valid)
                     y_valid_pred = model.predict(X_valid)
@@ -183,6 +187,7 @@ if __name__ == "__main__":
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
                                            ])
                     ModelCore(filepath).pred_drawing(y_test_pred, y_test, ind, predicted_step)
+                    plot_history(history, filepath + f'errorpic{ind}.png')
                     print('The graph has been saved.\n')
 
                 if rcr_activation == swish:
@@ -202,3 +207,4 @@ if __name__ == "__main__":
                 print(f'The result has been saved as {filename}.pkl')
                 score.to_csv(filepath + filename + '.csv')
                 print(f'The result has been saved as {filename}.csv')
+
