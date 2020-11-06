@@ -126,7 +126,7 @@ if __name__ == "__main__":
                     X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
                     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
-                    chkpt = ModelCheckpoint(filepath=filepath + f'//model-{ind}.h5',
+                    chkpt = ModelCheckpoint(filepath=filepath + '//model.h5',
                                             monitor='val_loss',
                                             verbose=1,
                                             save_best_only=True)
@@ -167,7 +167,7 @@ if __name__ == "__main__":
                     model.save('lastmodel.h5')
                     del model
                     model = load_model('lastmodel.h5')
-                    model.evaluate(X_test, y_test, verbose=0)
+                    model.evaluate(X_test, y_test, verbose=1)
                     #model.evaluate(X_test, y_test, verbose=0)
 
                     y_valid = y_sc.inverse_transform(y_valid)
