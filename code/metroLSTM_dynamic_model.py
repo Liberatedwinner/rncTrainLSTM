@@ -160,7 +160,7 @@ if __name__ == "__main__":
                     model.add(Dense(1))
                     model.compile(loss=mean_squared_error,
                                   optimizer=Adam(lr=lr),
-                                  metrics=['mae'])
+                                  metrics=['mae', 'accuracy'])
                     history = model.fit(X_train, y_train,
                                         epochs=500, batch_size=batch_size,
                                         validation_data=(X_valid, y_valid), verbose=1,
