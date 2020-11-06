@@ -60,11 +60,12 @@ def plot_history(history, result_dir):
     plt.figure()
     plt.plot(history.history['loss'], marker='.')
     plt.plot(history.history['val_loss'], marker='.')
+    plt.plot(history.history['accuracy'], marker='*')
     plt.title('Model')# Mean Absolute Error')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.grid()
-    plt.legend(['loss', 'val_loss'], loc='upper right')
+    plt.legend(['loss', 'val_loss', 'accuracy'], loc='upper right')
     plt.savefig(result_dir, dpi=500, bbox_inches="tight")
     plt.close()
 
@@ -188,7 +189,7 @@ if __name__ == "__main__":
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
                                            ])
                     ModelCore(filepath).pred_drawing(y_test_pred, y_test, ind, predicted_step)
-                    plot_history(history, filepath + f'errorpic{ind}.png')
+                    plot_history(history, filepath + f'errorpic{ind+1}.png')
                     print('The graph has been saved.\n')
 
                 if rcr_activation == swish:
