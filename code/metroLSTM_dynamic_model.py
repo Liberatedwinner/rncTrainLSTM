@@ -65,6 +65,7 @@ def plot_history(history, result_dir):
     plt.title('Model')# Mean Absolute Error')
     plt.xlabel('epoch')
     plt.ylabel('loss')
+    plt.ylim(0, 1)
     plt.grid()
     plt.legend(['loss', 'val_loss'], loc='upper right')
     plt.savefig(result_dir, dpi=500, bbox_inches="tight")
