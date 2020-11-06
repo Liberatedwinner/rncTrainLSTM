@@ -34,7 +34,7 @@ sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 earlyStopping = EarlyStopping(monitor="val_loss", patience=10, verbose=2)
 
 
-hidden_sizes = [16]#[10, 14, 18, 22, 26, 30]
+hidden_sizes = [10]#[10, 14, 18, 22, 26, 30]
 lrs = [2e-3]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
 batch_sizes = [64]#[32, 64, 128, 256, 512]
 metric = 'mae'
@@ -158,7 +158,7 @@ if __name__ == "__main__":
                                    recurrent_initializer="orthogonal",
                                    return_sequences=False,
                                    input_shape=(X_train.shape[1], X_train.shape[2]),
-                                   dropout=0.2, recurrent_dropout=0.2))
+                                   recurrent_dropout=0.5))
                     model.add(Dense(1))
                     model.compile(loss=mean_squared_error,
                                   optimizer=Adam(lr=lr),

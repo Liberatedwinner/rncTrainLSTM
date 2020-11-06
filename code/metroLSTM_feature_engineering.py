@@ -106,13 +106,13 @@ def feature_engineering(dataAll, predictStep=[10]):
         print("lagging features")
         data = lagging_features(data,
                                 name="actual speed",
-                                #laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
-                                laggingStep=list(range(1, 6)) + [20, 30])
+                                laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+
         print('.')
         data = lagging_features(data,
                                 name='permitted speed',
-                                #laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
-                                laggingStep=list(range(1, 6)) + [20, 30])
+                                laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+
         print('.')
         data = lagging_features(data,
                                 name="p/b",
