@@ -37,7 +37,7 @@ class ModelCore(object):
         test_data = self.load_data('test.pkl')
         return train_data, test_data
 
-    def graph_drawing(self, y_pred, y_test, picture_number, step):
+    def pred_drawing(self, y_pred, y_test, picture_number, step):
         if not os.path.exists(self._filePath):
             os.makedirs(self._filePath)
         start, end = 0, len(y_test)

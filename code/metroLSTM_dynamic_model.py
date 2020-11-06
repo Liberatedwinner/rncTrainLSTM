@@ -61,9 +61,9 @@ def plot_history(history, result_dir):
     plt.plot(history.history['val_loss'], marker='.')
     plt.title('Model Mean Absoluted Error')
     plt.xlabel('epoch')
-    plt.ylabel('MAE')
+    plt.ylabel('loss')
     plt.grid()
-    plt.legend(['mae', 'val_loss'], loc='upper right')
+    plt.legend(['loss', 'val_loss'], loc='upper right')
     plt.savefig(result_dir, dpi=500, bbox_inches="tight")
     plt.close()
 
@@ -182,7 +182,7 @@ if __name__ == "__main__":
                                            sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
                                            ])
-                    ModelCore(filepath).graph_drawing(y_test_pred, y_test, ind, predicted_step)
+                    ModelCore(filepath).pred_drawing(y_test_pred, y_test, ind, predicted_step)
                     print('The graph has been saved.\n')
 
                 if rcr_activation == swish:
