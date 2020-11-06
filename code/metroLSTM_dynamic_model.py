@@ -22,6 +22,7 @@ from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
 from keras.utils import get_custom_objects
+
 np.random.seed(20201005)
 os.environ["CUDA_VISIBLE_DEVICES"] = "1" # GPU No.
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -30,12 +31,12 @@ warnings.filterwarnings('ignore')
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
 sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
-earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
+earlyStopping = EarlyStopping(monitor="val_loss", patience=10, verbose=2)
 
 
-hidden_sizes = [20]#[10, 14, 18, 22, 26, 30]
-lrs = [1e-3]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
-batch_sizes = [256]#[32, 64, 128, 256, 512]
+hidden_sizes = [16]#[10, 14, 18, 22, 26, 30]
+lrs = [2e-3]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+batch_sizes = [64]#[32, 64, 128, 256, 512]
 metric = 'mae'
 
 parser = argparse.ArgumentParser()
@@ -60,12 +61,12 @@ def plot_history(history, result_dir):
     plt.figure()
     plt.plot(history.history['loss'], marker='.')
     plt.plot(history.history['val_loss'], marker='.')
-    plt.plot(history.history['accuracy'], marker='*')
+    #plt.plot(history.history['accuracy'], marker='*')
     plt.title('Model')# Mean Absolute Error')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.grid()
-    plt.legend(['loss', 'val_loss', 'accuracy'], loc='upper right')
+    plt.legend(['loss', 'val_loss'], loc='upper right')
     plt.savefig(result_dir, dpi=500, bbox_inches="tight")
     plt.close()
 
@@ -128,7 +129,7 @@ if __name__ == "__main__":
                     X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
                     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
-                    chkpt = ModelCheckpoint(filepath=filepath + '//model.h5',
+                    chkpt = ModelCheckpoint(filepath=filepath + 'model.h5',
                                             monitor='val_loss',
                                             verbose=1,
                                             save_best_only=True)
@@ -189,7 +190,7 @@ if __name__ == "__main__":
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
                                            ])
                     ModelCore(filepath).pred_drawing(y_test_pred, y_test, ind, predicted_step)
-                    plot_history(history, filepath + f'errorpic{ind+1}.png')
+                    plot_history(history, filepath + f'error_pic{ind + 1}.png')
                     print('The graph has been saved.\n')
 
                 if rcr_activation == swish:
