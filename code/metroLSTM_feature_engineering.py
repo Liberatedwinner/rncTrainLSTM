@@ -79,7 +79,7 @@ def flag_setting(df_lst):
 def data_concat(df_lst):
     """
     :This part is for 'pd.concat' of dataframes.:
-    :As you can see, please import pandas as pd.
+    :As you can see, please import pandas as pd.:
     :param df_lst:
     :return concatenated dataframe:
     """
@@ -91,6 +91,12 @@ def data_concat(df_lst):
 
 ### TODO
 def feature_engineering(dataAll, predictStep=[10]):
+    """
+    :Main function of this file. Indeed, this part proceeds the feature engineering.:
+    :param dataAll:
+    :param predictStep which is array:
+    :return feature-selected data:
+    """
     FLAG = dataAll["FLAG"].unique()
     newData = []
 
@@ -166,6 +172,13 @@ def feature_engineering(dataAll, predictStep=[10]):
 def lagging_features(data,
                      name=None,
                      laggingStep=[1, 2, 3]):
+    """
+    :This part makes delayed features.:
+    :param data:
+    :param name:
+    :param laggingStep:
+    :return data with lagged features.:
+    """
     assert name, "Invalid feature name."
 
     for step in laggingStep:
@@ -179,6 +192,13 @@ def lagging_features(data,
 def statistical_features(data,
                          name=None,
                          timeRange=5):
+    """
+    :This part makes statistical features.:
+    :param data:
+    :param name:
+    :param timeRange:
+    :return data with statistical features.:
+    """
     assert name, "Invalid feature name."
     index = list(data.index)
     featureValues = data[name].values
@@ -201,6 +221,13 @@ def statistical_features(data,
 def create_target(data,
                   predictStep=None,
                   targetName="actual speed"):
+    """
+    :This part marks the target feature.:
+    :param data:
+    :param predictStep:
+    :param targetName:
+    :return data with a marked target.:
+    """
     target = data[targetName].copy()
     newData = pd.DataFrame(None, columns=list(data.columns), dtype=np.float64)
     newData["target"] = None
