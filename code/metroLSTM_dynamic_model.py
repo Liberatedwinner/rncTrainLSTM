@@ -55,7 +55,7 @@ swish = tf.keras.activations.swish
 
 def mish(x):
     """
-    Return mish(x) = x * tanh(ln(1+exp(x)).
+    Mish is an activation function. Return mish(x) = x * tanh(ln(1+exp(x)).
 
     :param x: tensor object in TensorFlow
     :return: mish(x):
@@ -68,7 +68,7 @@ def plot_history(_history, result_dir):
     """
     Plot the history of loss and validation loss in some location.
 
-    :param _history: model history, which is model.fit.
+    :param _history: model history, which is equal to model.fit.
     :param result_dir: location to save plots.
     """
     plt.figure()
