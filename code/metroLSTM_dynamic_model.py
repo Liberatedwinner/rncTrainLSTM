@@ -23,16 +23,15 @@ from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
 from keras.utils import get_custom_objects
 
+warnings.filterwarnings('ignore')
 np.random.seed(20201005)
 os.environ["CUDA_VISIBLE_DEVICES"] = "1" # GPU No.
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-warnings.filterwarnings('ignore')
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
 sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 earlyStopping = EarlyStopping(monitor="val_loss", patience=10, verbose=2)
-
 
 hidden_sizes = [10, 14, 18, 22, 26, 30]
 lrs = [1e-4, 2e-4, 5e-4] # [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
@@ -125,6 +124,7 @@ def main_model(_X_train, _y_train,
                           validation_data=(_X_valid, _y_valid), verbose=1,
                           shuffle=False,
                           callbacks=[earlyStopping, chkpt, save_chkpt_callback])
+
     return _model, _history
 #######
 

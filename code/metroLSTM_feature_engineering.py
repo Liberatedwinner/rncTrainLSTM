@@ -73,6 +73,7 @@ def flag_setting(df_lst):
     """
     for ind, df in enumerate(df_lst):
         df['FLAG'] = ind
+
     return df_lst
 
 
@@ -86,6 +87,7 @@ def data_concat(df_lst):
     concatd_data = pd.concat(df_lst, ignore_index=True, axis=0)
     with open('..//Data//concatd_data.pkl', 'wb') as f:
         pickle.dump(concatd_data, f)
+
     return concatd_data
 
 
@@ -165,6 +167,7 @@ def feature_engineering(dataAll, predictStep=[10]):
         newData.append(data)
         print('complete')
     print("=======")
+
     return newData
 ### TODO
 
@@ -186,6 +189,7 @@ def lagging_features(data,
         tmpframe.rename({name: "lagged_" + f'{name}_' + str(step)}, axis=1, inplace=True)
         tmpframe["timeStep"] += step
         data = pd.merge(data, tmpframe, on="timeStep", how="left")
+
     return data
 
 
@@ -215,6 +219,7 @@ def statistical_features(data,
     data[name + "_lag_mean_" + str(timeRange)] = Means
     data[name + "_lag_std_" + str(timeRange)] = Stds
     data[name + "_diff_" + str(timeRange)] = Diffs
+
     return data
 
 
@@ -239,6 +244,7 @@ def create_target(data,
         data["timeFlag"] = step
         newData = pd.concat([newData, data], axis=0, ignore_index=True)
     newData["timeFlag"] = newData["timeFlag"].astype(np.float64)
+
     return newData
 #######
 

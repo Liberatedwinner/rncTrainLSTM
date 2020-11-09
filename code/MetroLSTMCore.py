@@ -3,7 +3,6 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 np.random.seed(20201005)
 
 
@@ -43,6 +42,7 @@ class ModelCore(object):
             data = pickle.load(f)
         print('Complete.')
         print('=======\n')
+
         return data
 
     def load_train_test_data(self):
@@ -52,6 +52,7 @@ class ModelCore(object):
         """
         train_data = self.load_data('train.pkl')
         test_data = self.load_data('test.pkl')
+
         return train_data, test_data
 
     def pred_drawing(self, y_pred, y_test, picture_number, step):
