@@ -56,7 +56,8 @@ swish = tf.keras.activations.swish
 def mish(x):
     return x * tf.nn.tanh(tf.nn.softplus(x))
 get_custom_objects().update({'mish': mish})
-###############################################################################
+
+
 def plot_history(history, result_dir):
     plt.figure()
     plt.plot(history.history['loss'], marker='.')
@@ -75,7 +76,7 @@ def plot_history(history, result_dir):
 def save_chkpt():
   with open(filepath + 'chkpt_best.pkl', 'wb') as f:
     pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
-###############################################################################
+#######
 
 
 if __name__ == "__main__":
@@ -152,27 +153,49 @@ if __name__ == "__main__":
                         rcr_activation = mish
 
                     # Start training the model
-                    model = Sequential()
-                    model.add(LSTM(hidden_size,
-                                   recurrent_activation=rcr_activation,
-                                   kernel_initializer="he_uniform",
-                                   recurrent_initializer="orthogonal",
-                                   return_sequences=False,
-                                   input_shape=(X_train.shape[1], X_train.shape[2])))
-                    model.add(Dense(1))
-                    model.compile(loss=mean_squared_error,
-                                  optimizer=Adam(lr=lr),
-                                  metrics=['mae'])
-                    history = model.fit(X_train, y_train,
-                                        epochs=500, batch_size=batch_size,
-                                        validation_data=(X_valid, y_valid), verbose=1,
-                                        shuffle=False,
-                                        callbacks=[earlyStopping, chkpt, save_chkpt_callback])
+                    def main_model(_X_train, _y_train,
+                                   _X_valid, _y_valid,
+                                   hs_info, rcr_act_info, lr_info, bs_info):
+                        _model = Sequential()
+                        _model.add(LSTM(hs_info,
+                                        recurrent_activation=rcr_act_info,
+                                        kernel_initializer="he_uniform",
+                                        recurrent_initializer="orthogonal",
+                                        return_sequences=False,
+                                        input_shape=(_X_train.shape[1], _X_train.shape[2])))
+                        _model.add(Dense(1))
+                        _model.compile(loss=mean_squared_error,
+                                       optimizer=Adam(lr=lr_info),
+                                       metrics=['mae'])
+                        _history = _model.fit(_X_train, _y_train,
+                                             epochs=500, batch_size=bs_info,
+                                             validation_data=(_X_valid, _y_valid), verbose=1,
+                                             shuffle=False,
+                                             callbacks=[earlyStopping, chkpt, save_chkpt_callback])
+                        return _model, _history
+
+                    model, history = main_model(X_train, hidden_size, rcr_activation, lr)
+                    # model = Sequential()
+                    # model.add(LSTM(hidden_size,
+                    #                recurrent_activation=rcr_activation,
+                    #                kernel_initializer="he_uniform",
+                    #                recurrent_initializer="orthogonal",
+                    #                return_sequences=False,
+                    #                input_shape=(X_train.shape[1], X_train.shape[2])))
+                    # model.add(Dense(1))
+                    # model.compile(loss=mean_squared_error,
+                    #               optimizer=Adam(lr=lr),
+                    #               metrics=['mae'])
+                    # history = model.fit(X_train, y_train,
+                    #                     epochs=500, batch_size=batch_size,
+                    #                     validation_data=(X_valid, y_valid), verbose=1,
+                    #                     shuffle=False,
+                    #                     callbacks=[earlyStopping, chkpt, save_chkpt_callback])
                     model.save(filepath + 'lastmodel.h5')
                     del model
                     model = load_model(filepath + 'lastmodel.h5', custom_objects={'mish': mish})
                     model.evaluate(X_test, y_test, verbose=1)
-                    #model.evaluate(X_test, y_test, verbose=0)
+                    # model.evaluate(X_test, y_test, verbose=0)
 
                     y_valid = y_sc.inverse_transform(y_valid)
                     y_valid_pred = model.predict(X_valid)
@@ -211,4 +234,3 @@ if __name__ == "__main__":
                 print(f'The result has been saved as {filename}.pkl')
                 score.to_csv(filepath + filename + '.csv')
                 print(f'The result has been saved as {filename}.csv')
-
