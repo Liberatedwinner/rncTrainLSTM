@@ -34,8 +34,8 @@ sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 earlyStopping = EarlyStopping(monitor="val_loss", patience=10, verbose=2)
 
 
-hidden_sizes = [10, 16, 32]#[10, 14, 18, 22, 26, 30]
-lrs = [1e-4, 1e-3]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+hidden_sizes = [10, 14, 18, 22, 26, 30]
+lrs = [1e-4, 2e-4, 5e-4]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
 batch_sizes = [32, 64, 256]#[32, 64, 128, 256, 512]
 metric = 'mae'
 
@@ -164,7 +164,7 @@ if __name__ == "__main__":
                                   optimizer=Adam(lr=lr),
                                   metrics=['mae'])
                     history = model.fit(X_train, y_train,
-                                        epochs=50, batch_size=batch_size,
+                                        epochs=500, batch_size=batch_size,
                                         validation_data=(X_valid, y_valid), verbose=1,
                                         shuffle=False,
                                         callbacks=[earlyStopping, chkpt, save_chkpt_callback])
