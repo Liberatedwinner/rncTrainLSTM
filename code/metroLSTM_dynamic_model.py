@@ -68,7 +68,7 @@ def plot_history(_history, result_dir):
     Plot the history of loss and validation loss.
     :param _history:
     :param result_dir:
-    :return:
+    :return epoch-loss graph:
     """
     plt.figure()
     plt.plot(_history.history['loss'], marker='.')
