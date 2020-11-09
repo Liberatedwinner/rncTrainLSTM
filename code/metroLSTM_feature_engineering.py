@@ -19,7 +19,7 @@ predicted_step = args.predictstep
 
 def preprocessing(file_name):
     """
-    :If you use this part, you need to convert .xlsx file to .csv file.:
+    If you use this part, you need to convert .xlsx file to .csv file.
     :param 'file_name.csv':
     :return dataframe which has features below:
     :p/b, motoring, braking,:
@@ -67,7 +67,7 @@ def preprocessing(file_name):
 
 def flag_setting(df_lst):
     """
-    :This part is for flag setting, as you know from the name.:
+    This part is for flag setting, as you know from the name.
     :param df_lst - array of dataframe:
     :return df_lst - with 'flag':
     """
@@ -78,8 +78,8 @@ def flag_setting(df_lst):
 
 def data_concat(df_lst):
     """
-    :This part is for 'pd.concat' of dataframes.:
-    :As you can see, please import pandas as pd.:
+    This part is for 'pd.concat' of dataframes.
+    As you can see, please import pandas as pd.
     :param df_lst:
     :return concatenated dataframe:
     """
@@ -92,7 +92,7 @@ def data_concat(df_lst):
 ### TODO
 def feature_engineering(dataAll, predictStep=[10]):
     """
-    :Main function of this file. Indeed, this part proceeds the feature engineering.:
+    Main function of this file. Indeed, this part proceeds the feature engineering.
     :param dataAll:
     :param predictStep which is array:
     :return feature-selected data:
@@ -173,7 +173,7 @@ def lagging_features(data,
                      name=None,
                      laggingStep=[1, 2, 3]):
     """
-    :This part makes delayed features.:
+    This part makes delayed features.
     :param data:
     :param name:
     :param laggingStep:
@@ -193,7 +193,7 @@ def statistical_features(data,
                          name=None,
                          timeRange=5):
     """
-    :This part makes statistical features.:
+    This part makes statistical features.
     :param data:
     :param name:
     :param timeRange:
@@ -222,7 +222,7 @@ def create_target(data,
                   predictStep=None,
                   targetName="actual speed"):
     """
-    :This part marks the target feature.:
+    This part marks the target feature.
     :param data:
     :param predictStep:
     :param targetName:

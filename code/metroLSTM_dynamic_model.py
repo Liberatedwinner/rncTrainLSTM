@@ -55,11 +55,22 @@ swish = tf.keras.activations.swish
 
 
 def mish(x):
+    """
+    Return mish(x) = x * tanh(ln(1+exp(x)).
+    :param x:
+    :return mish(x):
+    """
     return x * tf.nn.tanh(tf.nn.softplus(x))
 get_custom_objects().update({'mish': mish})
 
 
 def plot_history(_history, result_dir):
+    """
+    Plot the history of loss and validation loss.
+    :param _history:
+    :param result_dir:
+    :return:
+    """
     plt.figure()
     plt.plot(_history.history['loss'], marker='.')
     plt.plot(_history.history['val_loss'], marker='.')
@@ -75,13 +86,29 @@ def plot_history(_history, result_dir):
 
 
 def save_chkpt():
-  with open(filepath + 'chkpt_best.pkl', 'wb') as f:
-    pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
+    """
+    Save the checkpoint of model.
+    :return best chkpt of model:
+    """
+    with open(filepath + 'chkpt_best.pkl', 'wb') as f:
+        pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def main_model(_X_train, _y_train,
                _X_valid, _y_valid,
                hs_info, rcr_act_info, lr_info, bs_info):
+    """
+    The core part of this model.
+    :param _X_train:
+    :param _y_train:
+    :param _X_valid:
+    :param _y_valid:
+    :param hs_info:
+    :param rcr_act_info:
+    :param lr_info:
+    :param bs_info:
+    :return model, history:
+    """
     _model = Sequential()
     _model.add(LSTM(hs_info,
                     recurrent_activation=rcr_act_info,
