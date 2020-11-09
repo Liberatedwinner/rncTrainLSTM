@@ -19,12 +19,10 @@ predicted_step = args.predictstep
 
 def preprocessing(file_name):
     """
-    If you use this part, you need to convert .xlsx file to .csv file.
-    :param 'file_name.csv':
-    :return dataframe which has features below:
-    :p/b, motoring, braking,:
-    :permitted speed, actual speed, train speed,:
-    :bc1, bc2, bc3, bc4, bc5, bc6:
+    Preprocess the data. You need to pre-convert .xlsx file to .csv file.
+
+    :param file_name: 'file_name.csv'
+    :return: df: dataframe which has features below: p/b, motoring, braking, permitted speed, actual speed, train speed, bc1, bc2, bc3, bc4, bc5, bc6
     """
     df = pd.read_csv(f'..//Data//metroKOR//{file_name}')
 
@@ -68,8 +66,9 @@ def preprocessing(file_name):
 def flag_setting(df_lst):
     """
     This part is for flag setting, as you know from the name.
-    :param df_lst - array of dataframe:
-    :return df_lst - with 'flag':
+
+    :param df_lst: array of dataframe.
+    :return: df_lst: df_lst with 'flag'.
     """
     for ind, df in enumerate(df_lst):
         df['FLAG'] = ind
@@ -81,8 +80,9 @@ def data_concat(df_lst):
     """
     This part is for 'pd.concat' of dataframes.
     As you can see, please import pandas as pd.
-    :param df_lst:
-    :return concatenated dataframe:
+
+    :param df_lst: array of dataframe.
+    :return: concatd_data: Concatenated dataframe.
     """
     concatd_data = pd.concat(df_lst, ignore_index=True, axis=0)
     with open('..//Data//concatd_data.pkl', 'wb') as f:
@@ -95,9 +95,10 @@ def data_concat(df_lst):
 def feature_engineering(dataAll, predictStep=[10]):
     """
     Main function of this file. Indeed, this part proceeds the feature engineering.
-    :param dataAll:
-    :param predictStep which is array:
-    :return feature-selected data:
+
+    :param dataAll: dataframe.
+    :param predictStep: array of timesteps.
+    :return: newdata: feature-selected data array
     """
     FLAG = dataAll["FLAG"].unique()
     newData = []
@@ -177,10 +178,11 @@ def lagging_features(data,
                      laggingStep=[1, 2, 3]):
     """
     This part makes delayed features.
-    :param data:
-    :param name:
-    :param laggingStep:
-    :return data with lagged features.:
+
+    :param data: dataframe.
+    :param name: feature name.
+    :param laggingStep: array of timesteps.
+    :return: data: dataframe with lagged features.
     """
     assert name, "Invalid feature name."
 
@@ -198,10 +200,11 @@ def statistical_features(data,
                          timeRange=5):
     """
     This part makes statistical features.
-    :param data:
-    :param name:
-    :param timeRange:
-    :return data with statistical features.:
+
+    :param data: dataframe.
+    :param name: feature name.
+    :param timeRange: single timestep.
+    :return: data: dataframe with statistical features.
     """
     assert name, "Invalid feature name."
     index = list(data.index)
@@ -228,10 +231,11 @@ def create_target(data,
                   targetName="actual speed"):
     """
     This part marks the target feature.
-    :param data:
-    :param predictStep:
-    :param targetName:
-    :return data with a marked target.:
+
+    :param data: dataframe.
+    :param predictStep: array of timesteps.
+    :param targetName: Aim of feature prediction.
+    :return: data with a marked target.
     """
     target = data[targetName].copy()
     newData = pd.DataFrame(None, columns=list(data.columns), dtype=np.float64)

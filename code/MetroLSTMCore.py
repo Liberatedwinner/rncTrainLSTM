@@ -16,8 +16,9 @@ class ModelCore(object):
     def save_data(self, filename=None, data=None):
         """
         Save 'data' as 'filename' with 'filepath'. This function has no return value.
-        :param filename:
-        :param data:
+
+        :param filename: file name.
+        :param data: dataframe.
         """
         if self._filePath is None:
             assert filename, 'Invalid file path.'
@@ -31,8 +32,9 @@ class ModelCore(object):
     def load_data(self, filename=None):
         """
         Load data as 'filename' with 'filepath'.
-        :param filename:
-        :return data:
+
+        :param filename: file name.
+        :return: data: pickled data.
         """
         if self._filePath is None:
             assert filename, 'Invalid file path.'
@@ -48,7 +50,8 @@ class ModelCore(object):
     def load_train_test_data(self):
         """
         Load train data and test data. This function has no input.
-        :return:
+
+        :return: train_data, test_data: pickled data.
         """
         train_data = self.load_data('train.pkl')
         test_data = self.load_data('test.pkl')
@@ -58,11 +61,11 @@ class ModelCore(object):
     def pred_drawing(self, y_pred, y_test, picture_number, step):
         """
         Draw a picture about prediction graph.
-        :param y_pred:
-        :param y_test:
-        :param picture_number:
-        :param step:
-        :return 'picture':
+
+        :param y_pred: prediction of X_test.
+        :param y_test: Value of 'target feature'.
+        :param picture_number: index of picture.
+        :param step: single timestep.
         """
         if not os.path.exists(self._filePath):
             os.makedirs(self._filePath)
