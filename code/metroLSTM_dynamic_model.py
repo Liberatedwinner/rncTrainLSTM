@@ -35,8 +35,8 @@ earlyStopping = EarlyStopping(monitor="val_loss", patience=10, verbose=2)
 
 
 hidden_sizes = [10, 14, 18, 22, 26, 30]
-lrs = [1e-4, 2e-4, 5e-4]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
-batch_sizes = [32, 64, 256]#[32, 64, 128, 256, 512]
+lrs = [1e-4, 2e-4, 5e-4] # [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+batch_sizes = [32, 64, 256] # [32, 64, 128, 256, 512]
 metric = 'mae'
 
 parser = argparse.ArgumentParser()
@@ -51,6 +51,7 @@ rcr_activation = args.activation
 PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
 
 swish = tf.keras.activations.swish
+#######
 
 
 def mish(x):
@@ -58,10 +59,10 @@ def mish(x):
 get_custom_objects().update({'mish': mish})
 
 
-def plot_history(history, result_dir):
+def plot_history(_history, result_dir):
     plt.figure()
-    plt.plot(history.history['loss'], marker='.')
-    plt.plot(history.history['val_loss'], marker='.')
+    plt.plot(_history.history['loss'], marker='.')
+    plt.plot(_history.history['val_loss'], marker='.')
     #plt.plot(history.history['accuracy'], marker='*')
     plt.title('Model')# Mean Absolute Error')
     plt.xlabel('epoch')
@@ -76,6 +77,28 @@ def plot_history(history, result_dir):
 def save_chkpt():
   with open(filepath + 'chkpt_best.pkl', 'wb') as f:
     pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def main_model(_X_train, _y_train,
+               _X_valid, _y_valid,
+               hs_info, rcr_act_info, lr_info, bs_info):
+    _model = Sequential()
+    _model.add(LSTM(hs_info,
+                    recurrent_activation=rcr_act_info,
+                    kernel_initializer="he_uniform",
+                    recurrent_initializer="orthogonal",
+                    return_sequences=False,
+                    input_shape=(_X_train.shape[1], _X_train.shape[2])))
+    _model.add(Dense(1))
+    _model.compile(loss=mean_squared_error,
+                   optimizer=Adam(lr=lr_info),
+                   metrics=['mae'])
+    _history = _model.fit(_X_train, _y_train,
+                          epochs=500, batch_size=bs_info,
+                          validation_data=(_X_valid, _y_valid), verbose=1,
+                          shuffle=False,
+                          callbacks=[earlyStopping, chkpt, save_chkpt_callback])
+    return _model, _history
 #######
 
 
@@ -153,46 +176,9 @@ if __name__ == "__main__":
                         rcr_activation = mish
 
                     # Start training the model
-                    def main_model(_X_train, _y_train,
-                                   _X_valid, _y_valid,
-                                   hs_info, rcr_act_info, lr_info, bs_info):
-                        _model = Sequential()
-                        _model.add(LSTM(hs_info,
-                                        recurrent_activation=rcr_act_info,
-                                        kernel_initializer="he_uniform",
-                                        recurrent_initializer="orthogonal",
-                                        return_sequences=False,
-                                        input_shape=(_X_train.shape[1], _X_train.shape[2])))
-                        _model.add(Dense(1))
-                        _model.compile(loss=mean_squared_error,
-                                       optimizer=Adam(lr=lr_info),
-                                       metrics=['mae'])
-                        _history = _model.fit(_X_train, _y_train,
-                                             epochs=500, batch_size=bs_info,
-                                             validation_data=(_X_valid, _y_valid), verbose=1,
-                                             shuffle=False,
-                                             callbacks=[earlyStopping, chkpt, save_chkpt_callback])
-                        return _model, _history
-
                     model, history = main_model(X_train, y_train,
                                                 X_valid, y_valid,
                                                 hidden_size, rcr_activation, lr, batch_size)
-                    # model = Sequential()
-                    # model.add(LSTM(hidden_size,
-                    #                recurrent_activation=rcr_activation,
-                    #                kernel_initializer="he_uniform",
-                    #                recurrent_initializer="orthogonal",
-                    #                return_sequences=False,
-                    #                input_shape=(X_train.shape[1], X_train.shape[2])))
-                    # model.add(Dense(1))
-                    # model.compile(loss=mean_squared_error,
-                    #               optimizer=Adam(lr=lr),
-                    #               metrics=['mae'])
-                    # history = model.fit(X_train, y_train,
-                    #                     epochs=500, batch_size=batch_size,
-                    #                     validation_data=(X_valid, y_valid), verbose=1,
-                    #                     shuffle=False,
-                    #                     callbacks=[earlyStopping, chkpt, save_chkpt_callback])
                     model.save(filepath + 'lastmodel.h5')
                     del model
                     model = load_model(filepath + 'lastmodel.h5', custom_objects={'mish': mish})
