@@ -174,7 +174,9 @@ if __name__ == "__main__":
                                              callbacks=[earlyStopping, chkpt, save_chkpt_callback])
                         return _model, _history
 
-                    model, history = main_model(X_train, hidden_size, rcr_activation, lr)
+                    model, history = main_model(X_train, y_train,
+                                                X_valid, y_valid,
+                                                hidden_size, rcr_activation, lr, batch_size)
                     # model = Sequential()
                     # model.add(LSTM(hidden_size,
                     #                recurrent_activation=rcr_activation,
