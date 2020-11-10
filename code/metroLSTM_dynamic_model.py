@@ -25,19 +25,14 @@ from keras.utils import get_custom_objects
 
 warnings.filterwarnings('ignore')
 np.random.seed(20201005)
-os.environ["CUDA_VISIBLE_DEVICES"] = "1" # GPU No.
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-
-rcParams['patch.force_edgecolor'] = True
-rcParams['patch.facecolor'] = 'b'
-sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
-earlyStopping = EarlyStopping(monitor="val_loss", patience=10, verbose=2)
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--gpu', type=int, default=-1,
+                    help='Turn GPU on(GPU number) or off(-1). Default is -1.')
 parser.add_argument('--predictstep', type=int, default=10,
-                    help='choose the predicted step: 1, 10, 30, 50, 100. Default value is 10.')
+                    help='Choose the predicted step: 1, 10, 30, 50, 100. Default value is 10.')
 parser.add_argument('--activation', type=str, default='mish',
-                    help='choose the activation function instead of mish: sigmoid, swish.')
+                    help='Choose the activation function instead of mish: sigmoid, swish.')
 parser.add_argument('--explore_hp', type=bool, default='True',
                     help='Turn the parameter search on(True) or off(False). Default is True.')
 parser.add_argument('--hs', type=int,
@@ -47,12 +42,21 @@ parser.add_argument('--lr', type=float,
 parser.add_argument('--bs', type=int,
                     help='Determine the batch size of model. This option is valid only when explore_hp is False.')
 args = parser.parse_args()
+gpu_switch = args.gpu
 predicted_step = args.predictstep
 rcr_activation = args.activation
 param_search_switch = args.explore_hp
 direct_hs = args.hs
 direct_lr = args.lr
 direct_bs = args.bs
+
+os.environ["CUDA_VISIBLE_DEVICES"] = f'{gpu_switch}'
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+
+rcParams['patch.force_edgecolor'] = True
+rcParams['patch.facecolor'] = 'b'
+sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
+earlyStopping = EarlyStopping(monitor="val_loss", patience=10, verbose=2)
 
 PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
 
