@@ -278,8 +278,8 @@ if __name__ == "__main__":
     dropList = ['train speed', "timeStep", "hour", "dayOfWeek", "rest", "day", "timeFlag", 'speed_mult_0']
     #for i in range(1, 7):
      #   dropList.append(f'bc{i}')
-    dropList.append('motoring')
-    dropList.append('braking')
+    # dropList.append('motoring')
+    # dropList.append('braking')
     newData.drop(dropList, axis=1, inplace=True)
 
     # Save all the data
