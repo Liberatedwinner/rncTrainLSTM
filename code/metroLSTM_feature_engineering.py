@@ -108,6 +108,10 @@ def feature_engineering(dataAll, predictStep=[10]):
         print("Running with the file {}:".format(flag))
         data = dataAll[dataAll["FLAG"] == flag]
 
+        for name in list(data.columns):
+            if data[name].isnull().sum() <= 100:
+                data[name].fillna(method="ffill", inplace=True)
+
         data.reset_index(inplace=True, drop=True)
         data.reset_index(inplace=True)
         data.rename({"index": "timeStep"}, axis=1, inplace=True)
