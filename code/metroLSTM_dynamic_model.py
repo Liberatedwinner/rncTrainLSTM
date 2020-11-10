@@ -33,14 +33,14 @@ parser.add_argument('--predictstep', type=int, default=10,
                     help='Choose the predicted step: 1, 10, 30, 50, 100. Default value is 10.')
 parser.add_argument('--activation', type=str, default='mish',
                     help='Choose the activation function instead of mish: sigmoid, swish.')
-parser.add_argument('--explore_hp', type=bool, default='True',
-                    help='Turn the parameter search on(True) or off(False). Default is True.')
+parser.add_argument('--explore_hp', type=int, default='1',
+                    help='Turn the parameter search on(1) or off(0). Default is 1.')
 parser.add_argument('--hs', type=int,
-                    help='Determine the hidden unit size of model. This option is valid only when explore_hp is False.')
+                    help='Determine the hidden unit size of model. This option is valid only when explore_hp is 0.')
 parser.add_argument('--lr', type=float,
-                    help='Determine the learning rate of model. This option is valid only when explore_hp is False.')
+                    help='Determine the learning rate of model. This option is valid only when explore_hp is 0.')
 parser.add_argument('--bs', type=int,
-                    help='Determine the batch size of model. This option is valid only when explore_hp is False.')
+                    help='Determine the batch size of model. This option is valid only when explore_hp is 0.')
 args = parser.parse_args()
 
 predicted_step = args.predictstep
