@@ -126,14 +126,16 @@ def feature_engineering(dataAll, predictStep=[10]):
         data = lagging_features(data,
                                 name="p/b",
                                 #laggingStep=list(range(1, 6)) + [20, 60])
-                                laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+                                #laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+                                laggingStep=[1, 3, 5, 20, 60])
 
         print('.')
         for i in range(1, 7):
             data = lagging_features(data,
                                     name=f"bc{i}",
                                     #laggingStep=list(range(1, 6)) + [20, 60])
-                                    laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+                                    #laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+                                    laggingStep=[1, 3, 5, 20, 60])
 
         print('.')
         data['speed_mult_0'] = data['actual speed']
