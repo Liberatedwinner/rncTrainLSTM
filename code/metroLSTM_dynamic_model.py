@@ -42,15 +42,22 @@ parser.add_argument('--lr', type=float,
 parser.add_argument('--bs', type=int,
                     help='Determine the batch size of model. This option is valid only when explore_hp is False.')
 args = parser.parse_args()
-gpu_switch = args.gpu
+
 predicted_step = args.predictstep
 rcr_activation = args.activation
 param_search_switch = args.explore_hp
-direct_hs = args.hs
-direct_lr = args.lr
-direct_bs = args.bs
 
-os.environ["CUDA_VISIBLE_DEVICES"] = f'{gpu_switch}'
+# metric = 'mae'
+if param_search_switch:
+    hidden_sizes = [10, 14, 18, 22, 26, 30]
+    lrs = [1e-4, 2e-4, 5e-4] # [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+    batch_sizes = [32, 64, 256] # [32, 64, 128, 256, 512]
+else:
+    hidden_sizes = [args.hs]
+    lrs = [args.lr]
+    batch_sizes = [args.bs]
+
+os.environ["CUDA_VISIBLE_DEVICES"] = f'{args.gpu}'
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
 rcParams['patch.force_edgecolor'] = True
@@ -139,17 +146,6 @@ def main_model(_X_train, _y_train,
 
     return _model, _history
 #######
-
-
-# metric = 'mae'
-if param_search_switch:
-    hidden_sizes = [10, 14, 18, 22, 26, 30]
-    lrs = [1e-4, 2e-4, 5e-4] # [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
-    batch_sizes = [32, 64, 256] # [32, 64, 128, 256, 512]
-else:
-    hidden_sizes = [direct_hs]
-    lrs = [args.lr]
-    batch_sizes = [args.bs]
 
 
 if __name__ == "__main__":
