@@ -33,19 +33,26 @@ rcParams['patch.facecolor'] = 'b'
 sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 earlyStopping = EarlyStopping(monitor="val_loss", patience=10, verbose=2)
 
-hidden_sizes = [10, 14, 18, 22, 26, 30]
-lrs = [1e-4, 2e-4, 5e-4] # [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
-batch_sizes = [32, 64, 256] # [32, 64, 128, 256, 512]
-metric = 'mae'
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--predictstep', type=int, default=10,
                     help='choose the predicted step: 1, 10, 30, 50, 100. Default value is 10.')
 parser.add_argument('--activation', type=str, default='mish',
                     help='choose the activation function instead of mish: sigmoid, swish.')
+parser.add_argument('--explore_hp', type=bool, default='True',
+                    help='Turn the parameter search on(True) or off(False). Default is True.')
+parser.add_argument('--hs', type=int,
+                    help='Determine the hidden unit size of model. This option is valid only when explore_hp is False.')
+parser.add_argument('--lr', type=float,
+                    help='Determine the learning rate of model. This option is valid only when explore_hp is False.')
+parser.add_argument('--bs', type=int,
+                    help='Detemine the batch size of model. This option is valid only when explore_hp is False.')
 args = parser.parse_args()
 predicted_step = args.predictstep
 rcr_activation = args.activation
+param_search_switch = args.explore_hp
+direct_hs = args.hs
+direct_lr = args.lr
+direct_bs = args.bs
 
 PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
 
@@ -128,6 +135,17 @@ def main_model(_X_train, _y_train,
 
     return _model, _history
 #######
+
+
+# metric = 'mae'
+if param_search_switch:
+    hidden_sizes = [10, 14, 18, 22, 26, 30]
+    lrs = [1e-4, 2e-4, 5e-4] # [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+    batch_sizes = [32, 64, 256] # [32, 64, 128, 256, 512]
+else:
+    hidden_sizes = [direct_hs]
+    lrs = [args.lr]
+    batch_sizes = [args.bs]
 
 
 if __name__ == "__main__":
