@@ -230,6 +230,7 @@ if __name__ == "__main__":
                                                 X_valid, y_valid,
                                                 hidden_size, rcr_activation, lr, batch_size)
                     model.save(filepath + 'lastmodel.h5')
+                    print('The trained model has been saved as "lastmodel.h5".')
                     del model
                     model = load_model(filepath + 'lastmodel.h5', custom_objects={'mish': mish})
                     model.evaluate(X_test, y_test, verbose=1)
