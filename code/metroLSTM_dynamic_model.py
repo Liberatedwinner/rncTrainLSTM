@@ -53,8 +53,8 @@ direct_bs = args.bs
 # metric = 'mae'
 if param_search_switch:
     hidden_sizes = [10, 14, 18, 22, 26, 30]
-    lrs = [1e-4, 2e-4, 5e-4]  # [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
-    batch_sizes = [32, 64, 256]  # [32, 64, 128, 256, 512]
+    lrs = [1e-5, 1e-4, 2e-4, 5e-4]  # [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+    batch_sizes = [32, 64, 128, 256, 512]  # [32, 64, 128, 256, 512]
 else:
     hidden_sizes = [direct_hs]
     lrs = [direct_lr]

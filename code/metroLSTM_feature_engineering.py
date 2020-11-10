@@ -4,6 +4,8 @@ import os
 import argparse
 import pickle
 import warnings
+from scipy.stats import hmean
+
 from MetroLSTMCore import ModelCore
 
 warnings.filterwarnings('ignore')
@@ -59,6 +61,7 @@ def preprocessing(file_name):
     for i in range(1, 7):
         df[f'bc{i}'] = df[f'bc{i}'].str[:-5]
         df[f'bc{i}'] = df[f'bc{i}'].astype('float64')
+    df['harmonic_bc'] = hmean(df.loc[:, 'bc1':'bc6'], axis=1)
 
     return df
 
@@ -140,6 +143,11 @@ def feature_engineering(dataAll, predictStep=[10]):
         #                             #laggingStep=list(range(1, 6)) + [20, 60])
         #                             #laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
         #                             laggingStep=[1, 3, 5, 20, 60])
+        data = lagging_features(data,
+                                name='harmonic_bc',
+                                # laggingStep=list(range(1, 6)) + [20, 60])
+                                # laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
+                                laggingStep=[1, 3, 5, 20, 60])
 
         print('.')
         data['speed_mult_0'] = data['actual speed']
@@ -158,6 +166,10 @@ def feature_engineering(dataAll, predictStep=[10]):
             print('.')
             data = statistical_features(data,
                                         name='p/b',
+                                        timeRange=k)
+            print('.')
+            data = statistical_features(data,
+                                        name='harmonic_bc',
                                         timeRange=k)
             print('.')
             # for i in range(1, 7):
