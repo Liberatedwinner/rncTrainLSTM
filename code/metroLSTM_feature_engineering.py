@@ -156,10 +156,10 @@ def feature_engineering(dataAll, predictStep=[10]):
                                         name='p/b',
                                         timeRange=k)
             print('.')
-            for i in range(1, 7):
-                data = statistical_features(data,
-                                            name=f'bc{i}',
-                                            timeRange=k)
+            # for i in range(1, 7):
+            #     data = statistical_features(data,
+            #                                 name=f'bc{i}',
+            #                                 timeRange=k)
         print('complete')
         print("Marking the timestep flag with the target")
         data = create_target(data,
