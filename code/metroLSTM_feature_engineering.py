@@ -19,10 +19,10 @@ predicted_step = args.predictstep
 
 def preprocessing(file_name):
     """
-    Preprocess the data. You need to pre-convert .xlsx file to .csv file.
+    Preprocess the data. You need to pre-convert '.xlsx' file to '.csv' file.
 
     :param file_name: 'file_name.csv'
-    :return: df: dataframe which has features below: p/b, motoring, braking, permitted speed, actual speed, train speed, bc1, bc2, bc3, bc4, bc5, bc6
+    :return: df: dataframe which has features below: p/b, motoring, braking, {permitted, actual, train} speed, bc#s
     """
     df = pd.read_csv(f'..//Data//metroKOR//{file_name}')
 
@@ -98,7 +98,7 @@ def feature_engineering(dataAll, predictStep=[10]):
 
     :param dataAll: dataframe.
     :param predictStep: array of timesteps.
-    :return: newdata: feature-selected data array
+    :return: newdata: feature-selected dataframe array.
     """
     FLAG = dataAll["FLAG"].unique()
     newData = []

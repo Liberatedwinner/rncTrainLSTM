@@ -58,7 +58,6 @@ if param_search_switch:
 else:
     hidden_sizes = [direct_hs]
     lrs = [direct_lr]
-    print(lrs)
     batch_sizes = [direct_bs]
 
 os.environ["CUDA_VISIBLE_DEVICES"] = f'{args.gpu}'
@@ -94,8 +93,8 @@ def plot_history(_history, result_dir):
     :param result_dir: location to save plots.
     """
     plt.figure()
-    plt.plot(_history.history['loss'], marker='.')
-    plt.plot(_history.history['val_loss'], marker='.')
+    plt.plot(_history.history['loss'], marker='.', linewidth=1.5)
+    plt.plot(_history.history['val_loss'], marker=',', linewidth=1.5)
     #plt.plot(history.history['accuracy'], marker='*')
     plt.title('Model')# Mean Absolute Error')
     plt.xlabel('epoch')
