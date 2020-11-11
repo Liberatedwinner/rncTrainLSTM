@@ -52,6 +52,9 @@ def preprocessing(file_name):
     df['p/b'] = df['p/b'].str[:-3]
     df['p/b'] = df['p/b'].astype('int64')
 
+    df['distance to target'] = df['distance to target'].str[:-3]
+    df['distance to target'] = df['distance to target'].astype('float64')
+
     speedwords = ['permitted', 'actual', 'train']
     for word in speedwords:
         df[f'{word} speed'] = df[f'{word} speed'].str[:-6]
