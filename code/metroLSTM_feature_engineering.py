@@ -37,7 +37,7 @@ def preprocessing(file_name):
              'Unnamed: 27', 'Unnamed: 28', 'Target Speed',
              'Train Room Temp ＃1', 'Train Outside Temp ＃1',
              'FWD', 'REV', 'Train In Station', 'Line Voltage',
-             'DISTANCE', 'MR Pressure', 'Distance to Target'],
+             'DISTANCE', 'MR Pressure'],#, 'Distance to Target'],
             axis=1, inplace=True)
 
     df.rename(columns={'시간': 'time'}, inplace=True)
@@ -290,7 +290,7 @@ if __name__ == '__main__':
         newData = pd.concat([newData, data], axis=0, ignore_index=True)
     print('=======')
 
-    dropList = ['timeStep', 'hour', 'dayOfWeek', 'rest', 'day', 'timeFlag', 'speed_mult_0']
+    dropList = ['timeStep', 'hour', 'dayOfWeek', 'rest', 'day', 'timeFlag', 'train speed', 'speed_mult_0']
     for i in range(1, 7):
        dropList.append(f'bc{i}')
     # dropList.append('motoring')
