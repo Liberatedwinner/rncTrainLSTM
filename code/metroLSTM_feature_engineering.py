@@ -37,7 +37,8 @@ def preprocessing(file_name):
              'Unnamed: 27', 'Unnamed: 28', 'Target Speed',
              'Train Room Temp ＃1', 'Train Outside Temp ＃1',
              'FWD', 'REV', 'Train In Station', 'Line Voltage',
-             'DISTANCE', 'MR Pressure'],#, 'Distance to Target'],
+             #'DISTANCE', 'MR Pressure', 'Distance to Target'],
+             'MR Pressure', 'Distance to Target'],
             axis=1, inplace=True)
 
     df.rename(columns={'시간': 'time'}, inplace=True)
