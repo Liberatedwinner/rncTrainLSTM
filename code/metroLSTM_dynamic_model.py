@@ -94,7 +94,7 @@ def plot_history(_history, result_dir):
     plt.figure()
     plt.plot(_history.history['loss'], marker='.', linewidth=1.5)
     plt.plot(_history.history['val_loss'], marker=',', linewidth=1.5)
-    plt.title('Model loss and validation loss')# Mean Absolute Error')
+    plt.title('Model loss and validation loss')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.ylim(0, 0.1)
@@ -251,7 +251,7 @@ if __name__ == '__main__':
                                            ])
                     ModelCore(filepath).pred_drawing(y_test_pred, y_test, ind, predicted_step)
                     plot_history(history, filepath + f'error_pic{ind + 1}.png')
-                    print('The graph has been saved.\n')
+                    print('The metro-speed prediction graph has been saved.\n')
 
                 if rcr_activation == swish:
                     rcr_activation = 'swish'

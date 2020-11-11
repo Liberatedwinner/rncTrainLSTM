@@ -42,7 +42,7 @@ class ModelCore(object):
         print('Now loading...')
         with open(self._filePath + filename, 'rb') as f:
             data = pickle.load(f)
-        print('Complete.')
+        print('Completed.')
         print('=======\n')
 
         return data

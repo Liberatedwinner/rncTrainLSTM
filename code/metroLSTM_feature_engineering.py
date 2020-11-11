@@ -117,7 +117,7 @@ def feature_engineering(dataAll, predictStep=[10]):
         data.reset_index(inplace=True)
         data.rename({'index': 'timeStep'}, axis=1, inplace=True)
 
-        print('lagging features')
+        print('Generating lagging features...')
         data = lagging_features(data,
                                 name='actual speed',
                                 laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
@@ -151,8 +151,8 @@ def feature_engineering(dataAll, predictStep=[10]):
         data['speed_mult_0'] = data['actual speed']
         for k in range(1, 6):
             data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
-        print('complete')
-        print('statistical features')
+        print('Completed.')
+        print('Generating statistical features...')
         for k in [2, 5, 10, 20]:
             data = statistical_features(data,
                                         name='actual speed',
@@ -174,15 +174,15 @@ def feature_engineering(dataAll, predictStep=[10]):
             #     data = statistical_features(data,
             #                                 name=f'bc{i}',
             #                                 timeRange=k)
-        print('complete')
-        print('Marking the timestep flag with the target')
+        print('Completed.')
+        print('Marking the timestep flag to the target...')
         data = create_target(data,
                              predictStep=predictStep,
                              targetName='actual speed')
         data = data[~data['target'].isnull()]
         data.reset_index(inplace=True, drop=True)
         newData.append(data)
-        print('complete')
+        print('Completed.')
     print('=======')
 
     return newData
@@ -296,6 +296,7 @@ if __name__ == '__main__':
     newData.drop(dropList, axis=1, inplace=True)
 
     # Save all the data
+    print('Preparing to save data...')
     PATH = f'..//Data//TrainedRes//sec{predicted_step}//'
 
     if not os.path.exists(PATH):
