@@ -50,11 +50,10 @@ direct_hs = args.hs
 direct_lr = args.lr
 direct_bs = args.bs
 
-# metric = 'mae'
 if param_search_switch:
     hidden_sizes = [10, 14, 18, 22, 26, 30]
-    lrs = [1e-5, 1e-4, 2e-4, 5e-4]  # [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
-    batch_sizes = [32, 64, 128, 256, 512]  # [32, 64, 128, 256, 512]
+    lrs = [1e-5, 1e-4, 2e-4, 5e-4]
+    batch_sizes = [32, 64, 128, 256, 512]
 else:
     hidden_sizes = [direct_hs]
     lrs = [direct_lr]
@@ -76,10 +75,10 @@ swish = tf.keras.activations.swish
 
 def mish(x):
     """
-    Mish is an activation function. Return mish(x) = x * tanh(ln(1+exp(x)).
+    Mish is an activation function. Return Mish(x) = x * tanh(ln(1+exp(x)).
 
     :param x: tensor object in TensorFlow
-    :return: mish(x):
+    :return: Mish(x):
     """
     return x * tf.nn.tanh(tf.nn.softplus(x))
 get_custom_objects().update({'mish': mish})
@@ -95,8 +94,7 @@ def plot_history(_history, result_dir):
     plt.figure()
     plt.plot(_history.history['loss'], marker='.', linewidth=1.5)
     plt.plot(_history.history['val_loss'], marker=',', linewidth=1.5)
-    #plt.plot(history.history['accuracy'], marker='*')
-    plt.title('Model')# Mean Absolute Error')
+    plt.title('Model loss and validation loss')# Mean Absolute Error')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.ylim(0, 0.1)
@@ -172,7 +170,7 @@ if __name__ == '__main__':
     for trainInd, validInd in tscv.split(trainData):
         folds.append([trainInd, validInd])
 
-    # Start the time series cross validation
+    # Start the time series cross validation.
     for hidden_size in hidden_sizes:
         for lr in lrs:
             for batch_size in batch_sizes:
