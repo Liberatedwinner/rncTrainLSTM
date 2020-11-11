@@ -60,13 +60,13 @@ else:
     lrs = [direct_lr]
     batch_sizes = [direct_bs]
 
-os.environ["CUDA_VISIBLE_DEVICES"] = f'{args.gpu}'
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ['CUDA_VISIBLE_DEVICES'] = f'{args.gpu}'
+os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
-sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
-earlyStopping = EarlyStopping(monitor="val_loss", patience=10, verbose=2)
+sns.set(style='ticks', font_scale=1.1, palette='deep', color_codes=True)
+earlyStopping = EarlyStopping(monitor='val_loss', patience=10, verbose=2)
 
 PATH = f'..//Data//TrainedRes//sec{predicted_step}//'
 
@@ -102,7 +102,7 @@ def plot_history(_history, result_dir):
     plt.ylim(0, 0.1)
     plt.grid()
     plt.legend(['loss', 'val_loss'], loc='upper right')
-    plt.savefig(result_dir, dpi=500, bbox_inches="tight")
+    plt.savefig(result_dir, dpi=500, bbox_inches='tight')
     plt.close()
 
 
@@ -133,8 +133,8 @@ def main_model(_X_train, _y_train,
     _model = Sequential()
     _model.add(LSTM(hs_info,
                     recurrent_activation=rcr_act_info,
-                    kernel_initializer="he_uniform",
-                    recurrent_initializer="orthogonal",
+                    kernel_initializer='he_uniform',
+                    recurrent_initializer='orthogonal',
                     return_sequences=False,
                     input_shape=(_X_train.shape[1], _X_train.shape[2])))
     _model.add(Dense(1))
@@ -151,20 +151,20 @@ def main_model(_X_train, _y_train,
 #######
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mdc = ModelCore(PATH)
     trainData, testData = mdc.load_train_test_data()
 
     # Exclude
-    testData["target"] = mdc.load_data('test_results.pkl')
+    testData['target'] = mdc.load_data('test_results.pkl')
 
-    print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.")
+    print(f'Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.')
     trainData.dropna(inplace=True)
     testData.dropna(inplace=True)
 
-    trainData.drop("FLAG", axis=1, inplace=True)
-    testData.drop("FLAG", axis=1, inplace=True)
-    print(f"Train shape: {trainData.shape}, Test shape: {testData.shape} After dropping nan values.")
+    trainData.drop('FLAG', axis=1, inplace=True)
+    testData.drop('FLAG', axis=1, inplace=True)
+    print(f'Train shape: {trainData.shape}, Test shape: {testData.shape} After dropping nan values.')
 
     numFolds = 10
     tscv = TimeSeriesSplit(n_splits=numFolds)
@@ -182,22 +182,22 @@ if __name__ == "__main__":
                     os.makedirs(filepath)
 
                 for ind, (train, valid) in enumerate(folds):
-                    X_train = trainData.iloc[train].drop(["target"], axis=1).values
-                    X_valid = trainData.iloc[valid].drop(["target"], axis=1).values
+                    X_train = trainData.iloc[train].drop(['target'], axis=1).values
+                    X_valid = trainData.iloc[valid].drop(['target'], axis=1).values
 
-                    y_train = trainData.iloc[train]["target"].values.reshape(len(X_train), 1)
-                    y_valid = trainData.iloc[valid]["target"].values.reshape(len(X_valid), 1)
+                    y_train = trainData.iloc[train]['target'].values.reshape(len(X_train), 1)
+                    y_valid = trainData.iloc[valid]['target'].values.reshape(len(X_valid), 1)
 
                     # Access the normalized data
                     X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
 
                     X_train = X_sc.fit_transform(X_train)
                     X_valid = X_sc.transform(X_valid)
-                    X_test = X_sc.transform(testData.drop(["target"], axis=1).values)
+                    X_test = X_sc.transform(testData.drop(['target'], axis=1).values)
 
                     y_train = y_sc.fit_transform(y_train)
                     y_valid = y_sc.transform(y_valid)
-                    y_test = y_sc.transform(testData["target"].values.reshape(len(X_test), 1))
+                    y_test = y_sc.transform(testData['target'].values.reshape(len(X_test), 1))
 
                     X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
                     X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
@@ -263,7 +263,7 @@ if __name__ == "__main__":
                     rcr_activation = 'mish'
 
                 score = pd.DataFrame(score,
-                                     columns=["R-square", "validMAE", "validRMSE", "testMAE", "testRMSE"])
+                                     columns=['R-square', 'validMAE', 'validRMSE', 'testMAE', 'testRMSE'])
                 print(score)
 
                 # saving the results

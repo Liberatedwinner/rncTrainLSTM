@@ -5,7 +5,6 @@ import argparse
 import pickle
 import warnings
 from scipy.stats import hmean
-
 from MetroLSTMCore import ModelCore
 
 warnings.filterwarnings('ignore')
@@ -44,10 +43,10 @@ def preprocessing(file_name):
     df.rename(columns={'시간': 'time'}, inplace=True)
     df.columns = df.columns.str.lower()
     df['time'] = pd.to_datetime(file_name[:-4] + df['time'].str.replace(':', ''))
-    df['hour'] = df["time"].dt.hour
-    df['dayOfWeek'] = df["time"].dt.dayofweek
-    df['rest'] = df["dayOfWeek"] > 4 # 0-mon
-    df['day'] = df["time"].dt.day
+    df['hour'] = df['time'].dt.hour
+    df['dayOfWeek'] = df['time'].dt.dayofweek
+    df['rest'] = df['dayOfWeek'] > 4 # 0-mon
+    df['day'] = df['time'].dt.day
     df.drop(['time'], axis=1, inplace=True)
 
     df['p/b'] = df['p/b'].str[:-3]
@@ -109,7 +108,7 @@ def feature_engineering(dataAll, predictStep=[10]):
     print('=======')
     for flag in FLAG:
         print('Running with the file {}:'.format(flag))
-        data = dataAll[dataAll["FLAG"] == flag]
+        data = dataAll[dataAll['FLAG'] == flag]
 
         for name in list(data.columns):
             if data[name].isnull().sum() <= 100:
@@ -119,7 +118,7 @@ def feature_engineering(dataAll, predictStep=[10]):
         data.reset_index(inplace=True)
         data.rename({'index': 'timeStep'}, axis=1, inplace=True)
 
-        print("lagging features")
+        print('lagging features')
         data = lagging_features(data,
                                 name='actual speed',
                                 laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
@@ -139,7 +138,7 @@ def feature_engineering(dataAll, predictStep=[10]):
         print('.')
         # for i in range(1, 7):
         #     data = lagging_features(data,
-        #                             name=f"bc{i}",
+        #                             name=f'bc{i}',
         #                             #laggingStep=list(range(1, 6)) + [20, 60])
         #                             #laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
         #                             laggingStep=[1, 3, 5, 20, 60])
@@ -202,13 +201,13 @@ def lagging_features(data,
     :param laggingStep: array of timesteps.
     :return: data: dataframe with lagged features.
     """
-    assert name, "Invalid feature name."
+    assert name, 'Invalid feature name.'
 
     for step in laggingStep:
-        tmpframe = data[[name, "timeStep"]].copy()
-        tmpframe.rename({name: "lagged_" + f'{name}_' + str(step)}, axis=1, inplace=True)
-        tmpframe["timeStep"] += step
-        data = pd.merge(data, tmpframe, on="timeStep", how="left")
+        tmpframe = data[[name, 'timeStep']].copy()
+        tmpframe.rename({name: 'lagged_' + f'{name}_' + str(step)}, axis=1, inplace=True)
+        tmpframe['timeStep'] += step
+        data = pd.merge(data, tmpframe, on='timeStep', how='left')
 
     return data
 
@@ -224,7 +223,7 @@ def statistical_features(data,
     :param timeRange: single timestep.
     :return: data: dataframe with statistical features.
     """
-    assert name, "Invalid feature name."
+    assert name, 'Invalid feature name.'
     index = list(data.index)
     featureValues = data[name].values
     Means = []
@@ -237,16 +236,16 @@ def statistical_features(data,
         Stds.append(np.nanstd(tmp))
         Diffs.append(featureValues[currInd] - featureValues[max(0, currInd - timeRange)])
 
-    data[name + "_lag_mean_" + str(timeRange)] = Means
-    data[name + "_lag_std_" + str(timeRange)] = Stds
-    data[name + "_diff_" + str(timeRange)] = Diffs
+    data[name + '_lag_mean_' + str(timeRange)] = Means
+    data[name + '_lag_std_' + str(timeRange)] = Stds
+    data[name + '_diff_' + str(timeRange)] = Diffs
 
     return data
 
 
 def create_target(data,
                   predictStep=None,
-                  targetName="actual speed"):
+                  targetName='actual speed'):
     """
     This part marks the target feature.
 
@@ -257,21 +256,21 @@ def create_target(data,
     """
     target = data[targetName].copy()
     newData = pd.DataFrame(None, columns=list(data.columns), dtype=np.float64)
-    newData["target"] = None
-    newData["timeFlag"] = None
+    newData['target'] = None
+    newData['timeFlag'] = None
 
     for step in predictStep:
         targetTmp = target[step:].copy()
-        data["target"] = targetTmp.reset_index(drop=True)
-        data["timeFlag"] = step
+        data['target'] = targetTmp.reset_index(drop=True)
+        data['timeFlag'] = step
         newData = pd.concat([newData, data], axis=0, ignore_index=True)
-    newData["timeFlag"] = newData["timeFlag"].astype(np.float64)
+    newData['timeFlag'] = newData['timeFlag'].astype(np.float64)
 
     return newData
 #######
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     filenames = ['20180717.csv', '20180713.csv']
     dfs = []
     for filename in filenames:
@@ -281,17 +280,17 @@ if __name__ == "__main__":
     dataframe = data_concat(dfs)
 
     dataAll = feature_engineering(dataframe, predictStep=[predicted_step])
-    print("\nMerging the data:")
-    print("=======")
+    print('\nMerging the data:')
+    print('=======')
     shapeList = [len(df) for df in dataAll]
-    print(f"Total shape is {sum(shapeList)}")
+    print(f'Total shape is {sum(shapeList)}')
     newData = pd.DataFrame(None, columns=list(dataAll[0].columns))
     for idx, data in enumerate(dataAll):
-        print(f"{idx}: {len(data)}.")
+        print(f'{idx}: {len(data)}.')
         newData = pd.concat([newData, data], axis=0, ignore_index=True)
-    print("=======")
+    print('=======')
 
-    dropList = ["timeStep", "hour", "dayOfWeek", "rest", "day", "timeFlag", 'speed_mult_0']
+    dropList = ['timeStep', 'hour', 'dayOfWeek', 'rest', 'day', 'timeFlag', 'speed_mult_0']
     for i in range(1, 7):
        dropList.append(f'bc{i}')
     # dropList.append('motoring')
