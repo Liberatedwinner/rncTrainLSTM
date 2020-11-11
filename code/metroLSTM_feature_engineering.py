@@ -291,7 +291,7 @@ if __name__ == "__main__":
         newData = pd.concat([newData, data], axis=0, ignore_index=True)
     print("=======")
 
-    dropList = ['train speed', "timeStep", "hour", "dayOfWeek", "rest", "day", "timeFlag", 'speed_mult_0']
+    dropList = ["timeStep", "hour", "dayOfWeek", "rest", "day", "timeFlag", 'speed_mult_0']
     for i in range(1, 7):
        dropList.append(f'bc{i}')
     # dropList.append('motoring')
@@ -299,7 +299,7 @@ if __name__ == "__main__":
     newData.drop(dropList, axis=1, inplace=True)
 
     # Save all the data
-    PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
+    PATH = f'..//Data//TrainedRes//sec{predicted_step}//'
 
     if not os.path.exists(PATH):
         os.makedirs(PATH)
