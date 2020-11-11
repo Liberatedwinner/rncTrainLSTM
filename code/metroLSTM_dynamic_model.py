@@ -175,7 +175,7 @@ if __name__ == '__main__':
         for lr in lrs:
             for batch_size in batch_sizes:
                 score = np.zeros((numFolds, 5))
-                filepath = f'..//Plots-tanh_{rcr_activation}//{hidden_size}-{lr}-{batch_size}//'
+                filepath = f'..//Plots-tanh_{rcr_activation}//{predicted_step}_{hidden_size}-{lr}-{batch_size}//'
                 if not os.path.exists(filepath):
                     os.makedirs(filepath)
 
