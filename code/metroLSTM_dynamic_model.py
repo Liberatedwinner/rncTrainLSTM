@@ -68,7 +68,7 @@ rcParams['patch.facecolor'] = 'b'
 sns.set(style="ticks", font_scale=1.1, palette='deep', color_codes=True)
 earlyStopping = EarlyStopping(monitor="val_loss", patience=10, verbose=2)
 
-PATH = f"..//Data//TrainedRes//sec{predicted_step}//"
+PATH = f'..//Data//TrainedRes//sec{predicted_step}//'
 
 swish = tf.keras.activations.swish
 #######

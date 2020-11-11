@@ -44,11 +44,11 @@ def preprocessing(file_name):
     df.rename(columns={'시간': 'time'}, inplace=True)
     df.columns = df.columns.str.lower()
     df['time'] = pd.to_datetime(file_name[:-4] + df['time'].str.replace(':', ''))
-    df["hour"] = df["time"].dt.hour
-    df["dayOfWeek"] = df["time"].dt.dayofweek
-    df["rest"] = df["dayOfWeek"] > 4 # 0-mon
-    df["day"] = df["time"].dt.day
-    df.drop(["time"], axis=1, inplace=True)
+    df['hour'] = df["time"].dt.hour
+    df['dayOfWeek'] = df["time"].dt.dayofweek
+    df['rest'] = df["dayOfWeek"] > 4 # 0-mon
+    df['day'] = df["time"].dt.day
+    df.drop(['time'], axis=1, inplace=True)
 
     df['p/b'] = df['p/b'].str[:-3]
     df['p/b'] = df['p/b'].astype('int64')
@@ -103,25 +103,25 @@ def feature_engineering(dataAll, predictStep=[10]):
     :param predictStep: array of timesteps.
     :return: newdata: feature-selected dataframe array.
     """
-    FLAG = dataAll["FLAG"].unique()
+    FLAG = dataAll['FLAG'].unique()
     newData = []
 
-    print("=======")
+    print('=======')
     for flag in FLAG:
-        print("Running with the file {}:".format(flag))
+        print('Running with the file {}:'.format(flag))
         data = dataAll[dataAll["FLAG"] == flag]
 
         for name in list(data.columns):
             if data[name].isnull().sum() <= 100:
-                data[name].fillna(method="ffill", inplace=True)
+                data[name].fillna(method='ffill', inplace=True)
 
         data.reset_index(inplace=True, drop=True)
         data.reset_index(inplace=True)
-        data.rename({"index": "timeStep"}, axis=1, inplace=True)
+        data.rename({'index': 'timeStep'}, axis=1, inplace=True)
 
         print("lagging features")
         data = lagging_features(data,
-                                name="actual speed",
+                                name='actual speed',
                                 laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
 
         print('.')
@@ -131,7 +131,7 @@ def feature_engineering(dataAll, predictStep=[10]):
 
         print('.')
         data = lagging_features(data,
-                                name="p/b",
+                                name='p/b',
                                 #laggingStep=list(range(1, 6)) + [20, 60])
                                 #laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
                                 laggingStep=[1, 3, 5, 20, 60])
@@ -154,7 +154,7 @@ def feature_engineering(dataAll, predictStep=[10]):
         for k in range(1, 6):
             data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
         print('complete')
-        print("statistical features")
+        print('statistical features')
         for k in [2, 5, 10, 20]:
             data = statistical_features(data,
                                         name='actual speed',
@@ -177,15 +177,15 @@ def feature_engineering(dataAll, predictStep=[10]):
             #                                 name=f'bc{i}',
             #                                 timeRange=k)
         print('complete')
-        print("Marking the timestep flag with the target")
+        print('Marking the timestep flag with the target')
         data = create_target(data,
                              predictStep=predictStep,
-                             targetName="actual speed")
-        data = data[~data["target"].isnull()]
+                             targetName='actual speed')
+        data = data[~data['target'].isnull()]
         data.reset_index(inplace=True, drop=True)
         newData.append(data)
         print('complete')
-    print("=======")
+    print('=======')
 
     return newData
 ### TODO
@@ -305,8 +305,8 @@ if __name__ == "__main__":
         os.makedirs(PATH)
 
     train_data = newData[(newData['FLAG'] == 0)]
-    test_data = newData[(newData["FLAG"] == 1)].drop("target", axis=1)
-    test_result = newData[(newData["FLAG"] == 1)]["target"].values
+    test_data = newData[(newData['FLAG'] == 1)].drop('target', axis=1)
+    test_result = newData[(newData['FLAG'] == 1)]['target'].values
 
     mdc = ModelCore(PATH)
     mdc.save_data('train.pkl', data=train_data)
