@@ -37,8 +37,7 @@ def preprocessing(file_name):
              'Unnamed: 27', 'Unnamed: 28', 'Target Speed',
              'Train Room Temp ＃1', 'Train Outside Temp ＃1',
              'FWD', 'REV', 'Train In Station', 'Line Voltage',
-             #'DISTANCE', 'MR Pressure', 'Distance to Target'],
-             'MR Pressure', 'Distance to Target'],
+             'DISTANCE', 'MR Pressure', 'Distance to Target'],
             axis=1, inplace=True)
 
     df.rename(columns={'시간': 'time'}, inplace=True)
@@ -52,9 +51,6 @@ def preprocessing(file_name):
 
     df['p/b'] = df['p/b'].str[:-3]
     df['p/b'] = df['p/b'].astype('int64')
-
-    df['distance'] = df['distance'].str[:-3]
-    df['distance'] = df['distance'].astype('float64')
 
     speedwords = ['permitted', 'actual', 'train']
     for word in speedwords:
@@ -97,7 +93,6 @@ def data_concat(df_lst):
     return concatd_data
 
 
-### TODO
 def feature_engineering(dataAll, predictStep=[10]):
     """
     Main function of this file. Indeed, this part proceeds the feature engineering.
@@ -191,7 +186,6 @@ def feature_engineering(dataAll, predictStep=[10]):
     print('=======')
 
     return newData
-### TODO
 
 
 def lagging_features(data,
