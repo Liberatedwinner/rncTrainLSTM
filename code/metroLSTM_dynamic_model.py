@@ -194,10 +194,7 @@ def trained_model_score(_filepath, _numFolds, _folds,
         X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
         X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
-        chkpt = ModelCheckpoint(filepath=_filepath + 'model.h5',
-                                monitor='val_loss',
-                                verbose=1,
-                                save_best_only=True)
+
 
         if os.path.exists(_filepath + 'chkpt_best.pkl') and os.path.getsize(_filepath + 'chkpt_best.pkl') > 0:
             with open(_filepath + 'chkpt_best.pkl', 'rb') as f:
@@ -270,6 +267,10 @@ if __name__ == '__main__':
                 filepath = f'..//Plots-tanh_{rcr_activation}//{predicted_step}_{hidden_size}-{lr}-{batch_size}//'
                 if not os.path.exists(filepath):
                     os.makedirs(filepath)
+                chkpt = ModelCheckpoint(filepath=filepath + 'model.h5',
+                                        monitor='val_loss',
+                                        verbose=1,
+                                        save_best_only=True)
                 trained_model_score(filepath, numFolds, folds,
                                     trainData, testData,
                                     hidden_size, lr, batch_size)
