@@ -197,13 +197,13 @@ if __name__ == "__main__":
                                         callbacks=[earlyStopping, chkpt, save_chkpt_callback])
                     model.evaluate(X_test, y_test, verbose=0)
 
-                    y_valid_pred = model.predict(X_valid)
                     y_valid = y_sc.inverse_transform(y_valid)
+                    y_valid_pred = model.predict(X_valid)
                     y_valid_pred = y_sc.inverse_transform(y_valid_pred)
                     y_valid_pred[y_valid_pred < 1] = 0
 
-                    y_test_pred = model.predict(X_test)
                     y_test = y_sc.inverse_transform(y_test)
+                    y_test_pred = model.predict(X_test)
                     y_test_pred = y_sc.inverse_transform(y_test_pred)
                     y_test_pred[y_test_pred < 1] = 0
                     
