@@ -116,7 +116,7 @@ def main_model(_X_train, _y_train,
                _X_valid, _y_valid,
                hs_info, rcr_act_info, lr_info, bs_info):
     """
-    The core part of this model. Return LSTM model and model.fit.
+    The core part of this model. Return LSTM model and history = model.fit.
 
     :param _X_train:
     :param _y_train:
@@ -231,17 +231,23 @@ if __name__ == '__main__':
                     del model
                     model = load_model(filepath + 'lastmodel.h5', custom_objects={'mish': mish})
                     model.evaluate(X_test, y_test, verbose=1)
-                    # model.evaluate(X_test, y_test, verbose=0)
 
-                    y_valid = y_sc.inverse_transform(y_valid)
-                    y_valid_pred = model.predict(X_valid)
-                    y_valid_pred = y_sc.inverse_transform(y_valid_pred)
-                    y_valid_pred[y_valid_pred < 1] = 0
+                    y_pred_names = ['valid', 'test']
+                    for name in y_pred_names:
+                        globals()[f'y_{name}'] = y_sc.inverse_transform(globals()[f'y_{name}'])
+                        globals()[f'y_{name}_pred'] = model.predict(globals()[f'X_{name}'])
+                        globals()[f'y_{name}_pred'] = y_sc.inverse_transform(globals()[f'y_{name}_pred'])
+                        globals()[f'y_{name}_pred'][globals()[f'y_{name}_pred'] < 1] = 0
 
-                    y_test = y_sc.inverse_transform(y_test)
-                    y_test_pred = model.predict(X_test)
-                    y_test_pred = y_sc.inverse_transform(y_test_pred)
-                    y_test_pred[y_test_pred < 1] = 0
+                    # y_valid = y_sc.inverse_transform(y_valid)
+                    # y_valid_pred = model.predict(X_valid)
+                    # y_valid_pred = y_sc.inverse_transform(y_valid_pred)
+                    # y_valid_pred[y_valid_pred < 1] = 0
+                    #
+                    # y_test = y_sc.inverse_transform(y_test)
+                    # y_test_pred = model.predict(X_test)
+                    # y_test_pred = y_sc.inverse_transform(y_test_pred)
+                    # y_test_pred[y_test_pred < 1] = 0
                     
                     score[ind] = np.array([r2_score(y_test, y_test_pred),
                                            sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred),
@@ -249,7 +255,7 @@ if __name__ == '__main__':
                                            sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
                                            ])
-                    print(f'R-square: {score[ind][0]}, testMAE: {score[ind][3]}')
+                    print(f'R-square: {score[ind][0]}, test MAE: {score[ind][3]}')
                     ModelCore(filepath).pred_drawing(y_test_pred, y_test, ind, predicted_step)
                     plot_history(history, filepath + f'error_pic{ind + 1}.png')
                     print('The metro-speed prediction graph has been saved.\n')
