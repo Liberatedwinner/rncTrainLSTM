@@ -126,6 +126,10 @@ def main_model(_X_train, _y_train,
     :param int bs_info: batch size.
     :return: model, history
     """
+    save_chkpt_callback = LambdaCallback(
+        on_epoch_end=lambda epoch, logs: save_chkpt()
+    )
+
     _model = Sequential()
     _model.add(LSTM(hs_info,
                     recurrent_activation=rcr_act_info,
@@ -144,6 +148,13 @@ def main_model(_X_train, _y_train,
                           callbacks=[earlyStopping, chkpt, save_chkpt_callback])
 
     return _model, _history
+
+
+def save_result(_filepath, _filename, _score):
+    _score.to_pickle(_filepath + _filename + '.pkl')
+    print(f'The result has been saved as {_filename}.pkl')
+    _score.to_csv(_filepath + _filename + '.csv')
+    print(f'The result has been saved as {_filename}.csv')
 #######
 
 
@@ -209,10 +220,6 @@ if __name__ == '__main__':
                             best = pickle.load(f)
                             chkpt.best = best
 
-                    save_chkpt_callback = LambdaCallback(
-                        on_epoch_end=lambda epoch, logs: save_chkpt()
-                    )
-
                     # if rcr_activation == 'mish':
                     #     rcr_activation = mish
 
@@ -263,7 +270,4 @@ if __name__ == '__main__':
 
                 # saving the results
                 filename = f'score-{hidden_size}-{lr}-{batch_size}'
-                score.to_pickle(filepath + filename + '.pkl')
-                print(f'The result has been saved as {filename}.pkl')
-                score.to_csv(filepath + filename + '.csv')
-                print(f'The result has been saved as {filename}.csv')
+                save_result(filepath, filename, score)
