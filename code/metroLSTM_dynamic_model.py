@@ -158,6 +158,90 @@ def save_result(_filepath, _filename, _score):
 #######
 
 
+def post_training(func):
+    def wrapper(*args, **kwargs):
+        # saving the results
+        score = func(*args, **kwargs)
+        filename = f'score-{hidden_size}-{lr}-{batch_size}'
+        save_result(filepath, filename, score)
+
+    return wrapper
+
+@post_training
+def trained_model_score(_filepath, _numFolds, _folds,
+                        _trainData, _testData,
+                        _hs, _lr, _bs):
+    score = np.zeros((_numFolds, 5))
+    for ind, (train, valid) in enumerate(_folds):
+        X_train = _trainData.iloc[train].drop(['target'], axis=1).values
+        X_valid = _trainData.iloc[valid].drop(['target'], axis=1).values
+
+        y_train = _trainData.iloc[train]['target'].values.reshape(len(X_train), 1)
+        y_valid = _trainData.iloc[valid]['target'].values.reshape(len(X_valid), 1)
+
+        # Access the normalized data
+        X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+
+        X_train = X_sc.fit_transform(X_train)
+        X_valid = X_sc.transform(X_valid)
+        X_test = X_sc.transform(_testData.drop(['target'], axis=1).values)
+
+        y_train = y_sc.fit_transform(y_train)
+        y_valid = y_sc.transform(y_valid)
+        y_test = y_sc.transform(_testData['target'].values.reshape(len(X_test), 1))
+
+        X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+        X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
+        X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+
+        chkpt = ModelCheckpoint(filepath=_filepath + 'model.h5',
+                                monitor='val_loss',
+                                verbose=1,
+                                save_best_only=True)
+
+        if os.path.exists(_filepath + 'chkpt_best.pkl') and os.path.getsize(_filepath + 'chkpt_best.pkl') > 0:
+            with open(_filepath + 'chkpt_best.pkl', 'rb') as f:
+                best = pickle.load(f)
+                chkpt.best = best
+
+        # Start training the model
+        model, history = main_model(X_train, y_train,
+                                    X_valid, y_valid,
+                                    _hs, rcr_activation, _lr, _bs)
+        model.save(_filepath + 'lastmodel.h5')
+        print('The trained model has been saved as "lastmodel.h5".')
+        del model
+        model = load_model(_filepath + 'lastmodel.h5', custom_objects={'mish': mish})
+        model.evaluate(X_test, y_test, verbose=1)
+
+        y_valid = y_sc.inverse_transform(y_valid)
+        y_valid_pred = model.predict(X_valid)
+        y_valid_pred = y_sc.inverse_transform(y_valid_pred)
+        y_valid_pred[y_valid_pred < 1] = 0
+
+        y_test = y_sc.inverse_transform(y_test)
+        y_test_pred = model.predict(X_test)
+        y_test_pred = y_sc.inverse_transform(y_test_pred)
+        y_test_pred[y_test_pred < 1] = 0
+
+        score[ind] = np.array([r2_score(y_test, y_test_pred),
+                               sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred),
+                               np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred)),
+                               sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
+                               np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
+                               ])
+        print(f'R-square: {score[ind][0]}, test MAE: {score[ind][3]}')
+        ModelCore(_filepath).pred_drawing(y_test_pred, y_test, ind, predicted_step)
+        plot_history(history, _filepath + f'error_pic{ind + 1}.png')
+        print('The metro-speed prediction graph has been saved.\n')
+
+    score = pd.DataFrame(score,
+                         columns=['R-square', 'validMAE', 'validRMSE', 'testMAE', 'testRMSE'])
+    print(score)
+
+    return score
+
+
 if __name__ == '__main__':
     mdc = ModelCore(PATH)
     trainData, testData = mdc.load_train_test_data()
@@ -183,91 +267,9 @@ if __name__ == '__main__':
     for hidden_size in hidden_sizes:
         for lr in lrs:
             for batch_size in batch_sizes:
-                score = np.zeros((numFolds, 5))
                 filepath = f'..//Plots-tanh_{rcr_activation}//{predicted_step}_{hidden_size}-{lr}-{batch_size}//'
                 if not os.path.exists(filepath):
                     os.makedirs(filepath)
-
-                for ind, (train, valid) in enumerate(folds):
-                    X_train = trainData.iloc[train].drop(['target'], axis=1).values
-                    X_valid = trainData.iloc[valid].drop(['target'], axis=1).values
-
-                    y_train = trainData.iloc[train]['target'].values.reshape(len(X_train), 1)
-                    y_valid = trainData.iloc[valid]['target'].values.reshape(len(X_valid), 1)
-
-                    # Access the normalized data
-                    X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
-
-                    X_train = X_sc.fit_transform(X_train)
-                    X_valid = X_sc.transform(X_valid)
-                    X_test = X_sc.transform(testData.drop(['target'], axis=1).values)
-
-                    y_train = y_sc.fit_transform(y_train)
-                    y_valid = y_sc.transform(y_valid)
-                    y_test = y_sc.transform(testData['target'].values.reshape(len(X_test), 1))
-
-                    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-                    X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
-                    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
-
-                    chkpt = ModelCheckpoint(filepath=filepath + 'model.h5',
-                                            monitor='val_loss',
-                                            verbose=1,
-                                            save_best_only=True)
-
-                    if os.path.exists(filepath + 'chkpt_best.pkl') and os.path.getsize(filepath + 'chkpt_best.pkl') > 0:
-                        with open(filepath + 'chkpt_best.pkl', 'rb') as f:
-                            best = pickle.load(f)
-                            chkpt.best = best
-
-                    # if rcr_activation == 'mish':
-                    #     rcr_activation = mish
-
-                    # Start training the model
-                    model, history = main_model(X_train, y_train,
-                                                X_valid, y_valid,
-                                                hidden_size, rcr_activation, lr, batch_size)
-                    model.save(filepath + 'lastmodel.h5')
-                    print('The trained model has been saved as "lastmodel.h5".')
-                    del model
-                    model = load_model(filepath + 'lastmodel.h5', custom_objects={'mish': mish})
-                    model.evaluate(X_test, y_test, verbose=1)
-
-                    # y_pred_names = ['valid', 'test']
-                    # for name in y_pred_names:
-                    #     globals()[f'y_{name}'] = y_sc.inverse_transform(globals()[f'y_{name}'])
-                    #     globals()[f'y_{name}_pred'] = model.predict(globals()[f'X_{name}'])
-                    #     globals()[f'y_{name}_pred'] = y_sc.inverse_transform(globals()[f'y_{name}_pred'])
-                    #     globals()[f'y_{name}_pred'][globals()[f'y_{name}_pred'] < 1] = 0
-
-                    y_valid = y_sc.inverse_transform(y_valid)
-                    y_valid_pred = model.predict(X_valid)
-                    y_valid_pred = y_sc.inverse_transform(y_valid_pred)
-                    y_valid_pred[y_valid_pred < 1] = 0
-
-                    y_test = y_sc.inverse_transform(y_test)
-                    y_test_pred = model.predict(X_test)
-                    y_test_pred = y_sc.inverse_transform(y_test_pred)
-                    y_test_pred[y_test_pred < 1] = 0
-
-                    score[ind] = np.array([r2_score(y_test, y_test_pred),
-                                           sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred),
-                                           np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred)),
-                                           sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
-                                           np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
-                                           ])
-                    print(f'R-square: {score[ind][0]}, test MAE: {score[ind][3]}')
-                    ModelCore(filepath).pred_drawing(y_test_pred, y_test, ind, predicted_step)
-                    plot_history(history, filepath + f'error_pic{ind + 1}.png')
-                    print('The metro-speed prediction graph has been saved.\n')
-
-                # if rcr_activation == mish:
-                #     rcr_activation = 'mish'
-
-                score = pd.DataFrame(score,
-                                     columns=['R-square', 'validMAE', 'validRMSE', 'testMAE', 'testRMSE'])
-                print(score)
-
-                # saving the results
-                filename = f'score-{hidden_size}-{lr}-{batch_size}'
-                save_result(filepath, filename, score)
+                trained_model_score(filepath, numFolds, folds,
+                                    trainData, testData,
+                                    hidden_size, lr, batch_size)
