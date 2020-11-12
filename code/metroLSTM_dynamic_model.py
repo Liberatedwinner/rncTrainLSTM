@@ -249,6 +249,7 @@ if __name__ == '__main__':
                                            sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
                                            ])
+                    print(f'R-square: {score[ind][0]}, testMAE: {score[ind][3]}')
                     ModelCore(filepath).pred_drawing(y_test_pred, y_test, ind, predicted_step)
                     plot_history(history, filepath + f'error_pic{ind + 1}.png')
                     print('The metro-speed prediction graph has been saved.\n')
