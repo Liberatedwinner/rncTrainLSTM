@@ -170,7 +170,6 @@ def post_training(func):
     Decorator of a function 'trained_model_score'. This part is of saving data.
 
     :param func:
-    :return:
     """
     def wrapper(*args, **kwargs):
         # saving the results
@@ -187,14 +186,14 @@ def trained_model_score(_filepath, _numFolds, _folds,
     """
     This part is the model training block.
 
-    :param _filepath:
+    :param _filepath: The path where file is located.
     :param _numFolds:
     :param _folds:
     :param _trainData:
     :param _testData:
-    :param _hs:
-    :param _lr:
-    :param _bs:
+    :param _hs: hidden unit size.
+    :param _lr: learning rate.
+    :param _bs: batch size.
     :return: score, which is np.array.
     """
     score = np.zeros((_numFolds, 5))
