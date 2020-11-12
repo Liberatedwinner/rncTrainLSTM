@@ -1,7 +1,6 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-from MetroLSTMCore import ModelCore
 import numpy as np
 import pandas as pd
 import warnings
@@ -22,6 +21,7 @@ from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
 from keras.utils import get_custom_objects
+from MetroLSTMCore import ModelCore
 
 warnings.filterwarnings('ignore')
 np.random.seed(20201005)
@@ -68,8 +68,6 @@ sns.set(style='ticks', font_scale=1.1, palette='deep', color_codes=True)
 earlyStopping = EarlyStopping(monitor='val_loss', patience=10, verbose=2)
 
 PATH = f'..//Data//TrainedRes//sec{predicted_step}//'
-
-swish = tf.keras.activations.swish
 #######
 
 
@@ -78,7 +76,7 @@ def mish(x):
     Mish is an activation function. Return Mish(x) = x * tanh(ln(1+exp(x)).
 
     :param x: tensor object in TensorFlow
-    :return: Mish(x):
+    :return: Mish(x)
     """
     return x * tf.nn.tanh(tf.nn.softplus(x))
 get_custom_objects().update({'mish': mish})
@@ -215,12 +213,9 @@ if __name__ == '__main__':
                         on_epoch_end=lambda epoch, logs: save_chkpt()
                     )
 
-                    if rcr_activation == 'swish':
-                        rcr_activation = swish
-                    elif rcr_activation == 'sigmoid':
+                    rcr_activation = mish
+                    if rcr_activation == 'sigmoid':
                         rcr_activation = 'sigmoid'
-                    else:
-                        rcr_activation = mish
 
                     # Start training the model
                     model, history = main_model(X_train, y_train,
@@ -232,23 +227,23 @@ if __name__ == '__main__':
                     model = load_model(filepath + 'lastmodel.h5', custom_objects={'mish': mish})
                     model.evaluate(X_test, y_test, verbose=1)
 
-                    y_pred_names = ['valid', 'test']
-                    for name in y_pred_names:
-                        globals()[f'y_{name}'] = y_sc.inverse_transform(globals()[f'y_{name}'])
-                        globals()[f'y_{name}_pred'] = model.predict(globals()[f'X_{name}'])
-                        globals()[f'y_{name}_pred'] = y_sc.inverse_transform(globals()[f'y_{name}_pred'])
-                        globals()[f'y_{name}_pred'][globals()[f'y_{name}_pred'] < 1] = 0
+                    # y_pred_names = ['valid', 'test']
+                    # for name in y_pred_names:
+                    #     globals()[f'y_{name}'] = y_sc.inverse_transform(globals()[f'y_{name}'])
+                    #     globals()[f'y_{name}_pred'] = model.predict(globals()[f'X_{name}'])
+                    #     globals()[f'y_{name}_pred'] = y_sc.inverse_transform(globals()[f'y_{name}_pred'])
+                    #     globals()[f'y_{name}_pred'][globals()[f'y_{name}_pred'] < 1] = 0
 
-                    # y_valid = y_sc.inverse_transform(y_valid)
-                    # y_valid_pred = model.predict(X_valid)
-                    # y_valid_pred = y_sc.inverse_transform(y_valid_pred)
-                    # y_valid_pred[y_valid_pred < 1] = 0
-                    #
-                    # y_test = y_sc.inverse_transform(y_test)
-                    # y_test_pred = model.predict(X_test)
-                    # y_test_pred = y_sc.inverse_transform(y_test_pred)
-                    # y_test_pred[y_test_pred < 1] = 0
-                    
+                    y_valid = y_sc.inverse_transform(y_valid)
+                    y_valid_pred = model.predict(X_valid)
+                    y_valid_pred = y_sc.inverse_transform(y_valid_pred)
+                    y_valid_pred[y_valid_pred < 1] = 0
+
+                    y_test = y_sc.inverse_transform(y_test)
+                    y_test_pred = model.predict(X_test)
+                    y_test_pred = y_sc.inverse_transform(y_test_pred)
+                    y_test_pred[y_test_pred < 1] = 0
+
                     score[ind] = np.array([r2_score(y_test, y_test_pred),
                                            sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred),
                                            np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred)),
@@ -260,12 +255,9 @@ if __name__ == '__main__':
                     plot_history(history, filepath + f'error_pic{ind + 1}.png')
                     print('The metro-speed prediction graph has been saved.\n')
 
-                if rcr_activation == swish:
-                    rcr_activation = 'swish'
-                elif rcr_activation == 'sigmoid':
+                rcr_activation = 'mish'
+                if rcr_activation == 'sigmoid':
                     rcr_activation = 'sigmoid'
-                else:
-                    rcr_activation = 'mish'
 
                 score = pd.DataFrame(score,
                                      columns=['R-square', 'validMAE', 'validRMSE', 'testMAE', 'testRMSE'])
