@@ -32,7 +32,7 @@ parser.add_argument('--gpu', type=int, default=-1,
 parser.add_argument('--predictstep', type=int, default=10,
                     help='Choose the predicted step: 1, 10, 30, 50, 100. Default value is 10.')
 parser.add_argument('--activation', type=str, default='mish',
-                    help='Choose the activation function instead of mish: sigmoid, swish.')
+                    help='Choose the activation function: sigmoid or Mish. Default is Mish.')
 parser.add_argument('--explore_hp', type=int, default='1',
                     help='Turn the parameter search on(1) or off(0). Default is 1.')
 parser.add_argument('--hs', type=int,
@@ -213,9 +213,8 @@ if __name__ == '__main__':
                         on_epoch_end=lambda epoch, logs: save_chkpt()
                     )
 
-                    rcr_activation = mish
-                    if rcr_activation == 'sigmoid':
-                        rcr_activation = 'sigmoid'
+                    # if rcr_activation == 'mish':
+                    #     rcr_activation = mish
 
                     # Start training the model
                     model, history = main_model(X_train, y_train,
@@ -255,9 +254,8 @@ if __name__ == '__main__':
                     plot_history(history, filepath + f'error_pic{ind + 1}.png')
                     print('The metro-speed prediction graph has been saved.\n')
 
-                rcr_activation = 'mish'
-                if rcr_activation == 'sigmoid':
-                    rcr_activation = 'sigmoid'
+                # if rcr_activation == mish:
+                #     rcr_activation = 'mish'
 
                 score = pd.DataFrame(score,
                                      columns=['R-square', 'validMAE', 'validRMSE', 'testMAE', 'testRMSE'])
