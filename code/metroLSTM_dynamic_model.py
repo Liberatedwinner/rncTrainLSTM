@@ -151,6 +151,13 @@ def main_model(_X_train, _y_train,
 
 
 def save_result(_filepath, _filename, _score):
+    """
+    Saving the result as '.pkl' and '.csv' files.
+
+    :param _filepath:
+    :param _filename:
+    :param _score:
+    """
     _score.to_pickle(_filepath + _filename + '.pkl')
     print(f'The result has been saved as {_filename}.pkl')
     _score.to_csv(_filepath + _filename + '.csv')
@@ -159,6 +166,12 @@ def save_result(_filepath, _filename, _score):
 
 
 def post_training(func):
+    """
+    Decorator of a function 'trained_model_score'. This part is of saving data.
+
+    :param func:
+    :return:
+    """
     def wrapper(*args, **kwargs):
         # saving the results
         score = func(*args, **kwargs)
@@ -171,6 +184,19 @@ def post_training(func):
 def trained_model_score(_filepath, _numFolds, _folds,
                         _trainData, _testData,
                         _hs, _lr, _bs):
+    """
+    This part is the model training block.
+
+    :param _filepath:
+    :param _numFolds:
+    :param _folds:
+    :param _trainData:
+    :param _testData:
+    :param _hs:
+    :param _lr:
+    :param _bs:
+    :return: score, which is np.array.
+    """
     score = np.zeros((_numFolds, 5))
     for ind, (train, valid) in enumerate(_folds):
         X_train = _trainData.iloc[train].drop(['target'], axis=1).values
@@ -193,8 +219,6 @@ def trained_model_score(_filepath, _numFolds, _folds,
         X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
         X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
         X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
-
-
 
         if os.path.exists(_filepath + 'chkpt_best.pkl') and os.path.getsize(_filepath + 'chkpt_best.pkl') > 0:
             with open(_filepath + 'chkpt_best.pkl', 'rb') as f:
