@@ -133,9 +133,9 @@ def feature_engineering(dataAll, predictStep=[10]):
                                 laggingStep=[1, 3, 5, 20, 60])
 
         print('.')
-        # data = lagging_features(data,
-        #                         name='harmonic_bc',
-        #                         laggingStep=[1, 3, 5, 20, 60])
+        data = lagging_features(data,
+                                name='harmonic_bc',
+                                laggingStep=[1, 3, 5, 20, 60])
 
         print('.')
         data['speed_mult_0'] = data['actual speed']
@@ -157,9 +157,9 @@ def feature_engineering(dataAll, predictStep=[10]):
                                         name='p/b',
                                         timeRange=k)
             print('.')
-            # data = statistical_features(data,
-            #                             name='harmonic_bc',
-            #                             timeRange=k)
+            data = statistical_features(data,
+                                        name='harmonic_bc',
+                                        timeRange=k)
             print('.')
         print('Completed.')
 
