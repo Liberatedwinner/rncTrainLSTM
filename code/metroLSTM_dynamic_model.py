@@ -22,7 +22,6 @@ from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
 from keras.utils import get_custom_objects
 from MetroLSTMCore import ModelCore
-
 warnings.filterwarnings('ignore')
 np.random.seed(20201005)
 
@@ -162,7 +161,6 @@ def save_result(_filepath, _filename, _score):
     print(f'The result has been saved as {_filename}.pkl')
     _score.to_csv(_filepath + _filename + '.csv')
     print(f'The result has been saved as {_filename}.csv')
-#######
 
 
 def post_training(func):
@@ -178,6 +176,7 @@ def post_training(func):
         save_result(filepath, filename, score)
 
     return wrapper
+
 
 @post_training
 def trained_model_score(_filepath, _numFolds, _folds,
@@ -260,6 +259,7 @@ def trained_model_score(_filepath, _numFolds, _folds,
     print(score)
 
     return score
+#######
 
 
 if __name__ == '__main__':
