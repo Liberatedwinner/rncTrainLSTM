@@ -188,7 +188,7 @@ def trained_model_score(_filepath, _numFolds, _folds,
 
     :param _filepath: The path where file is located.
     :param _numFolds:
-    :param _folds:
+    :param _folds: split data with time series split method.
     :param _trainData:
     :param _testData:
     :param _hs: hidden unit size.

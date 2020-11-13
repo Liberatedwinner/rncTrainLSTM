@@ -130,21 +130,11 @@ def feature_engineering(dataAll, predictStep=[10]):
         print('.')
         data = lagging_features(data,
                                 name='p/b',
-                                #laggingStep=list(range(1, 6)) + [20, 60])
-                                #laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
                                 laggingStep=[1, 3, 5, 20, 60])
 
         print('.')
-        # for i in range(1, 7):
-        #     data = lagging_features(data,
-        #                             name=f'bc{i}',
-        #                             #laggingStep=list(range(1, 6)) + [20, 60])
-        #                             #laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
-        #                             laggingStep=[1, 3, 5, 20, 60])
         data = lagging_features(data,
                                 name='harmonic_bc',
-                                # laggingStep=list(range(1, 6)) + [20, 60])
-                                # laggingStep=list(range(1, 11)) + [20, 30, 50, 80])
                                 laggingStep=[1, 3, 5, 20, 60])
 
         print('.')
@@ -152,6 +142,7 @@ def feature_engineering(dataAll, predictStep=[10]):
         for k in range(1, 6):
             data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
         print('Completed.')
+
         print('Generating statistical features...')
         for k in [2, 5, 10, 20]:
             data = statistical_features(data,
@@ -170,11 +161,8 @@ def feature_engineering(dataAll, predictStep=[10]):
                                         name='harmonic_bc',
                                         timeRange=k)
             print('.')
-            # for i in range(1, 7):
-            #     data = statistical_features(data,
-            #                                 name=f'bc{i}',
-            #                                 timeRange=k)
         print('Completed.')
+
         print('Marking the timestep flag to the target...')
         data = create_target(data,
                              predictStep=predictStep,
@@ -291,8 +279,6 @@ if __name__ == '__main__':
     dropList = ['timeStep', 'hour', 'dayOfWeek', 'rest', 'day', 'timeFlag', 'train speed', 'speed_mult_0']
     for i in range(1, 7):
        dropList.append(f'bc{i}')
-    # dropList.append('motoring')
-    # dropList.append('braking')
     newData.drop(dropList, axis=1, inplace=True)
 
     # Save all the data
