@@ -22,7 +22,7 @@ from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
 from keras.utils import get_custom_objects
 from MetroLSTMCore import ModelCore
-import config
+import MetroLSTMconfig
 warnings.filterwarnings('ignore')
 np.random.seed(20201005)
 
@@ -51,9 +51,9 @@ direct_input_lr = args.lr
 direct_input_bs = args.bs
 
 if param_search_switch:
-    hidden_sizes = config.MODEL_CONFIG['hidden_sizes']
-    lrs = config.MODEL_CONFIG['learning_rates']
-    batch_sizes = config.MODEL_CONFIG['batch_sizes']
+    hidden_sizes = MetroLSTMconfig.MODEL_CONFIG['hidden_sizes']
+    lrs = MetroLSTMconfig.MODEL_CONFIG['learning_rates']
+    batch_sizes = MetroLSTMconfig.MODEL_CONFIG['batch_sizes']
 else:
     hidden_sizes = [direct_input_hs]
     lrs = [direct_input_lr]
@@ -67,7 +67,7 @@ rcParams['patch.facecolor'] = 'b'
 sns.set(style='ticks', font_scale=1.1, palette='deep', color_codes=True)
 earlyStopping = EarlyStopping(monitor='val_loss', patience=10, verbose=2)
 
-PATH = config.MODEL_CONFIG['path'] + f'sec{predicted_step}//'
+PATH = MetroLSTMconfig.MODEL_CONFIG['path'] + f'sec{predicted_step}//'
 #######
 
 
@@ -163,6 +163,50 @@ def save_result(_filepath, _filename, _score):
     print(f'The result has been saved as {_filename}.csv')
 
 
+def drop_nan_data(_path):
+    mdc = ModelCore(_path)
+    trainData, testData = mdc.load_train_test_data()
+
+    # Exclude
+    testData['target'] = mdc.load_data('test_results.pkl')
+
+    print(f'Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.')
+    trainData.dropna(inplace=True)
+    testData.dropna(inplace=True)
+
+    trainData.drop('FLAG', axis=1, inplace=True)
+    testData.drop('FLAG', axis=1, inplace=True)
+    print(f'Train shape: {trainData.shape}, Test shape: {testData.shape} After dropping nan values.')
+
+    return trainData, testData
+
+
+def parsing_train_valid_test_set(_path, raw_train_data, raw_valid_data):
+    _traindata, _testdata = drop_nan_data(_path)
+    X_train = _traindata.iloc[raw_train_data].drop(['target'], axis=1).values
+    X_valid = _traindata.iloc[raw_valid_data].drop(['target'], axis=1).values
+
+    y_train = _traindata.iloc[raw_train_data]['target'].values.reshape(len(X_train), 1)
+    y_valid = _traindata.iloc[raw_valid_data]['target'].values.reshape(len(X_valid), 1)
+
+    # Access the normalized data
+    X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+
+    X_train = X_sc.fit_transform(X_train)
+    X_valid = X_sc.transform(X_valid)
+    X_test = X_sc.transform(_testdata.drop(['target'], axis=1).values)
+
+    y_train = y_sc.fit_transform(y_train)
+    y_valid = y_sc.transform(y_valid)
+    y_test = y_sc.transform(_testdata['target'].values.reshape(len(X_test), 1))
+
+    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
+    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+
+    return X_train, y_train, X_valid, y_valid, X_test, y_test
+
+
 def post_training(func):
     """
     Decorator of a function 'trained_model_score'. This part is of saving data.
@@ -195,7 +239,7 @@ def trained_model_score(_filepath, _folds,
     :return: score, which is np.array.
     """
 
-    fold_number = config.MODEL_CONFIG['fold_number']
+    fold_number = MetroLSTMconfig.MODEL_CONFIG['fold_number']
     score = np.zeros((fold_number, 5))
 
     for ind, (train, valid) in enumerate(_folds):
@@ -244,55 +288,12 @@ def trained_model_score(_filepath, _folds,
     print(score)
 
     return score
-
-
-def parsing_train_valid_test_set(_path, raw_train_data, raw_valid_data):
-    _traindata, _testdata = drop_nan_data(_path)
-    X_train = _traindata.iloc[raw_train_data].drop(['target'], axis=1).values
-    X_valid = _traindata.iloc[raw_valid_data].drop(['target'], axis=1).values
-
-    y_train = _traindata.iloc[raw_train_data]['target'].values.reshape(len(X_train), 1)
-    y_valid = _traindata.iloc[raw_valid_data]['target'].values.reshape(len(X_valid), 1)
-
-    # Access the normalized data
-    X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
-
-    X_train = X_sc.fit_transform(X_train)
-    X_valid = X_sc.transform(X_valid)
-    X_test = X_sc.transform(_testdata.drop(['target'], axis=1).values)
-
-    y_train = y_sc.fit_transform(y_train)
-    y_valid = y_sc.transform(y_valid)
-    y_test = y_sc.transform(_testdata['target'].values.reshape(len(X_test), 1))
-
-    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-    X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
-    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
-
-    return X_train, y_train, X_valid, y_valid, X_test, y_test
-
-def drop_nan_data(_path):
-    mdc = ModelCore(_path)
-    trainData, testData = mdc.load_train_test_data()
-
-    # Exclude
-    testData['target'] = mdc.load_data('test_results.pkl')
-
-    print(f'Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.')
-    trainData.dropna(inplace=True)
-    testData.dropna(inplace=True)
-
-    trainData.drop('FLAG', axis=1, inplace=True)
-    testData.drop('FLAG', axis=1, inplace=True)
-    print(f'Train shape: {trainData.shape}, Test shape: {testData.shape} After dropping nan values.')
-
-    return trainData, testData
 #######
 
 
 if __name__ == '__main__':
     trainData, testData = drop_nan_data(PATH)
-    fold_number = config.MODEL_CONFIG['fold_number']
+    fold_number = MetroLSTMconfig.MODEL_CONFIG['fold_number']
     tscv = TimeSeriesSplit(n_splits=fold_number)
     folds = []
     for trainInd, validInd in tscv.split(trainData):
