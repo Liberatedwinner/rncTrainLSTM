@@ -12,8 +12,8 @@
                         Choose the predicted step: 1, 10, 30, 50, 100. Default
                         value is 10.
   --activation ACTIVATION
-                        Choose the activation function instead of mish:
-                        sigmoid, swish.
+                        Choose the activation function: sigmoid or Mish.  
+                        Default is Mish.
   --explore_hp EXPLORE_HP
                         Turn the parameter search on(1) or off(0). Default is
                         1.
