@@ -181,31 +181,6 @@ def drop_nan_data(_path):
     return trainData, testData
 
 
-def parsing_train_valid_test_set(_traindata, _testdata, raw_train_data, raw_valid_data):
-    X_train = _traindata.iloc[raw_train_data].drop(['target'], axis=1).values
-    X_valid = _traindata.iloc[raw_valid_data].drop(['target'], axis=1).values
-
-    y_train = _traindata.iloc[raw_train_data]['target'].values.reshape(len(X_train), 1)
-    y_valid = _traindata.iloc[raw_valid_data]['target'].values.reshape(len(X_valid), 1)
-
-    # Access the normalized data
-    X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
-
-    X_train = X_sc.fit_transform(X_train)
-    X_valid = X_sc.transform(X_valid)
-    X_test = X_sc.transform(_testdata.drop(['target'], axis=1).values)
-
-    y_train = y_sc.fit_transform(y_train)
-    y_valid = y_sc.transform(y_valid)
-    y_test = y_sc.transform(_testdata['target'].values.reshape(len(X_test), 1))
-
-    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-    X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
-    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
-
-    return X_train, y_train, X_valid, y_valid, X_test, y_test
-
-
 def post_training(func):
     """
     Decorator of a function 'trained_model_score'. This part is of saving data.
@@ -222,7 +197,7 @@ def post_training(func):
 
 
 @post_training
-def trained_model_score(_filepath, _folds, _traindata, _testdata,
+def trained_model_score(_filepath, _folds, _path,
                         _hidden_size, _learning_rate, _batch_size):
     """
     This part is the model training block.
@@ -237,15 +212,30 @@ def trained_model_score(_filepath, _folds, _traindata, _testdata,
     :param _batch_size: batch size.
     :return: score, which is np.array.
     """
-
+    _traindata, _testdata = drop_nan_data(_path)
     fold_number = MetroLSTMconfig.MODEL_CONFIG['fold_number']
     score = np.zeros((fold_number, 5))
-    raw_traindata, raw_testdata = _traindata, _testdata
     for ind, (train, valid) in enumerate(_folds):
-        y_sc = MinMaxScaler()
-        (X_train, y_train,
-         X_valid, y_valid,
-         X_test, y_test) = parsing_train_valid_test_set(raw_traindata, raw_testdata, train, valid)
+        X_train = _traindata.iloc[train].drop(['target'], axis=1).values
+        X_valid = _traindata.iloc[valid].drop(['target'], axis=1).values
+
+        y_train = _traindata.iloc[train]['target'].values.reshape(len(X_train), 1)
+        y_valid = _traindata.iloc[valid]['target'].values.reshape(len(X_valid), 1)
+
+        # Access the normalized data
+        X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+
+        X_train = X_sc.fit_transform(X_train)
+        X_valid = X_sc.transform(X_valid)
+        X_test = X_sc.transform(_testdata.drop(['target'], axis=1).values)
+
+        y_train = y_sc.fit_transform(y_train)
+        y_valid = y_sc.transform(y_valid)
+        y_test = y_sc.transform(_testdata['target'].values.reshape(len(X_test), 1))
+
+        X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+        X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
+        X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
         if os.path.exists(_filepath + 'chkpt_best.pkl') and os.path.getsize(_filepath + 'chkpt_best.pkl') > 0:
             with open(_filepath + 'chkpt_best.pkl', 'rb') as f:
@@ -309,5 +299,5 @@ if __name__ == '__main__':
                                         monitor='val_loss',
                                         verbose=1,
                                         save_best_only=True)
-                trained_model_score(filepath, folds, trainData, testData,
+                trained_model_score(filepath, folds, PATH,
                                     hidden_size, lr, batch_size)
