@@ -197,7 +197,7 @@ def post_training(func):
 
 
 @post_training
-def trained_model_score(_filepath, _folds,
+def trained_model_score(_filepath, _folds, _train_data, _test_data,
                         _hidden_size, _learning_rate, _batch_size):
     """
     This part is the model training block.
@@ -211,26 +211,25 @@ def trained_model_score(_filepath, _folds,
     :param _batch_size: batch size.
     :return: score, which is np.array.
     """
-    _traindata, _testdata = drop_nan_data(PATH)
     fold_number = MetroLSTMconfig.MODEL_CONFIG['fold_number']
     score = np.zeros((fold_number, 5))
     for ind, (train, valid) in enumerate(_folds):
-        X_train = _traindata.iloc[train].drop(['target'], axis=1).values
-        X_valid = _traindata.iloc[valid].drop(['target'], axis=1).values
+        X_train = _train_data.iloc[train].drop(['target'], axis=1).values
+        X_valid = _train_data.iloc[valid].drop(['target'], axis=1).values
 
-        y_train = _traindata.iloc[train]['target'].values.reshape(len(X_train), 1)
-        y_valid = _traindata.iloc[valid]['target'].values.reshape(len(X_valid), 1)
+        y_train = _train_data.iloc[train]['target'].values.reshape(len(X_train), 1)
+        y_valid = _train_data.iloc[valid]['target'].values.reshape(len(X_valid), 1)
 
         # Access the normalized data
         X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
 
         X_train = X_sc.fit_transform(X_train)
         X_valid = X_sc.transform(X_valid)
-        X_test = X_sc.transform(_testdata.drop(['target'], axis=1).values)
+        X_test = X_sc.transform(_test_data.drop(['target'], axis=1).values)
 
         y_train = y_sc.fit_transform(y_train)
         y_valid = y_sc.transform(y_valid)
-        y_test = y_sc.transform(_testdata['target'].values.reshape(len(X_test), 1))
+        y_test = y_sc.transform(_test_data['target'].values.reshape(len(X_test), 1))
 
         X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
         X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
@@ -298,5 +297,5 @@ if __name__ == '__main__':
                                         monitor='val_loss',
                                         verbose=1,
                                         save_best_only=True)
-                trained_model_score(filepath, folds,
+                trained_model_score(filepath, folds, trainData, testData,
                                     hidden_size, lr, batch_size)
