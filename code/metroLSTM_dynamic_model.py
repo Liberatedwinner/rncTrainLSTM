@@ -298,5 +298,5 @@ if __name__ == '__main__':
                                         monitor='val_loss',
                                         verbose=1,
                                         save_best_only=True)
-                trained_model_score(filepath, folds, PATH,
+                trained_model_score(filepath, folds,
                                     hidden_size, lr, batch_size)
