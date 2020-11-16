@@ -197,13 +197,12 @@ def post_training(func):
 
 
 @post_training
-def trained_model_score(_filepath, _folds, _path,
+def trained_model_score(_filepath, _folds,
                         _hidden_size, _learning_rate, _batch_size):
     """
     This part is the model training block.
 
     :param _filepath: The path where file is located.
-    :param _fold_number:
     :param _folds: split data with time series split method.
     :param _trainData:
     :param _testData:
@@ -212,7 +211,7 @@ def trained_model_score(_filepath, _folds, _path,
     :param _batch_size: batch size.
     :return: score, which is np.array.
     """
-    _traindata, _testdata = drop_nan_data(_path)
+    _traindata, _testdata = drop_nan_data(PATH)
     fold_number = MetroLSTMconfig.MODEL_CONFIG['fold_number']
     score = np.zeros((fold_number, 5))
     for ind, (train, valid) in enumerate(_folds):
