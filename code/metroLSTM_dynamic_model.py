@@ -22,6 +22,7 @@ from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
 from keras.utils import get_custom_objects
 from MetroLSTMCore import ModelCore
+import config
 warnings.filterwarnings('ignore')
 np.random.seed(20201005)
 
@@ -43,20 +44,20 @@ parser.add_argument('--bs', type=int,
 args = parser.parse_args()
 
 predicted_step = args.predictstep
-rcr_activation = args.activation
+recurrent_activation = args.activation
 param_search_switch = args.explore_hp
-direct_hs = args.hs
-direct_lr = args.lr
-direct_bs = args.bs
+direct_input_hs = args.hs
+direct_input_lr = args.lr
+direct_input_bs = args.bs
 
 if param_search_switch:
-    hidden_sizes = [10, 14, 18, 22, 26, 30]
-    lrs = [1e-5, 1e-4, 2e-4, 5e-4]
-    batch_sizes = [32, 64, 128, 256, 512]
+    hidden_sizes = config.MODEL_CONFIG['hidden_sizes']
+    lrs = config.MODEL_CONFIG['learning_rates']
+    batch_sizes = config.MODEL_CONFIG['batch_sizes']
 else:
-    hidden_sizes = [direct_hs]
-    lrs = [direct_lr]
-    batch_sizes = [direct_bs]
+    hidden_sizes = [direct_input_hs]
+    lrs = [direct_input_lr]
+    batch_sizes = [direct_input_bs]
 
 os.environ['CUDA_VISIBLE_DEVICES'] = f'{args.gpu}'
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
@@ -66,7 +67,7 @@ rcParams['patch.facecolor'] = 'b'
 sns.set(style='ticks', font_scale=1.1, palette='deep', color_codes=True)
 earlyStopping = EarlyStopping(monitor='val_loss', patience=10, verbose=2)
 
-PATH = f'..//Data//TrainedRes//sec{predicted_step}//'
+PATH = config.MODEL_CONFIG['path'] + f'sec{predicted_step}//'
 #######
 
 
@@ -109,9 +110,8 @@ def save_chkpt():
         pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def main_model(_X_train, _y_train,
-               _X_valid, _y_valid,
-               hs_info, rcr_act_info, lr_info, bs_info):
+def main_model(_X_train, _y_train, _X_valid, _y_valid,
+               _hidden_size, _recurrent_activation, _lr, _batch_size):
     """
     The core part of this model. Return LSTM model and history = model.fit.
 
@@ -119,10 +119,10 @@ def main_model(_X_train, _y_train,
     :param _y_train:
     :param _X_valid:
     :param _y_valid:
-    :param int hs_info: hidden unit size.
-    :param rcr_act_info: recurrent activation function.
-    :param float lr_info: learning rate.
-    :param int bs_info: batch size.
+    :param int _hidden_size: hidden unit size.
+    :param _recurrent_activation: recurrent activation function.
+    :param float _lr: learning rate.
+    :param int _batch_size: batch size.
     :return: model, history
     """
     save_chkpt_callback = LambdaCallback(
@@ -130,18 +130,18 @@ def main_model(_X_train, _y_train,
     )
 
     _model = Sequential()
-    _model.add(LSTM(hs_info,
-                    recurrent_activation=rcr_act_info,
+    _model.add(LSTM(_hidden_size,
+                    recurrent_activation=_recurrent_activation,
                     kernel_initializer='he_uniform',
                     recurrent_initializer='orthogonal',
                     return_sequences=False,
                     input_shape=(_X_train.shape[1], _X_train.shape[2])))
     _model.add(Dense(1))
     _model.compile(loss=mean_squared_error,
-                   optimizer=Adam(lr=lr_info),
+                   optimizer=Adam(lr=_lr),
                    metrics=['mae'])
     _history = _model.fit(_X_train, _y_train,
-                          epochs=500, batch_size=bs_info,
+                          epochs=500, batch_size=_batch_size,
                           validation_data=(_X_valid, _y_valid), verbose=1,
                           shuffle=False,
                           callbacks=[earlyStopping, chkpt, save_chkpt_callback])
@@ -179,44 +179,30 @@ def post_training(func):
 
 
 @post_training
-def trained_model_score(_filepath, _numFolds, _folds,
-                        _trainData, _testData,
-                        _hs, _lr, _bs):
+def trained_model_score(_filepath, _folds,
+                        _hidden_size, _lr, _batch_size):
     """
     This part is the model training block.
 
     :param _filepath: The path where file is located.
-    :param _numFolds:
+    :param _fold_number:
     :param _folds: split data with time series split method.
     :param _trainData:
     :param _testData:
-    :param _hs: hidden unit size.
+    :param _hidden_size: hidden unit size.
     :param _lr: learning rate.
-    :param _bs: batch size.
+    :param _batch_size: batch size.
     :return: score, which is np.array.
     """
-    score = np.zeros((_numFolds, 5))
+
+    fold_number = config.MODEL_CONFIG['fold_number']
+    score = np.zeros((fold_number, 5))
+
     for ind, (train, valid) in enumerate(_folds):
-        X_train = _trainData.iloc[train].drop(['target'], axis=1).values
-        X_valid = _trainData.iloc[valid].drop(['target'], axis=1).values
-
-        y_train = _trainData.iloc[train]['target'].values.reshape(len(X_train), 1)
-        y_valid = _trainData.iloc[valid]['target'].values.reshape(len(X_valid), 1)
-
-        # Access the normalized data
-        X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
-
-        X_train = X_sc.fit_transform(X_train)
-        X_valid = X_sc.transform(X_valid)
-        X_test = X_sc.transform(_testData.drop(['target'], axis=1).values)
-
-        y_train = y_sc.fit_transform(y_train)
-        y_valid = y_sc.transform(y_valid)
-        y_test = y_sc.transform(_testData['target'].values.reshape(len(X_test), 1))
-
-        X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-        X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
-        X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+        y_sc = MinMaxScaler()
+        (X_train, y_train,
+         X_valid, y_valid,
+         X_test, y_test) = parsing_train_valid_test_set(PATH, train, valid)
 
         if os.path.exists(_filepath + 'chkpt_best.pkl') and os.path.getsize(_filepath + 'chkpt_best.pkl') > 0:
             with open(_filepath + 'chkpt_best.pkl', 'rb') as f:
@@ -224,9 +210,8 @@ def trained_model_score(_filepath, _numFolds, _folds,
                 chkpt.best = best
 
         # Start training the model
-        model, history = main_model(X_train, y_train,
-                                    X_valid, y_valid,
-                                    _hs, rcr_activation, _lr, _bs)
+        model, history = main_model(X_train, y_train, X_valid, y_valid,
+                                    _hidden_size, recurrent_activation, _lr, _batch_size)
         model.save(_filepath + 'lastmodel.h5')
         print('The trained model has been saved as "lastmodel.h5".')
         del model
@@ -259,11 +244,35 @@ def trained_model_score(_filepath, _numFolds, _folds,
     print(score)
 
     return score
-#######
 
 
-if __name__ == '__main__':
-    mdc = ModelCore(PATH)
+def parsing_train_valid_test_set(_path, raw_train_data, raw_valid_data):
+    _traindata, _testdata = drop_nan_data(_path)
+    X_train = _traindata.iloc[raw_train_data].drop(['target'], axis=1).values
+    X_valid = _traindata.iloc[raw_valid_data].drop(['target'], axis=1).values
+
+    y_train = _traindata.iloc[raw_train_data]['target'].values.reshape(len(X_train), 1)
+    y_valid = _traindata.iloc[raw_valid_data]['target'].values.reshape(len(X_valid), 1)
+
+    # Access the normalized data
+    X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+
+    X_train = X_sc.fit_transform(X_train)
+    X_valid = X_sc.transform(X_valid)
+    X_test = X_sc.transform(_testdata.drop(['target'], axis=1).values)
+
+    y_train = y_sc.fit_transform(y_train)
+    y_valid = y_sc.transform(y_valid)
+    y_test = y_sc.transform(_testdata['target'].values.reshape(len(X_test), 1))
+
+    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
+    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+
+    return X_train, y_train, X_valid, y_valid, X_test, y_test
+
+def drop_nan_data(_path):
+    mdc = ModelCore(_path)
     trainData, testData = mdc.load_train_test_data()
 
     # Exclude
@@ -277,8 +286,14 @@ if __name__ == '__main__':
     testData.drop('FLAG', axis=1, inplace=True)
     print(f'Train shape: {trainData.shape}, Test shape: {testData.shape} After dropping nan values.')
 
-    numFolds = 10
-    tscv = TimeSeriesSplit(n_splits=numFolds)
+    return trainData, testData
+#######
+
+
+if __name__ == '__main__':
+    trainData, testData = drop_nan_data(PATH)
+    fold_number = config.MODEL_CONFIG['fold_number']
+    tscv = TimeSeriesSplit(n_splits=fold_number)
     folds = []
     for trainInd, validInd in tscv.split(trainData):
         folds.append([trainInd, validInd])
@@ -287,13 +302,12 @@ if __name__ == '__main__':
     for hidden_size in hidden_sizes:
         for lr in lrs:
             for batch_size in batch_sizes:
-                filepath = f'..//Plots-tanh_{rcr_activation}//{predicted_step}_{hidden_size}-{lr}-{batch_size}//'
+                filepath = f'..//Plots-tanh_{recurrent_activation}//{predicted_step}_{hidden_size}-{lr}-{batch_size}//'
                 if not os.path.exists(filepath):
                     os.makedirs(filepath)
                 chkpt = ModelCheckpoint(filepath=filepath + 'model.h5',
                                         monitor='val_loss',
                                         verbose=1,
                                         save_best_only=True)
-                trained_model_score(filepath, numFolds, folds,
-                                    trainData, testData,
+                trained_model_score(filepath, folds,
                                     hidden_size, lr, batch_size)
