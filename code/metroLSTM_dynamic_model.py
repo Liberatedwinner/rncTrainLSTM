@@ -66,7 +66,6 @@ rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
 sns.set(style='ticks', font_scale=1.1, palette='deep', color_codes=True)
 earlyStopping = EarlyStopping(monitor='val_loss', patience=10, verbose=2)
-
 PATH = MetroLSTMconfig.MODEL_CONFIG['path'] + f'sec{predicted_step}//'
 #######
 
@@ -128,7 +127,6 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
     save_chkpt_callback = LambdaCallback(
         on_epoch_end=lambda epoch, logs: save_chkpt()
     )
-
     _model = Sequential()
     _model.add(LSTM(_hidden_size,
                     recurrent_activation=_recurrent_activation,
@@ -204,8 +202,8 @@ def trained_model_score(_filepath, _folds, _train_data, _test_data,
 
     :param _filepath: The path where file is located.
     :param _folds: split data with time series split method.
-    :param _trainData:
-    :param _testData:
+    :param _train_data:
+    :param _test_data:
     :param _hidden_size: hidden unit size.
     :param _learning_rate: learning rate.
     :param _batch_size: batch size.
