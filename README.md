@@ -26,4 +26,5 @@
   ```
   
     
-  - `MetroLSTMCore.py`: 다른 파일에서 쓰이는 주요 클래스를 담아둔 코드. 
+  - `MetroLSTMCore.py`: 다른 파일에서 쓰이는 주요 클래스를 담아둔 코드.  
+  - `MetroLSTMconfig.py`: 하이퍼패러미터 탐색할 때 쓰이는 값 등의 설정을 담아두 코드.
