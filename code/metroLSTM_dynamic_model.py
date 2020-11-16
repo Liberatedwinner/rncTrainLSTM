@@ -111,7 +111,7 @@ def save_chkpt():
 
 
 def main_model(_X_train, _y_train, _X_valid, _y_valid,
-               _hidden_size, _recurrent_activation, _lr, _batch_size):
+               _hidden_size, _recurrent_activation, _learning_rate, _batch_size):
     """
     The core part of this model. Return LSTM model and history = model.fit.
 
@@ -121,7 +121,7 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
     :param _y_valid:
     :param int _hidden_size: hidden unit size.
     :param _recurrent_activation: recurrent activation function.
-    :param float _lr: learning rate.
+    :param float _learning_rate: learning rate.
     :param int _batch_size: batch size.
     :return: model, history
     """
@@ -138,7 +138,7 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
                     input_shape=(_X_train.shape[1], _X_train.shape[2])))
     _model.add(Dense(1))
     _model.compile(loss=mean_squared_error,
-                   optimizer=Adam(lr=_lr),
+                   optimizer=Adam(lr=_learning_rate),
                    metrics=['mae'])
     _history = _model.fit(_X_train, _y_train,
                           epochs=500, batch_size=_batch_size,
@@ -181,8 +181,7 @@ def drop_nan_data(_path):
     return trainData, testData
 
 
-def parsing_train_valid_test_set(_path, raw_train_data, raw_valid_data):
-    _traindata, _testdata = drop_nan_data(_path)
+def parsing_train_valid_test_set(_traindata, _testdata, raw_train_data, raw_valid_data):
     X_train = _traindata.iloc[raw_train_data].drop(['target'], axis=1).values
     X_valid = _traindata.iloc[raw_valid_data].drop(['target'], axis=1).values
 
@@ -223,8 +222,8 @@ def post_training(func):
 
 
 @post_training
-def trained_model_score(_filepath, _folds,
-                        _hidden_size, _lr, _batch_size):
+def trained_model_score(_filepath, _folds, _traindata, _testdata,
+                        _hidden_size, _learning_rate, _batch_size):
     """
     This part is the model training block.
 
@@ -234,19 +233,19 @@ def trained_model_score(_filepath, _folds,
     :param _trainData:
     :param _testData:
     :param _hidden_size: hidden unit size.
-    :param _lr: learning rate.
+    :param _learning_rate: learning rate.
     :param _batch_size: batch size.
     :return: score, which is np.array.
     """
 
     fold_number = MetroLSTMconfig.MODEL_CONFIG['fold_number']
     score = np.zeros((fold_number, 5))
-
+    raw_traindata, raw_testdata = _traindata, _testdata
     for ind, (train, valid) in enumerate(_folds):
         y_sc = MinMaxScaler()
         (X_train, y_train,
          X_valid, y_valid,
-         X_test, y_test) = parsing_train_valid_test_set(PATH, train, valid)
+         X_test, y_test) = parsing_train_valid_test_set(raw_traindata, raw_testdata, train, valid)
 
         if os.path.exists(_filepath + 'chkpt_best.pkl') and os.path.getsize(_filepath + 'chkpt_best.pkl') > 0:
             with open(_filepath + 'chkpt_best.pkl', 'rb') as f:
@@ -255,7 +254,7 @@ def trained_model_score(_filepath, _folds,
 
         # Start training the model
         model, history = main_model(X_train, y_train, X_valid, y_valid,
-                                    _hidden_size, recurrent_activation, _lr, _batch_size)
+                                    _hidden_size, recurrent_activation, _learning_rate, _batch_size)
         model.save(_filepath + 'lastmodel.h5')
         print('The trained model has been saved as "lastmodel.h5".')
         del model
@@ -310,5 +309,5 @@ if __name__ == '__main__':
                                         monitor='val_loss',
                                         verbose=1,
                                         save_best_only=True)
-                trained_model_score(filepath, folds,
+                trained_model_score(filepath, folds, trainData, testData,
                                     hidden_size, lr, batch_size)
