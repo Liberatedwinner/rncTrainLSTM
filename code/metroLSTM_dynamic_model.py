@@ -161,6 +161,12 @@ def save_result(_filepath, _filename, _score):
 
 
 def drop_nan_data(_path):
+    """
+    This part is in order to get rid NaN value off from data.
+
+    :param _path: file path where data is located.
+    :return: train data and test data
+    """
     mdc = ModelCore(_path)
     _trainData, _testData = mdc.load_train_test_data()
 
@@ -267,7 +273,7 @@ def trained_model_score(_filepath, _folds, _train_data, _test_data,
         print(f'R-square: {score[ind][0]}, test MAE: {score[ind][3]}')
         ModelCore(_filepath).pred_drawing(y_test_pred, y_test, ind, predicted_step)
         plot_history(history, _filepath + f'error_pic{ind + 1}.png')
-        print('The metro-speed prediction graph has been saved.\n')
+        print('The metro speed-prediction graph has been saved.\n')
 
     score = pd.DataFrame(score,
                          columns=['R-square', 'validMAE', 'validRMSE', 'testMAE', 'testRMSE'])
