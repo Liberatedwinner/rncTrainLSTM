@@ -111,6 +111,63 @@ def save_chkpt():
         pickle.dump(chkpt.best, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
+def save_result(_filepath, _filename, _score):
+    """
+    Saving the result as '.pkl' and '.csv' files.
+
+    :param _filepath:
+    :param _filename:
+    :param _score:
+    """
+    _score.to_pickle(_filepath + _filename + '.pkl')
+    print(f'The result has been saved as {_filename}.pkl')
+    _score.to_csv(_filepath + _filename + '.csv')
+    print(f'The result has been saved as {_filename}.csv')
+
+
+def drop_nan_data(_path):
+    """
+    This part is in order to get rid NaN value off from data.
+
+    :param _path: file path where data is located.
+    :return: traindata and testdata
+    """
+    mdc = ModelCore(_path)
+    _trainData, _testData = mdc.load_train_test_data()
+
+    # Exclude
+    _testData['target'] = mdc.load_data('test_results.pkl')
+
+    print(f'Train shape: {_trainData.shape}, Test shape: {_testData.shape} before dropping nan values.')
+    _trainData.dropna(inplace=True)
+    _testData.dropna(inplace=True)
+
+    _trainData.drop('FLAG', axis=1, inplace=True)
+    _testData.drop('FLAG', axis=1, inplace=True)
+    print(f'Train shape: {_trainData.shape}, Test shape: {_testData.shape} After dropping nan values.')
+
+    return _trainData, _testData
+
+
+def preparation_to_parse_data(_traindata, _testdata, raw_train, raw_valid):
+    """
+    This part parses data into traindata and testdata.
+
+    :param _traindata:
+    :param _testdata:
+    :param raw_train:
+    :param raw_valid:
+    :return: parsed data.
+    """
+    _X_train = _traindata.iloc[raw_train].drop(['target'], axis=1).values
+    _X_valid = _traindata.iloc[raw_valid].drop(['target'], axis=1).values
+
+    _y_train = _traindata.iloc[raw_train]['target'].values.reshape(len(_X_train), 1)
+    _y_valid = _traindata.iloc[raw_valid]['target'].values.reshape(len(_X_valid), 1)
+
+    return _X_train, _y_train, _X_valid, _y_valid
+
+
 def main_model(_X_train, _y_train, _X_valid, _y_valid,
                _hidden_size, _recurrent_activation, _learning_rate, _batch_size):
     """
@@ -146,44 +203,6 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
     return _model, _history
 
 
-def save_result(_filepath, _filename, _score):
-    """
-    Saving the result as '.pkl' and '.csv' files.
-
-    :param _filepath:
-    :param _filename:
-    :param _score:
-    """
-    _score.to_pickle(_filepath + _filename + '.pkl')
-    print(f'The result has been saved as {_filename}.pkl')
-    _score.to_csv(_filepath + _filename + '.csv')
-    print(f'The result has been saved as {_filename}.csv')
-
-
-def drop_nan_data(_path):
-    """
-    This part is in order to get rid NaN value off from data.
-
-    :param _path: file path where data is located.
-    :return: train data and test data
-    """
-    mdc = ModelCore(_path)
-    _trainData, _testData = mdc.load_train_test_data()
-
-    # Exclude
-    _testData['target'] = mdc.load_data('test_results.pkl')
-
-    print(f'Train shape: {_trainData.shape}, Test shape: {_testData.shape} before dropping nan values.')
-    _trainData.dropna(inplace=True)
-    _testData.dropna(inplace=True)
-
-    _trainData.drop('FLAG', axis=1, inplace=True)
-    _testData.drop('FLAG', axis=1, inplace=True)
-    print(f'Train shape: {_trainData.shape}, Test shape: {_testData.shape} After dropping nan values.')
-
-    return _trainData, _testData
-
-
 def post_training(func):
     """
     Decorator of a function 'trained_model_score'. This part is of saving data.
@@ -217,11 +236,7 @@ def trained_model_score(_filepath, _folds, _train_data, _test_data,
     _fold_number = MetroLSTMconfig.MODEL_CONFIG['fold_number']
     score = np.zeros((_fold_number, 5))
     for ind, (train, valid) in enumerate(_folds):
-        X_train = _train_data.iloc[train].drop(['target'], axis=1).values
-        X_valid = _train_data.iloc[valid].drop(['target'], axis=1).values
-
-        y_train = _train_data.iloc[train]['target'].values.reshape(len(X_train), 1)
-        y_valid = _train_data.iloc[valid]['target'].values.reshape(len(X_valid), 1)
+        X_train, y_train, X_valid, y_valid = preparation_to_parse_data(_train_data, _test_data, train, valid)
 
         # Access the normalized data
         X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
