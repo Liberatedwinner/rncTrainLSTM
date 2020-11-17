@@ -149,7 +149,7 @@ def drop_nan_data(_path):
     return _trainData, _testData
 
 
-def preparation_to_parse_data(_traindata, _testdata, raw_train, raw_valid):
+def prepare_to_parse_data(_traindata, _testdata, raw_train, raw_valid):
     """
     This part parses data into traindata and testdata.
 
@@ -203,6 +203,66 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
     return _model, _history
 
 
+def evaluate_model(_train_data, _test_data,
+                   raw_train, raw_valid, _file_path,
+                   _hidden_size, _learning_rate, _batch_size):
+    """
+    Evaluation part of the model.
+
+    :param _train_data:
+    :param _test_data:
+    :param raw_train:
+    :param raw_valid:
+    :param _file_path:
+    :param _hidden_size:
+    :param _learning_rate:
+    :param _batch_size:
+    :return: y_valid, prediction of y_valid, y_test, prediction of y_test.
+    """
+    X_train, y_train, X_valid, y_valid = prepare_to_parse_data(_train_data, _test_data, raw_train, raw_valid)
+
+    # Access the normalized data
+    X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+
+    X_train = X_sc.fit_transform(X_train)
+    X_valid = X_sc.transform(X_valid)
+    X_test = X_sc.transform(_test_data.drop(['target'], axis=1).values)
+
+    y_train = y_sc.fit_transform(y_train)
+    y_valid = y_sc.transform(y_valid)
+    y_test = y_sc.transform(_test_data['target'].values.reshape(len(X_test), 1))
+
+    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
+    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+
+    if os.path.exists(_file_path + 'chkpt_best.pkl') and os.path.getsize(_file_path + 'chkpt_best.pkl') > 0:
+        with open(_file_path + 'chkpt_best.pkl', 'rb') as f:
+            best = pickle.load(f)
+            chkpt.best = best
+
+    # Start training the model
+    model, history = main_model(X_train, y_train, X_valid, y_valid,
+                                _hidden_size, recurrent_activation, _learning_rate, _batch_size)
+    model.save(_file_path + 'lastmodel.h5')
+    print('The trained model has been saved as "lastmodel.h5".')
+    del model
+    model = load_model(_file_path + 'lastmodel.h5', custom_objects={'mish': mish})
+    model.evaluate(X_test, y_test, verbose=1)
+
+    y_valid = y_sc.inverse_transform(y_valid)
+    y_valid_pred = model.predict(X_valid)
+    y_valid_pred = y_sc.inverse_transform(y_valid_pred)
+    y_valid_pred[y_valid_pred < 1] = 0
+
+    y_test = y_sc.inverse_transform(y_test)
+    y_test_pred = model.predict(X_test)
+    y_test_pred = y_sc.inverse_transform(y_test_pred)
+    y_test_pred[y_test_pred < 1] = 0
+
+    return y_valid, y_valid_pred, y_test, y_test_pred, history
+
+
 def post_training(func):
     """
     Decorator of a function 'trained_model_score'. This part is of saving data.
@@ -236,47 +296,9 @@ def trained_model_score(_filepath, _folds, _train_data, _test_data,
     _fold_number = MetroLSTMconfig.MODEL_CONFIG['fold_number']
     score = np.zeros((_fold_number, 5))
     for ind, (train, valid) in enumerate(_folds):
-        X_train, y_train, X_valid, y_valid = preparation_to_parse_data(_train_data, _test_data, train, valid)
-
-        # Access the normalized data
-        X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
-
-        X_train = X_sc.fit_transform(X_train)
-        X_valid = X_sc.transform(X_valid)
-        X_test = X_sc.transform(_test_data.drop(['target'], axis=1).values)
-
-        y_train = y_sc.fit_transform(y_train)
-        y_valid = y_sc.transform(y_valid)
-        y_test = y_sc.transform(_test_data['target'].values.reshape(len(X_test), 1))
-
-        X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-        X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
-        X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
-
-        if os.path.exists(_filepath + 'chkpt_best.pkl') and os.path.getsize(_filepath + 'chkpt_best.pkl') > 0:
-            with open(_filepath + 'chkpt_best.pkl', 'rb') as f:
-                best = pickle.load(f)
-                chkpt.best = best
-
-        # Start training the model
-        model, history = main_model(X_train, y_train, X_valid, y_valid,
-                                    _hidden_size, recurrent_activation, _learning_rate, _batch_size)
-        model.save(_filepath + 'lastmodel.h5')
-        print('The trained model has been saved as "lastmodel.h5".')
-        del model
-        model = load_model(_filepath + 'lastmodel.h5', custom_objects={'mish': mish})
-        model.evaluate(X_test, y_test, verbose=1)
-
-        y_valid = y_sc.inverse_transform(y_valid)
-        y_valid_pred = model.predict(X_valid)
-        y_valid_pred = y_sc.inverse_transform(y_valid_pred)
-        y_valid_pred[y_valid_pred < 1] = 0
-
-        y_test = y_sc.inverse_transform(y_test)
-        y_test_pred = model.predict(X_test)
-        y_test_pred = y_sc.inverse_transform(y_test_pred)
-        y_test_pred[y_test_pred < 1] = 0
-
+        y_valid, y_valid_pred, y_test, y_test_pred, history = evaluate_model(_train_data, _test_data,
+                                                                             train, valid, _filepath,
+                                                                             _hidden_size, _learning_rate, _batch_size)
         score[ind] = np.array([
             r2_score(y_test, y_test_pred),
             sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred),
