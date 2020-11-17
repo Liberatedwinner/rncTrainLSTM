@@ -78,6 +78,8 @@ def mish(x):
     :return: Mish(x)
     """
     return x * tf.nn.tanh(tf.nn.softplus(x))
+
+
 get_custom_objects().update({'mish': mish})
 
 
@@ -124,9 +126,6 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
     :param int _batch_size: batch size.
     :return: model, history
     """
-    save_chkpt_callback = LambdaCallback(
-        on_epoch_end=lambda epoch, logs: save_chkpt()
-    )
     _model = Sequential()
     _model.add(LSTM(_hidden_size,
                     recurrent_activation=_recurrent_activation,
@@ -163,20 +162,20 @@ def save_result(_filepath, _filename, _score):
 
 def drop_nan_data(_path):
     mdc = ModelCore(_path)
-    trainData, testData = mdc.load_train_test_data()
+    _trainData, _testData = mdc.load_train_test_data()
 
     # Exclude
-    testData['target'] = mdc.load_data('test_results.pkl')
+    _testData['target'] = mdc.load_data('test_results.pkl')
 
-    print(f'Train shape: {trainData.shape}, Test shape: {testData.shape} before dropping nan values.')
-    trainData.dropna(inplace=True)
-    testData.dropna(inplace=True)
+    print(f'Train shape: {_trainData.shape}, Test shape: {_testData.shape} before dropping nan values.')
+    _trainData.dropna(inplace=True)
+    _testData.dropna(inplace=True)
 
-    trainData.drop('FLAG', axis=1, inplace=True)
-    testData.drop('FLAG', axis=1, inplace=True)
-    print(f'Train shape: {trainData.shape}, Test shape: {testData.shape} After dropping nan values.')
+    _trainData.drop('FLAG', axis=1, inplace=True)
+    _testData.drop('FLAG', axis=1, inplace=True)
+    print(f'Train shape: {_trainData.shape}, Test shape: {_testData.shape} After dropping nan values.')
 
-    return trainData, testData
+    return _trainData, _testData
 
 
 def post_training(func):
@@ -209,8 +208,8 @@ def trained_model_score(_filepath, _folds, _train_data, _test_data,
     :param _batch_size: batch size.
     :return: score, which is np.array.
     """
-    fold_number = MetroLSTMconfig.MODEL_CONFIG['fold_number']
-    score = np.zeros((fold_number, 5))
+    _fold_number = MetroLSTMconfig.MODEL_CONFIG['fold_number']
+    score = np.zeros((_fold_number, 5))
     for ind, (train, valid) in enumerate(_folds):
         X_train = _train_data.iloc[train].drop(['target'], axis=1).values
         X_valid = _train_data.iloc[valid].drop(['target'], axis=1).values
@@ -257,12 +256,14 @@ def trained_model_score(_filepath, _folds, _train_data, _test_data,
         y_test_pred = y_sc.inverse_transform(y_test_pred)
         y_test_pred[y_test_pred < 1] = 0
 
-        score[ind] = np.array([r2_score(y_test, y_test_pred),
-                               sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred),
-                               np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred)),
-                               sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
-                               np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
-                               ])
+        score[ind] = np.array([
+            r2_score(y_test, y_test_pred),
+            sklearn.metrics.mean_absolute_error(y_valid, y_valid_pred),
+            np.sqrt(sklearn.metrics.mean_squared_error(y_valid, y_valid_pred)),
+            sklearn.metrics.mean_absolute_error(y_test, y_test_pred),
+            np.sqrt(sklearn.metrics.mean_squared_error(y_test, y_test_pred))
+        ])
+
         print(f'R-square: {score[ind][0]}, test MAE: {score[ind][3]}')
         ModelCore(_filepath).pred_drawing(y_test_pred, y_test, ind, predicted_step)
         plot_history(history, _filepath + f'error_pic{ind + 1}.png')
@@ -283,6 +284,9 @@ if __name__ == '__main__':
     folds = []
     for trainInd, validInd in tscv.split(trainData):
         folds.append([trainInd, validInd])
+    save_chkpt_callback = LambdaCallback(
+        on_epoch_end=lambda epoch, logs: save_chkpt()
+    )
 
     # Start the time series cross validation.
     for hidden_size in hidden_sizes:
