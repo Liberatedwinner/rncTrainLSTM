@@ -16,7 +16,6 @@ from sklearn.metrics import r2_score
 import tensorflow as tf
 from keras.models import Sequential, load_model
 from keras.layers import Dense
-from keras.layers import LSTM
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
@@ -214,17 +213,8 @@ def evaluate_model(_train_data, _test_data,
     :return: y_valid, prediction of y_valid, y_test, prediction of y_test.
     """
     X_train, y_train, X_valid, y_valid = prepare_to_parse_data(_train_data, _test_data, raw_train, raw_valid)
-
-    # Access the normalized data
-    X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
-
-    X_train = X_sc.fit_transform(X_train)
-    X_valid = X_sc.transform(X_valid)
-    X_test = X_sc.transform(_test_data.drop(['target'], axis=1).values)
-
-    y_train = y_sc.fit_transform(y_train)
-    y_valid = y_sc.transform(y_valid)
-    y_test = y_sc.transform(_test_data['target'].values.reshape(len(X_test), 1))
+    X_test = _test_data.drop(['target'], axis=1)
+    y_test = _test_data['target'].values.reshape(len(X_test), 1)
 
     X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
     X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
@@ -244,14 +234,10 @@ def evaluate_model(_train_data, _test_data,
     model = load_model(_file_path + 'lastmodel.h5', custom_objects={'mish': mish})
     model.evaluate(X_test, y_test, verbose=1)
 
-    y_valid = y_sc.inverse_transform(y_valid)
     y_valid_pred = model.predict(X_valid)
-    y_valid_pred = y_sc.inverse_transform(y_valid_pred)
     y_valid_pred[y_valid_pred < 1] = 0
 
-    y_test = y_sc.inverse_transform(y_test)
     y_test_pred = model.predict(X_test)
-    y_test_pred = y_sc.inverse_transform(y_test_pred)
     y_test_pred[y_test_pred < 1] = 0
 
     return y_valid, y_valid_pred, y_test, y_test_pred, history
