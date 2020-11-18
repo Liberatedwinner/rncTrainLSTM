@@ -161,7 +161,7 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
     """
     _model = Sequential()
     _model.add(Dense(32, activation='mish',
-                     input_shape=(_X_train.shape[1], _X_train.shape[2])))
+                     input_shape=(_X_train.shape[0], _X_train.shape[1])))
     _model.add(Dense(32, activation='mish'))
     _model.add(Dense(32, activation='mish'))
     _model.add(Dense(1))
