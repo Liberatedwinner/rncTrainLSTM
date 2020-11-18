@@ -165,7 +165,7 @@ def prepare_to_parse_data(_traindata, _testdata, raw_train, raw_valid):
 
 
 def main_model(_X_train, _y_train, _X_valid, _y_valid,
-               _hidden_size, _recurrent_activation, _learning_rate, _batch_size):
+               _hidden_size, _learning_rate, _batch_size):
     """
     The core part of this model. Return LSTM model and history = model.fit.
 
@@ -174,18 +174,15 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
     :param _X_valid:
     :param _y_valid:
     :param int _hidden_size: hidden unit size.
-    :param _recurrent_activation: recurrent activation function.
     :param float _learning_rate: learning rate.
     :param int _batch_size: batch size.
     :return: model, history
     """
     _model = Sequential()
-    _model.add(LSTM(_hidden_size,
-                    recurrent_activation=_recurrent_activation,
-                    kernel_initializer='he_uniform',
-                    recurrent_initializer='orthogonal',
-                    return_sequences=False,
-                    input_shape=(_X_train.shape[1], _X_train.shape[2])))
+    _model.add(Dense(32, activation='mish',
+                     input_shape=(_X_train.shape[1], _X_train.shape[2])))
+    _model.add(Dense(32, activation='mish'))
+    _model.add(Dense(32, activation='mish'))
     _model.add(Dense(1))
     _model.compile(loss=mean_squared_error,
                    optimizer=Adam(lr=_learning_rate),
@@ -246,14 +243,10 @@ def evaluate_model(_train_data, _test_data,
     model = load_model(_file_path + 'lastmodel.h5', custom_objects={'mish': mish})
     model.evaluate(X_test, y_test, verbose=1)
 
-    y_valid = y_sc.inverse_transform(y_valid)
     y_valid_pred = model.predict(X_valid)
-    y_valid_pred = y_sc.inverse_transform(y_valid_pred)
     y_valid_pred[y_valid_pred < 1] = 0
 
-    y_test = y_sc.inverse_transform(y_test)
     y_test_pred = model.predict(X_test)
-    y_test_pred = y_sc.inverse_transform(y_test_pred)
     y_test_pred[y_test_pred < 1] = 0
 
     return y_valid, y_valid_pred, y_test, y_test_pred, history
