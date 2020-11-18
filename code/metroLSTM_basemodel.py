@@ -145,25 +145,6 @@ def drop_nan_data(_path):
     return _trainData, _testData
 
 
-def prepare_to_parse_data(_traindata, _testdata, raw_train, raw_valid):
-    """
-    This part parses data into traindata and testdata.
-
-    :param _traindata:
-    :param _testdata:
-    :param raw_train:
-    :param raw_valid:
-    :return: parsed data.
-    """
-    _X_train = _traindata.iloc[raw_train].drop(['target'], axis=1).values
-    _X_valid = _traindata.iloc[raw_valid].drop(['target'], axis=1).values
-
-    _y_train = _traindata.iloc[raw_train]['target'].values.reshape(len(_X_train), 1)
-    _y_valid = _traindata.iloc[raw_valid]['target'].values.reshape(len(_X_valid), 1)
-
-    return _X_train, _y_train, _X_valid, _y_valid
-
-
 def main_model(_X_train, _y_train, _X_valid, _y_valid,
                _hidden_size, _learning_rate, _batch_size):
     """
@@ -212,7 +193,10 @@ def evaluate_model(_train_data, _test_data,
     :param _batch_size:
     :return: y_valid, prediction of y_valid, y_test, prediction of y_test.
     """
-    X_train, y_train, X_valid, y_valid = prepare_to_parse_data(_train_data, _test_data, raw_train, raw_valid)
+    X_train = _train_data.iloc[raw_train].drop(['target'], axis=1).values
+    X_valid = _train_data.iloc[raw_valid].drop(['target'], axis=1).values
+    y_train = _train_data.iloc[raw_train]['target'].values.reshape(len(X_train), 1)
+    y_valid = _train_data.iloc[raw_valid]['target'].values.reshape(len(X_valid), 1)
     X_test = _test_data.drop(['target'], axis=1)
     y_test = _test_data['target'].values.reshape(len(X_test), 1)
 
