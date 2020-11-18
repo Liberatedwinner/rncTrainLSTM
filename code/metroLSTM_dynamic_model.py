@@ -91,9 +91,9 @@ def plot_history(_history, result_dir):
     :param result_dir: location to save plots.
     """
     plt.figure()
-    # plt.plot(_history.history['loss'], marker='.', linewidth=1.5)
-    # plt.plot(_history.history['val_loss'], marker=',', linewidth=1.5)
-    plt.plot(_history.history['mae'], marker='.', linewidth=1.5)
+    plt.plot(_history.history['loss'], marker='.', linewidth=1.5)
+    plt.plot(_history.history['val_loss'], marker='-', linewidth=1.5)
+    plt.plot(_history.history['mae'], marker='*', linewidth=1.5)
     plt.plot(_history.history['val_mae'], marker=',', linewidth=1.5)
     plt.title('Model loss and validation loss')
     plt.xlabel('epoch')
@@ -101,7 +101,7 @@ def plot_history(_history, result_dir):
     plt.ylim(0, 0.1)
     plt.grid()
     # plt.legend(['loss', 'val_loss'], loc='upper right')
-    plt.legend(['mae', 'val_mae'], loc='upper right')
+    plt.legend(['loss', 'val_loss', 'mae', 'val_mae'], loc='upper right')
     plt.savefig(result_dir, dpi=500, bbox_inches='tight')
     plt.close()
 
@@ -192,8 +192,8 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
                     kernel_initializer='he_uniform',
                     recurrent_initializer='orthogonal',
                     return_sequences=False,
-                    dropout=0.5,
-                    recurrent_dropout=0.5,
+                    dropout=0.2,
+                    recurrent_dropout=0.2,
                     input_shape=(_X_train.shape[1], _X_train.shape[2])))
     _model.add(Dense(1))
     _model.compile(loss=mean_squared_error,
