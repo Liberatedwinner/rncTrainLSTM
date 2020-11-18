@@ -192,7 +192,8 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
                     kernel_initializer='he_uniform',
                     recurrent_initializer='orthogonal',
                     return_sequences=False,
-                    input_shape=(_X_train.shape[1], _X_train.shape[2])))
+                    #input_shape=(_X_train.shape[1], _X_train.shape[2])))
+                    input_shape=(_X_train.shape[0], _X_train.shape[1])))
     _model.add(Dense(1))
     _model.compile(loss=mean_squared_error,
                    optimizer=Adam(lr=_learning_rate),
