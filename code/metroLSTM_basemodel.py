@@ -15,7 +15,7 @@ from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import r2_score
 import tensorflow as tf
 from keras.models import Sequential, load_model
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
@@ -167,7 +167,7 @@ def prepare_to_parse_data(_traindata, _testdata, raw_train, raw_valid):
 def main_model(_X_train, _y_train, _X_valid, _y_valid,
                _hidden_size, _learning_rate, _batch_size):
     """
-    The core part of this model. Return LSTM model and history = model.fit.
+    The core part of this model. Return base model and history = model.fit.
 
     :param _X_train:
     :param _y_train:
@@ -184,6 +184,7 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
                      kernel_initializer='he_uniform',
                      bias_initializer='he_uniform',
                      input_shape=(_X_train.shape[1], _X_train.shape[2])))
+    _model.add(Dropout(0.1, None, 20201005))
     _model.add(Dense(128, activation='mish'))
     _model.add(Dense(128, activation='mish'))
     _model.add(Dense(64, activation='mish'))
