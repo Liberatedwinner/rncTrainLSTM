@@ -216,9 +216,9 @@ def evaluate_model(_train_data, _test_data,
     X_test = _test_data.drop(['target'], axis=1)
     y_test = _test_data['target'].values.reshape(len(X_test), 1)
 
-    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-    X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
-    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+    X_train = X_train.values.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    X_valid = X_valid.values.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
+    X_test = X_test.values.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
     if os.path.exists(_file_path + 'chkpt_best.pkl') and os.path.getsize(_file_path + 'chkpt_best.pkl') > 0:
         with open(_file_path + 'chkpt_best.pkl', 'rb') as f:
