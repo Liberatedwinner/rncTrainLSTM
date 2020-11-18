@@ -245,6 +245,7 @@ def evaluate_model(_train_data, _test_data,
 
     y_valid = y_sc.inverse_transform(y_valid)
     y_valid_pred = model.predict(X_valid)
+    y_valid_pred.values.reshape(y_valid_pred.shape[0], y_valid_pred[1]*y_valid_pred[2])
     y_valid_pred = y_sc.inverse_transform(y_valid_pred)
     y_valid_pred[y_valid_pred < 1] = 0
 
