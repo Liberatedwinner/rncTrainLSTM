@@ -197,10 +197,9 @@ def evaluate_model(_train_data, _test_data,
     X_valid = _train_data.iloc[raw_valid].drop(['target'], axis=1).values
     y_train = _train_data.iloc[raw_train]['target'].values.reshape(len(X_train), 1)
     y_valid = _train_data.iloc[raw_valid]['target'].values.reshape(len(X_valid), 1)
-    X_test = _test_data.drop(['target'], axis=1)
+    X_test = _test_data.drop(['target'], axis=1).values
     y_test = _test_data['target'].values.reshape(len(X_test), 1)
 
-    print(type(X_train))
     X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
     X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
