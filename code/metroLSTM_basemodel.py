@@ -145,8 +145,27 @@ def drop_nan_data(_path):
     return _trainData, _testData
 
 
+def prepare_to_parse_data(_traindata, _testdata, raw_train, raw_valid):
+    """
+    This part parses data into traindata and testdata.
+
+    :param _traindata:
+    :param _testdata:
+    :param raw_train:
+    :param raw_valid:
+    :return: parsed data.
+    """
+    _X_train = _traindata.iloc[raw_train].drop(['target'], axis=1).values
+    _X_valid = _traindata.iloc[raw_valid].drop(['target'], axis=1).values
+
+    _y_train = _traindata.iloc[raw_train]['target'].values.reshape(len(_X_train), 1)
+    _y_valid = _traindata.iloc[raw_valid]['target'].values.reshape(len(_X_valid), 1)
+
+    return _X_train, _y_train, _X_valid, _y_valid
+
+
 def main_model(_X_train, _y_train, _X_valid, _y_valid,
-               _hidden_size, _learning_rate, _batch_size):
+               _hidden_size, _recurrent_activation, _learning_rate, _batch_size):
     """
     The core part of this model. Return LSTM model and history = model.fit.
 
@@ -155,15 +174,18 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
     :param _X_valid:
     :param _y_valid:
     :param int _hidden_size: hidden unit size.
+    :param _recurrent_activation: recurrent activation function.
     :param float _learning_rate: learning rate.
     :param int _batch_size: batch size.
     :return: model, history
     """
     _model = Sequential()
-    _model.add(Dense(32, activation='mish',
-                     input_shape=(_X_train.shape[0], _X_train.shape[1])))
-    _model.add(Dense(32, activation='mish'))
-    _model.add(Dense(32, activation='mish'))
+    _model.add(LSTM(_hidden_size,
+                    recurrent_activation=_recurrent_activation,
+                    kernel_initializer='he_uniform',
+                    recurrent_initializer='orthogonal',
+                    return_sequences=False,
+                    input_shape=(_X_train.shape[1], _X_train.shape[2])))
     _model.add(Dense(1))
     _model.compile(loss=mean_squared_error,
                    optimizer=Adam(lr=_learning_rate),
@@ -193,16 +215,22 @@ def evaluate_model(_train_data, _test_data,
     :param _batch_size:
     :return: y_valid, prediction of y_valid, y_test, prediction of y_test.
     """
-    X_train = _train_data.iloc[raw_train].drop(['target'], axis=1).values
-    X_valid = _train_data.iloc[raw_valid].drop(['target'], axis=1).values
-    y_train = _train_data.iloc[raw_train]['target'].values.reshape(len(X_train), 1)
-    y_valid = _train_data.iloc[raw_valid]['target'].values.reshape(len(X_valid), 1)
-    X_test = _test_data.drop(['target'], axis=1).values
-    y_test = _test_data['target'].values.reshape(len(X_test), 1)
+    X_train, y_train, X_valid, y_valid = prepare_to_parse_data(_train_data, _test_data, raw_train, raw_valid)
 
-    # X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-    # X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
-    # X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+    # Access the normalized data
+    X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+
+    X_train = X_sc.fit_transform(X_train)
+    X_valid = X_sc.transform(X_valid)
+    X_test = X_sc.transform(_test_data.drop(['target'], axis=1).values)
+
+    y_train = y_sc.fit_transform(y_train)
+    y_valid = y_sc.transform(y_valid)
+    y_test = y_sc.transform(_test_data['target'].values.reshape(len(X_test), 1))
+
+    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
+    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
     if os.path.exists(_file_path + 'chkpt_best.pkl') and os.path.getsize(_file_path + 'chkpt_best.pkl') > 0:
         with open(_file_path + 'chkpt_best.pkl', 'rb') as f:
@@ -218,10 +246,14 @@ def evaluate_model(_train_data, _test_data,
     model = load_model(_file_path + 'lastmodel.h5', custom_objects={'mish': mish})
     model.evaluate(X_test, y_test, verbose=1)
 
+    y_valid = y_sc.inverse_transform(y_valid)
     y_valid_pred = model.predict(X_valid)
+    y_valid_pred = y_sc.inverse_transform(y_valid_pred)
     y_valid_pred[y_valid_pred < 1] = 0
 
+    y_test = y_sc.inverse_transform(y_test)
     y_test_pred = model.predict(X_test)
+    y_test_pred = y_sc.inverse_transform(y_test_pred)
     y_test_pred[y_test_pred < 1] = 0
 
     return y_valid, y_valid_pred, y_test, y_test_pred, history
