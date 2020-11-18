@@ -92,7 +92,7 @@ def plot_history(_history, result_dir):
     """
     plt.figure()
     plt.plot(_history.history['loss'], marker='.', linewidth=1.5)
-    plt.plot(_history.history['val_loss'], marker='-', linewidth=1.5)
+    plt.plot(_history.history['val_loss'], marker='+', linewidth=1.5)
     plt.plot(_history.history['mae'], marker='*', linewidth=1.5)
     plt.plot(_history.history['val_mae'], marker=',', linewidth=1.5)
     plt.title('Model loss and validation loss')
