@@ -200,6 +200,7 @@ def evaluate_model(_train_data, _test_data,
     X_test = _test_data.drop(['target'], axis=1)
     y_test = _test_data['target'].values.reshape(len(X_test), 1)
 
+    print(type(X_train))
     X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
     X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
