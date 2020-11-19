@@ -34,7 +34,7 @@ parser.add_argument('--predictstep', type=int, default=10,
 parser.add_argument('--activation', type=str, default='mish',
                     help='Choose the activation function: sigmoid or Mish. Default is Mish.')
 parser.add_argument('--model', type=int, default=0,
-                    help="Use the LSTM dynamic model (0), or use the basemodel (1). Default is 0.")
+                    help="Use the LSTM dynamic model (0), or use the base model (1). Default is 0.")
 parser.add_argument('--explore_hp', type=int, default='1',
                     help='Turn the parameter search on(1) or off(0). Default is 1.')
 parser.add_argument('--hs', type=int,
