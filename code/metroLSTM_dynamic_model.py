@@ -15,7 +15,7 @@ from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import r2_score
 import tensorflow as tf
 from keras.models import Sequential, load_model
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from keras.layers import LSTM
 from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
@@ -33,6 +33,8 @@ parser.add_argument('--predictstep', type=int, default=10,
                     help='Choose the predicted step: 1, 10, 30, 50, 100. Default value is 10.')
 parser.add_argument('--activation', type=str, default='mish',
                     help='Choose the activation function: sigmoid or Mish. Default is Mish.')
+parser.add_argument('--model', type=int, default=0,
+                    help="Use the LSTM dynamic model (0), or use the basemodel (1). Default is 0.")
 parser.add_argument('--explore_hp', type=int, default='1',
                     help='Turn the parameter search on(1) or off(0). Default is 1.')
 parser.add_argument('--hs', type=int,
@@ -45,6 +47,7 @@ args = parser.parse_args()
 
 predicted_step = args.predictstep
 recurrent_activation = args.activation
+model_switch = args.model
 param_search_switch = args.explore_hp
 direct_input_hs = args.hs
 direct_input_lr = args.lr
@@ -208,6 +211,46 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
     return _model, _history
 
 
+def base_model(_X_train, _y_train, _X_valid, _y_valid,
+               _hidden_size, _learning_rate, _batch_size):
+    """
+    The core part of this base model. Return base model and history = model.fit.
+
+    :param _X_train:
+    :param _y_train:
+    :param _X_valid:
+    :param _y_valid:
+    :param int _hidden_size: hidden unit size.
+    :param float _learning_rate: learning rate.
+    :param int _batch_size: batch size.
+    :return: model, history
+    """
+    _model = Sequential()
+    _model.add(Dense(256,
+                     activation='mish',
+                     kernel_initializer='he_uniform',
+                     bias_initializer='he_uniform',
+                     input_shape=(_X_train.shape[1], _X_train.shape[2])))
+    _model.add(Dropout(0.1, None, 20201005))
+    _model.add(Dense(128, activation='mish'))
+    _model.add(Dense(128, activation='mish'))
+    _model.add(Dense(64, activation='mish'))
+    _model.add(Dense(64, activation='mish'))
+    _model.add(Dense(32, activation='mish'))
+    _model.add(Dense(32, activation='mish'))
+    _model.add(Dense(1))
+    _model.compile(loss=mean_squared_error,
+                   optimizer=Adam(lr=_learning_rate),
+                   metrics=['mae'])
+    _history = _model.fit(_X_train, _y_train,
+                          epochs=500, batch_size=_batch_size,
+                          validation_data=(_X_valid, _y_valid), verbose=1,
+                          shuffle=False,
+                          callbacks=[earlyStopping, chkpt, save_chkpt_callback])
+
+    return _model, _history
+
+
 def evaluate_model(_train_data, _test_data,
                    raw_train, raw_valid, _file_path,
                    _hidden_size, _learning_rate, _batch_size):
@@ -248,8 +291,14 @@ def evaluate_model(_train_data, _test_data,
             chkpt.best = best
 
     # Start training the model
-    model, history = main_model(X_train, y_train, X_valid, y_valid,
-                                _hidden_size, recurrent_activation, _learning_rate, _batch_size)
+    if model_switch:
+        model, history = base_model(X_train, y_train, X_valid, y_valid,
+                                    _hidden_size, _learning_rate, _batch_size)
+    else:
+        model, history = main_model(X_train, y_train, X_valid, y_valid,
+                                    _hidden_size, recurrent_activation, _learning_rate, _batch_size)
+
+    # Saving and evaluate the model
     model.save(_file_path + 'lastmodel.h5')
     print('The trained model has been saved as "lastmodel.h5".')
     del model
@@ -341,7 +390,10 @@ if __name__ == '__main__':
     for hidden_size in hidden_sizes:
         for lr in lrs:
             for batch_size in batch_sizes:
-                filepath = f'..//Plots-tanh_{recurrent_activation}//{predicted_step}_{hidden_size}-{lr}-{batch_size}//'
+                if model_switch:
+                    filepath = f'..//Plots-base//{predicted_step}_{hidden_size}-{lr}-{batch_size}//'
+                else:
+                    filepath = f'..//Plots-tanh_{recurrent_activation}//{predicted_step}_{hidden_size}-{lr}-{batch_size}//'
                 if not os.path.exists(filepath):
                     os.makedirs(filepath)
                 chkpt = ModelCheckpoint(filepath=filepath + 'model.h5',

@@ -164,10 +164,10 @@ def prepare_to_parse_data(_traindata, _testdata, raw_train, raw_valid):
     return _X_train, _y_train, _X_valid, _y_valid
 
 
-def main_model(_X_train, _y_train, _X_valid, _y_valid,
+def base_model(_X_train, _y_train, _X_valid, _y_valid,
                _hidden_size, _learning_rate, _batch_size):
     """
-    The core part of this model. Return base model and history = model.fit.
+    The core part of this base model. Return base model and history = model.fit.
 
     :param _X_train:
     :param _y_train:
@@ -243,7 +243,7 @@ def evaluate_model(_train_data, _test_data,
             chkpt.best = best
 
     # Start training the model
-    model, history = main_model(X_train, y_train, X_valid, y_valid,
+    model, history = base_model(X_train, y_train, X_valid, y_valid,
                                 _hidden_size, _learning_rate, _batch_size)
     model.save(_file_path + 'lastmodel.h5')
     print('The trained model has been saved as "lastmodel.h5".')
