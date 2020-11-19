@@ -12,8 +12,10 @@
                         Choose the predicted step: 1, 10, 30, 50, 100. Default
                         value is 10.
   --activation ACTIVATION
-                        Choose the activation function: sigmoid or Mish.  
+                        Choose the activation function: sigmoid or Mish.
                         Default is Mish.
+  --model MODEL         Use the LSTM dynamic model (0), or use the base model
+                        (1). Default is 0.
   --explore_hp EXPLORE_HP
                         Turn the parameter search on(1) or off(0). Default is
                         1.
