@@ -67,7 +67,7 @@ def preprocessing(file_name):
 
 def flag_setting(df_lst):
     """
-    This part is for flag setting, as you know from the name.
+    This part is for flag setting.
 
     :param df_lst: array of dataframe.
     :return: df_lst: df_lst with 'flag'.
@@ -136,8 +136,8 @@ def feature_engineering(dataAll, predictStep=[10]):
         # data = lagging_features(data,
         #                         name='harmonic_bc',
         #                         laggingStep=[1, 3, 5, 20, 60])
-
-        print('.')
+        #
+        # print('.')
         data['speed_mult_0'] = data['actual speed']
         for k in range(1, 6):
             data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
@@ -160,7 +160,7 @@ def feature_engineering(dataAll, predictStep=[10]):
             # data = statistical_features(data,
             #                             name='harmonic_bc',
             #                             timeRange=k)
-            print('.')
+            # print('.')
         print('Completed.')
 
         print('Marking the timestep flag to the target...')
@@ -180,7 +180,7 @@ def lagging_features(data,
                      name=None,
                      laggingStep=[1, 2, 3]):
     """
-    This part makes delayed features.
+    This part makes lagged features.
 
     :param data: dataframe.
     :param name: feature name.

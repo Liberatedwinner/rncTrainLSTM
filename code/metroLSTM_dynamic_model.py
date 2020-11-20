@@ -77,7 +77,7 @@ def mish(x):
     """
     Mish is an activation function. Return Mish(x) = x * tanh(ln(1+exp(x)).
 
-    :param x: tensor object in TensorFlow
+    :param x: tensor object in TensorFlow.
     :return: Mish(x)
     """
     return x * tf.nn.tanh(tf.nn.softplus(x))
@@ -88,7 +88,7 @@ get_custom_objects().update({'mish': mish})
 
 def plot_history(_history, result_dir):
     """
-    Plot the history of loss and validation loss in some location.
+    Plot the history of loss and validation loss.
 
     :param _history: model history, which is equal to model.fit.
     :param result_dir: location to save plots.
@@ -136,7 +136,7 @@ def drop_nan_data(_path):
     This part is in order to get rid NaN value off from data.
 
     :param _path: file path where data is located.
-    :return: traindata and testdata
+    :return: traindata and testdata.
     """
     mdc = ModelCore(_path)
     _trainData, _testData = mdc.load_train_test_data()
@@ -187,7 +187,7 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
     :param _recurrent_activation: recurrent activation function.
     :param float _learning_rate: learning rate.
     :param int _batch_size: batch size.
-    :return: model, history
+    :return: model, history.
     """
     _model = Sequential()
     _model.add(LSTM(_hidden_size,
@@ -223,7 +223,7 @@ def base_model(_X_train, _y_train, _X_valid, _y_valid,
     :param int _hidden_size: hidden unit size.
     :param float _learning_rate: learning rate.
     :param int _batch_size: batch size.
-    :return: model, history
+    :return: model, history.
     """
     _model = Sequential()
     _model.add(Dense(256,
