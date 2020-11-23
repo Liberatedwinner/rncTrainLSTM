@@ -237,7 +237,6 @@ def base_model(_X_train, _y_train, _X_valid, _y_valid,
     _model.add(Dense(64, activation='mish'))
     _model.add(Dense(64, activation='mish'))
     _model.add(Dense(32, activation='mish'))
-    _model.add(Dense(32, activation='mish'))
     _model.add(Dense(1))
     _model.compile(loss=mean_squared_error,
                    optimizer=Adam(lr=_learning_rate),
