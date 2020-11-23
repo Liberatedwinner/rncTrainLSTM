@@ -304,14 +304,14 @@ def evaluate_model(_train_data, _test_data,
     model = load_model(_file_path + 'lastmodel.h5', custom_objects={'mish': mish})
     model.evaluate(X_test, y_test, verbose=1)
     if model_switch:
-        y_valid = y_sc.inverse_transform(y_valid.reshape(1, -1))
+        y_valid = y_sc.inverse_transform(y_valid)
         y_valid_pred = model.predict(X_valid)
-        y_valid_pred = y_sc.inverse_transform(y_valid_pred)
+        y_valid_pred = y_sc.inverse_transform(y_valid_pred.reshape(1, -1))
         y_valid_pred[y_valid_pred < 1] = 0
 
-        y_test = y_sc.inverse_transform(y_test.reshape(1, -1))
+        y_test = y_sc.inverse_transform(y_test)
         y_test_pred = model.predict(X_test)
-        y_test_pred = y_sc.inverse_transform(y_test_pred)
+        y_test_pred = y_sc.inverse_transform(y_test_pred.reshape(1, -1))
         y_test_pred[y_test_pred < 1] = 0
     else:
         y_valid = y_sc.inverse_transform(y_valid)
