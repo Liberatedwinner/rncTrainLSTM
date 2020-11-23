@@ -275,7 +275,6 @@ def evaluate_model(_train_data, _test_data,
     X_valid = X_sc.transform(X_valid)
     X_test = X_sc.transform(_test_data.drop(['target'], axis=1).values)
 
-
     y_train = y_sc.fit_transform(y_train)
     y_valid = y_sc.transform(y_valid)
     y_test = y_sc.transform(_test_data['target'].values.reshape(len(X_test), 1))
