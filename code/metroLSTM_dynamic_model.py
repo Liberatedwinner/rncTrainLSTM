@@ -410,3 +410,4 @@ if __name__ == '__main__':
                                         save_best_only=True)
                 trained_model_score(filepath, folds, trainData, testData,
                                     hidden_size, lr, batch_size)
+###TODO 저장된 걸 불러올 수 있게 만들어야 함
