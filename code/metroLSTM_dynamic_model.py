@@ -401,5 +401,4 @@ if __name__ == '__main__':
                                         monitor='val_loss',
                                         verbose=1,
                                         save_best_only=True)
-                trained_model_score(filepath, folds, trainData, testData,
-                                    hs, lr, bs)
+                trained_model_score(filepath, folds, trainData, testData, hs, lr, bs)
