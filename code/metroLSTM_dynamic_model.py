@@ -47,7 +47,7 @@ args = parser.parse_args()
 
 predicted_step = args.predictstep
 recurrent_activation = args.activation
-model_switch = args.model
+basemodel_switch = args.model
 param_search_switch = args.explore_hp
 direct_input_hs = args.hs
 direct_input_lr = args.lr
@@ -96,15 +96,12 @@ def plot_history(_history, result_dir):
     plt.figure()
     plt.plot(_history.history['loss'], marker='.', linewidth=1.5)
     plt.plot(_history.history['val_loss'], marker='+', linewidth=1.5)
-    plt.plot(_history.history['mae'], marker='*', linewidth=1.5)
-    plt.plot(_history.history['val_mae'], marker=',', linewidth=1.5)
     plt.title('Model loss and validation loss')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.ylim(0, 0.1)
     plt.grid()
-    # plt.legend(['loss', 'val_loss'], loc='upper right')
-    plt.legend(['loss', 'val_loss', 'mae', 'val_mae'], loc='upper right')
+    plt.legend(['loss', 'val_loss'], loc='upper right')
     plt.savefig(result_dir, dpi=500, bbox_inches='tight')
     plt.close()
 
@@ -289,7 +286,7 @@ def evaluate_model(_train_data, _test_data,
             chkpt.best = best
 
     # Start training the model
-    if model_switch:
+    if basemodel_switch:
         model, history = base_model(X_train, y_train, X_valid, y_valid,
                                     _hidden_size, _learning_rate, _batch_size)
     else:
@@ -297,29 +294,27 @@ def evaluate_model(_train_data, _test_data,
                                     _hidden_size, recurrent_activation, _learning_rate, _batch_size)
 
     # Saving and evaluate the model
-    model.save(_file_path + 'lastmodel.h5')
-    print('The trained model has been saved as "lastmodel.h5".')
+    model.save(_file_path + 'saved_model.h5')
+    print('The trained model has been saved as "saved_model.h5"')
     del model
-    model = load_model(_file_path + 'lastmodel.h5', custom_objects={'mish': mish})
+    model = load_model(_file_path + 'saved_model.h5', custom_objects={'mish': mish})
+    print('Start the evaluation...')
     model.evaluate(X_test, y_test, verbose=1)
-    if model_switch:
-        y_valid = y_sc.inverse_transform(y_valid)
-        y_valid_pred = model.predict(X_valid)
+
+    y_valid = y_sc.inverse_transform(y_valid)
+    y_valid_pred = model.predict(X_valid)
+    y_test = y_sc.inverse_transform(y_test)
+    y_test_pred = model.predict(X_test)
+
+    if basemodel_switch:
         y_valid_pred = y_sc.inverse_transform(y_valid_pred.reshape(-1, 1))
         y_valid_pred[y_valid_pred < 1] = 0
-
-        y_test = y_sc.inverse_transform(y_test)
-        y_test_pred = model.predict(X_test)
         y_test_pred = y_sc.inverse_transform(y_test_pred.reshape(-1, 1))
         y_test_pred[y_test_pred < 1] = 0
+
     else:
-        y_valid = y_sc.inverse_transform(y_valid)
-        y_valid_pred = model.predict(X_valid)
         y_valid_pred = y_sc.inverse_transform(y_valid_pred)
         y_valid_pred[y_valid_pred < 1] = 0
-
-        y_test = y_sc.inverse_transform(y_test)
-        y_test_pred = model.predict(X_test)
         y_test_pred = y_sc.inverse_transform(y_test_pred)
         y_test_pred[y_test_pred < 1] = 0
 
@@ -328,14 +323,14 @@ def evaluate_model(_train_data, _test_data,
 
 def post_training(func):
     """
-    Decorator of a function 'trained_model_score'. This part is of saving data.
+    Decorator of a function 'trained_model_score'. This part is for saving data.
 
     :param func:
     """
-    def wrapper(*args, **kwargs):
+    def wrapper(*argss, **kwargs):
         # saving the results
-        score = func(*args, **kwargs)
-        filename = f'score-{hidden_size}-{lr}-{batch_size}'
+        score = func(*argss, **kwargs)
+        filename = f'score-{hs}-{lr}-{bs}'
         save_result(filepath, filename, score)
 
     return wrapper
@@ -395,13 +390,13 @@ if __name__ == '__main__':
     )
 
     # Start the time series cross validation.
-    for hidden_size in hidden_sizes:
+    for hs in hidden_sizes:
         for lr in lrs:
-            for batch_size in batch_sizes:
-                if model_switch:
-                    filepath = f'..//Plots-base//{predicted_step}_{hidden_size}-{lr}-{batch_size}//'
+            for bs in batch_sizes:
+                if basemodel_switch:
+                    filepath = f'..//Plots-base//{predicted_step}_{hs}-{lr}-{bs}//'
                 else:
-                    filepath = f'..//Plots-tanh_{recurrent_activation}//{predicted_step}_{hidden_size}-{lr}-{batch_size}//'
+                    filepath = f'..//Plots-tanh_{recurrent_activation}//{predicted_step}_{hs}-{lr}-{bs}//'
                 if not os.path.exists(filepath):
                     os.makedirs(filepath)
                 chkpt = ModelCheckpoint(filepath=filepath + 'model.h5',
@@ -409,5 +404,4 @@ if __name__ == '__main__':
                                         verbose=1,
                                         save_best_only=True)
                 trained_model_score(filepath, folds, trainData, testData,
-                                    hidden_size, lr, batch_size)
-###TODO 저장된 걸 불러올 수 있게 만들어야 함
+                                    hs, lr, bs)
