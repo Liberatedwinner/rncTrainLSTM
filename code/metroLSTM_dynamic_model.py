@@ -308,15 +308,13 @@ def evaluate_model(_train_data, _test_data,
 
     if basemodel_switch:
         y_valid_pred = y_sc.inverse_transform(y_valid_pred.reshape(-1, 1))
-        y_valid_pred[y_valid_pred < 1] = 0
         y_test_pred = y_sc.inverse_transform(y_test_pred.reshape(-1, 1))
-        y_test_pred[y_test_pred < 1] = 0
-
     else:
         y_valid_pred = y_sc.inverse_transform(y_valid_pred)
-        y_valid_pred[y_valid_pred < 1] = 0
         y_test_pred = y_sc.inverse_transform(y_test_pred)
-        y_test_pred[y_test_pred < 1] = 0
+
+    y_valid_pred[y_valid_pred < 1] = 0
+    y_test_pred[y_test_pred < 1] = 0
 
     return y_valid, y_valid_pred, y_test, y_test_pred, history
 
