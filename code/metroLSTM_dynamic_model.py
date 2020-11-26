@@ -189,7 +189,7 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
                     kernel_initializer='he_uniform',
                     recurrent_initializer='orthogonal',
                     return_sequences=False,
-                    dropout=0.1,
+                    dropout=0.0,
                     recurrent_dropout=0.1,
                     input_shape=(_X_train.shape[1], _X_train.shape[2])))
     _model.add(Dense(1))
@@ -340,7 +340,7 @@ if __name__ == '__main__':
     for hs in hidden_sizes:
         for lr in lrs:
             for bs in batch_sizes:
-                filepath = f'..//Plots-tanh_{recurrent_activation}//{predicted_step}_{hs}-{lr}-{bs}//'
+                filepath = f'..//Plots80-tanh_{recurrent_activation}//{predicted_step}_{hs}-{lr}-{bs}//'
                 if not os.path.exists(filepath):
                     os.makedirs(filepath)
                 chkpt = ModelCheckpoint(filepath=filepath + 'model.h5',
