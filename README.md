@@ -19,7 +19,7 @@
                         Default is sigmoid.
   ```
  
-  - `metroLSTM_feature_engineering.py`: `csv` 파일에서 `pkl` 데이터를 만들어주는 코드.  
+  - `metroLSTM_feature_engineering.py`: 신분당선 열차차상데이터에서 학습용 데이터를 만들어주는 코드.  
     사용 예시: `python metroLSTM_feature_engineering.py --predictstep=5`  
     
   ```
@@ -27,7 +27,7 @@
                         choose the predicted step: for example, 1, 10, 30, 50,
                         etc.
   ```
-  - `metroLSTM_dynamic_model.py`: `pkl` 파일을 가지고서 LSTM 모델 학습 및 속도 예측 그래프 산출에 쓰이는 코드.  
+  - `metroLSTM_dynamic_model.py`: 학습용 신분당선 열차차상데이터를 가지고서 LSTM 모델 학습 및 속도 예측 그래프 산출에 쓰이는 코드.  
     사용 예시: `python metroLSTM_dynamic_model.py --predictstep=5 --explore_hp=0 --hs=26 --lr=0.0001 --bs=32`  
     
   ```
