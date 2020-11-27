@@ -1,4 +1,4 @@
-# rncTrainLSTM
+# 열차동적모델 README
 
 - 코드 목록
   - `Feature_engineering_multi_step_predict.py`: 중국 열차차상데이터에서 학습데이터를 만들어주는 코드.  
