@@ -50,13 +50,13 @@
   ```
   - `WeaponLib.py`: `Feature_engineering_multi_step_predict.py` 및 `Train_lstm_dynamic_model.py` 에서 쓰이는 주요 클래스를 담아둔 코드.  
   - `MetroLSTMCore.py`: `'metro'`가 붙은 파일에서 쓰이는 주요 클래스를 담아둔 코드.  
-  - `MetroLSTMconfig.py`: `metroLSTM_dynamic_model.py`의 하이퍼패러미터 탐색 범위 등의 설정을 담아둔 코드.   
-                          하이퍼패러미터 탐색 시 이 파일 내부의 값을 조정하여 범위를 설정하시면 됩니다.  
+  - `MetroLSTMconfig.py`: `metroLSTM_dynamic_model.py`의 하이퍼패러미터 탐색 범위 등의 설정을 담아둔 코드. 하이퍼패러미터 탐색 시 이 파일 내부의 값을 조정하여 범위를 설정하시면 됩니다.  
                           
                           
 - 데이터 목록
   - `training and validation sets.csv` 및 `test set.csv`: 중국 열차차상데이터
   - metroKOR
     - `180713_2.xlsx` 및 `180717_2.xlsx`: 신분당선 열차차상데이터의 원본
-    - `20180713.ㅇ
-    - `180713_2.xlsx` 및 `180717_2.xlsx`: 신분당선 열차차상데이터의 원
+    - `20180713.csv` 및 `20180717.csv`: 모델 학습용 신분당선 열차차상데이터
+  - 분석용 신분당선 데이터
+    - `20180713(cm).csv` 및 `20180717(cm).csv`: 데이터 분석을 용이하게 하기 위해, 약간의 편집을 가한 데이터. km/h를 cm/s로 변환한 열도 포함한 데이터입니다.
