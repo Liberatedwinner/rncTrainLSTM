@@ -12,7 +12,7 @@ np.random.seed(20201005)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--predictstep', type=int, default=10,
-                    help='choose the predicted step: 1, 10, 30, 50, 100')
+                    help='choose the predicted step: for example, 1, 10, 30, 50, etc.')
 args = parser.parse_args()
 predicted_step = args.predictstep
 #######
@@ -133,11 +133,6 @@ def feature_engineering(dataAll, predictStep=[10]):
                                 laggingStep=[1, 3, 5, 20, 60])
 
         print('.')
-        # data = lagging_features(data,
-        #                         name='harmonic_bc',
-        #                         laggingStep=[1, 3, 5, 20, 60])
-        #
-        # print('.')
         data['speed_mult_0'] = data['actual speed']
         for k in range(1, 6):
             data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
@@ -157,10 +152,6 @@ def feature_engineering(dataAll, predictStep=[10]):
                                         name='p/b',
                                         timeRange=k)
             print('.')
-            # data = statistical_features(data,
-            #                             name='harmonic_bc',
-            #                             timeRange=k)
-            # print('.')
         print('Completed.')
 
         print('Marking the timestep flag to the target...')
@@ -221,7 +212,6 @@ def statistical_features(data,
         Means.append(np.nanmean(tmp))
         Stds.append(np.nanstd(tmp))
         Diffs.append(featureValues[currInd] - featureValues[max(0, currInd - timeRange)])
-
     data[name + '_lag_mean_' + str(timeRange)] = Means
     data[name + '_lag_std_' + str(timeRange)] = Stds
     data[name + '_diff_' + str(timeRange)] = Diffs

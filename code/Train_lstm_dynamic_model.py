@@ -36,9 +36,9 @@ warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
 
-hidden_sizes = [26]#[10, 14, 18, 22, 26, 30]
-lrs = [1e-4]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
-batch_sizes = [32]#[32, 64, 128, 256, 512]
+hidden_sizes = [10, 14, 18, 22, 26, 30]
+lrs = [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+batch_sizes = [32, 64, 128, 256, 512]
 metric = 'mae'
 
 parser = argparse.ArgumentParser()
@@ -73,11 +73,11 @@ def plot_history(history, result_dir):
     plt.figure()
     plt.plot(history.history['loss'], marker='.')
     plt.plot(history.history['val_loss'], marker='.')
-    plt.title('Model Mean Absoluted Error')
+    plt.title('loss and validation loss')
     plt.xlabel('epoch')
-    plt.ylabel('MAE')
+    plt.ylabel('loss')
     plt.grid()
-    plt.legend(['mae', 'val_loss'], loc='upper right')
+    plt.legend(['loss', 'val_loss'], loc='upper right')
     plt.savefig(result_dir, dpi=500, bbox_inches="tight")
     plt.close()
 

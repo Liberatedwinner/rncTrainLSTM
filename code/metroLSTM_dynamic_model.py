@@ -30,9 +30,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', type=int, default=-1,
                     help='Turn GPU on(GPU number) or off(-1). Default is -1.')
 parser.add_argument('--predictstep', type=int, default=10,
-                    help='Choose the predicted step: 1, 10, 30, 50, 100. Default value is 10.')
+                    help='Choose the predicted step: for example, 1, 10, 30, 50, etc. Default value is 10.')
 parser.add_argument('--activation', type=str, default='mish',
-                    help='Choose the activation function: sigmoid or Mish. Default is Mish.')
+                    help='Choose the recurrent activation function: "sigmoid" or "mish". Default is mish.')
 parser.add_argument('--explore_hp', type=int, default='1',
                     help='Turn the parameter search on(1) or off(0). Default is 1.')
 parser.add_argument('--hs', type=int,
