@@ -1,10 +1,26 @@
 # rncTrainLSTM
 
 - 파일 목록
+  - `Train_lstm_dynamic_model.py`: 중국 열차차상데이터를 통한 모델 학습에 쓰이는 코드.  
+    사용 예시:  `Train_lstm_dynamic_model.py --predictstep=10 --activation2=mish`  
+    
+  ```
+      --predictstep PREDICTSTEP
+                        choose the predicted step: 1, 10, 30, 50, 100
+      --activation2 ACTIVATION2
+                        choose the activation function: "sigmoid" or "mish".
+                        Default is sigmoid.
+  ```
   - `metroLSTM_feature_engineering.py`: `csv` 파일에서 `pkl` 데이터를 만들어주는 코드.  
-    사용 예시: `python metroLSTM_feature_engineering.py --predictstep=1`
+    사용 예시: `python metroLSTM_feature_engineering.py --predictstep=5`  
+    
+  ```
+    --predictstep PREDICTSTEP
+                        choose the predicted step: for example, 1, 10, 30, 50,
+                        etc.
+  ```
   - `metroLSTM_dynamic_model.py`: `pkl` 파일을 가지고서 LSTM 모델 학습 및 속도 예측 그래프 산출에 쓰이는 코드.  
-    사용 예시: `python metroLSTM_dynamic_model.py --predictstep=1 --explore_hp=0 --hs=10 --lr=0.0001 --bs=128`  
+    사용 예시: `python metroLSTM_dynamic_model.py --predictstep=5 --explore_hp=0 --hs=26 --lr=0.0001 --bs=32`  
     
   ```
   --gpu GPU             Turn GPU on(GPU number) or off(-1). Default is -1.
