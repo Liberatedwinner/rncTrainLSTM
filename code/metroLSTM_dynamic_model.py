@@ -340,7 +340,7 @@ if __name__ == '__main__':
     for hs in hidden_sizes:
         for lr in lrs:
             for bs in batch_sizes:
-                filepath = f'..//Plots80-tanh_{recurrent_activation}//{predicted_step}_{hs}-{lr}-{bs}//'
+                filepath = f'..//Plots50-tanh_{recurrent_activation}//{predicted_step}_{hs}-{lr}-{bs}//'
                 if not os.path.exists(filepath):
                     os.makedirs(filepath)
                 chkpt = ModelCheckpoint(filepath=filepath + 'model.h5',

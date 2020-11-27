@@ -1,7 +1,7 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
 import numpy as np
@@ -39,9 +39,9 @@ warnings.filterwarnings('ignore')
 earlyStopping = EarlyStopping(monitor="val_loss", patience=15, verbose=2)
 
 
-hidden_sizes = [18, 22, 26, 30]#[10, 14, 18, 22, 26, 30]
-lrs = [1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
-batch_sizes = [32, 64, 128, 256, 512]
+hidden_sizes = [26]#[10, 14, 18, 22, 26, 30]
+lrs = [1e-4]#[1e-4, 5e-4, 1e-3, 2e-3, 5e-3]
+batch_sizes = [32]#[32, 64, 128, 256, 512]
 metric = 'mae'
 
 parser = argparse.ArgumentParser()
@@ -58,7 +58,7 @@ activation2 = args.activation2
 
 PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
 
-swish = tf.keras.activations.swish
+swish = 0
 
 
 def mish(x):
@@ -184,6 +184,9 @@ if __name__ == "__main__":
                     model.add(LSTM(hidden_size, ###TODO
                                    activation=activation1, ###TODO
                                    recurrent_activation=activation2, ###TODO
+                                   kernel_initializer='he_uniform',
+                                   recurrent_initializer='orthogonal',
+                                   #recurrent_dropout=0.1,
                                    return_sequences=False,
                                    input_shape=(X_train.shape[1], X_train.shape[2])))
                     model.add(Dense(1))
@@ -226,7 +229,8 @@ if __name__ == "__main__":
                     plt.savefig(filepath + f'//PredictedStepTest_{(PREDICTED_STEP)}_folds_{ind + 1}.png',
                                 dpi=50, bbox_inches="tight")
                     plt.close("all")
-
+                    plot_history(history, filepath + f'//error_pic{ind + 1}.png')
+                    
                 if activation1 == swish:
                     activation1 = 'swish'
                 elif activation1 == mish:
