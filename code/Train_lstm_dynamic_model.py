@@ -3,22 +3,18 @@
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-
 import numpy as np
 import pandas as pd
 import warnings
 import gc
-
 from WeaponLib import ReduceMemoryUsage
 from WeaponLib import LoadSave
-
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import TimeSeriesSplit
 import sklearn
-
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
@@ -27,6 +23,7 @@ from keras.losses import mean_absolute_error, mean_squared_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LambdaCallback
 from sklearn.metrics import r2_score
+from keras.utils import get_custom_objects
 import argparse
 import pickle
 import tensorflow as tf
@@ -47,22 +44,19 @@ metric = 'mae'
 parser = argparse.ArgumentParser()
 parser.add_argument('--predictstep', type=int, default=10,
                     help='choose the predicted step: 1, 10, 30, 50, 100')
-parser.add_argument('--activation1', type=str, default='tanh',
-                    help='choose the activation function instead of tanh: swish, mish')
 parser.add_argument('--activation2', type=str, default='sigmoid',
-                    help='choose the activation function instead of sigmoid: swish, mish')
+                    help='choose the activation function: "sigmoid" or "mish". Default is sigmoid.')
 args = parser.parse_args()
 PREDICTED_STEP = args.predictstep
-activation1 = args.activation1
 activation2 = args.activation2
 
 PATH = f"..//Data//TrainedRes//sec{PREDICTED_STEP}//"
 
-swish = 0
-
-
 def mish(x):
     return x * tf.nn.tanh(tf.nn.softplus(x))
+
+
+get_custom_objects().update({'mish': mish})
 
 
 ###############################################################################
@@ -169,32 +163,23 @@ if __name__ == "__main__":
                         on_epoch_end=lambda epoch, logs: save_chkpt()
                     )
 
-                    if activation1 == 'swish':
-                        activation1 = swish
-                    elif activation1 == 'mish':
-                        activation1 = mish
-
-                    if activation2 == 'swish':
-                        activation2 = swish
-                    elif activation2 == 'mish':
+                    if activation2 == 'mish':
                         activation2 = mish
 
                     # Start training the model
                     model = Sequential()
-                    model.add(LSTM(hidden_size, ###TODO
-                                   activation=activation1, ###TODO
-                                   recurrent_activation=activation2, ###TODO
+                    model.add(LSTM(hidden_size,
+                                   recurrent_activation=activation2,
                                    kernel_initializer='he_uniform',
                                    recurrent_initializer='orthogonal',
-                                   #recurrent_dropout=0.1,
                                    return_sequences=False,
                                    input_shape=(X_train.shape[1], X_train.shape[2])))
                     model.add(Dense(1))
-                    model.compile(loss=mean_squared_error, #mean_absolute_error,
-                                  optimizer=Adam(lr=lr), ###TODO
+                    model.compile(loss=mean_squared_error,
+                                  optimizer=Adam(lr=lr),
                                   metrics=['mae'])
                     history = model.fit(X_train, y_train,
-                                        epochs=500, batch_size=batch_size, ###TODO
+                                        epochs=500, batch_size=batch_size,
                                         validation_data=(X_valid, y_valid), verbose=1,
                                         shuffle=False,
                                         callbacks=[earlyStopping, chkpt, save_chkpt_callback])
@@ -230,15 +215,8 @@ if __name__ == "__main__":
                                 dpi=50, bbox_inches="tight")
                     plt.close("all")
                     plot_history(history, filepath + f'//error_pic{ind + 1}.png')
-                    
-                if activation1 == swish:
-                    activation1 = 'swish'
-                elif activation1 == mish:
-                    activation1 = 'mish'
 
-                if activation2 == swish:
-                    activation2 = 'swish'
-                elif activation2 == mish:
+                if activation2 == mish:
                     activation2 = 'mish'
 
                 score = pd.DataFrame(score, columns=["R-square", "validMAE", "validRMSE", "testMAE", "testRMSE"])

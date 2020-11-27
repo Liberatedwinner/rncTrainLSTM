@@ -189,7 +189,6 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
                     kernel_initializer='he_uniform',
                     recurrent_initializer='orthogonal',
                     return_sequences=False,
-                    dropout=0.0,
                     recurrent_dropout=0.1,
                     input_shape=(_X_train.shape[1], _X_train.shape[2])))
     _model.add(Dense(1))
