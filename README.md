@@ -1,24 +1,6 @@
 # 열차동적모델 README
 
 - 코드 목록
-  - `Feature_engineering_multi_step_predict.py`: 중국 열차차상데이터에서 학습데이터를 만들어주는 코드.  
-    사용 예시: `Feature_engineering_multi_step_predict.py --predictstep=5`  
-  ```
-    --predictstep PREDICTSTEP
-                        choose the predicted step: 1, 10, 30, 50, 100
-  ```
-  
-  - `Train_lstm_dynamic_model.py`: 중국 열차차상데이터를 통한 모델 학습에 쓰이는 코드.    
-    사용 예시:  `Train_lstm_dynamic_model.py --predictstep=10 --activation2=mish`  
-    
-  ```
-    --predictstep PREDICTSTEP
-                        choose the predicted step: 1, 10, 30, 50, 100
-    --activation2 ACTIVATION2
-                        choose the activation function: "sigmoid" or "mish".
-                        Default is sigmoid.
-  ```
- 
   - `metroLSTM_feature_engineering.py`: 신분당선 열차차상데이터에서 학습용 데이터를 만들어주는 코드.  
     사용 예시: `python metroLSTM_feature_engineering.py --predictstep=5`  
     
@@ -48,15 +30,8 @@
   --bs BS               Determine the batch size of model. This option is
                         valid only when explore_hp is 0.
   ```
-  - `WeaponLib.py`: `Feature_engineering_multi_step_predict.py` 및 `Train_lstm_dynamic_model.py` 에서 쓰이는 주요 클래스를 담아둔 코드.  
+
   - `MetroLSTMCore.py`: `'metro'`가 붙은 파일에서 쓰이는 주요 클래스를 담아둔 코드.  
-  - `MetroLSTMconfig.py`: `metroLSTM_dynamic_model.py`의 하이퍼패러미터 탐색 범위 등의 설정을 담아둔 코드. 하이퍼패러미터 탐색 시 이 파일 내부의 값을 조정하여 범위를 설정하시면 됩니다.  
-                          
-                          
-- 데이터 목록
-  - `training and validation sets.csv` 및 `test set.csv`: 중국 열차차상데이터
-  - metroKOR
-    - `180713_2.xlsx` 및 `180717_2.xlsx`: 신분당선 열차차상데이터의 원본
-    - `20180713.csv` 및 `20180717.csv`: 모델 학습용 신분당선 열차차상데이터
-  - 분석용 신분당선 데이터
-    - `20180713(cm).csv` 및 `20180717(cm).csv`: 데이터 분석을 용이하게 하기 위해, 약간의 편집을 가한 데이터. km/h를 cm/s로 변환한 열도 포함한 데이터입니다.
+  - `MetroLSTMconfig.py`: `metroLSTM_dynamic_model.py`의 하이퍼패러미터 탐색 범위 등의 설정을 담아둔 코드. 하이퍼패러미터 탐색 시 이 파일 내부의 값을 조정하여 범위를 설정.  
+  
+- 데이터는 계약에 의거하여 GitHub 저장소 내에서는 삭제처리되었음.
