@@ -31,7 +31,7 @@ def preprocessing(file_name):
                'BC ＃4': 'BC4', 'BC ＃7': 'BC5', 'BC ＃0': 'BC6'},
               axis=1, inplace=True)
 
-    df.drop(['번호', 'OP Mode', '편성번호', '열차길이', 'VOBC ＃1', 'VOBC ＃0',
+    df.drop(['번호', '시간', 'OP Mode', '편성번호', '열차길이', 'VOBC ＃1', 'VOBC ＃0',
              'Master Clock of VOBC', 'Train In Station.1',
              'Next Platform ID', 'Final Platform ID',
              'Unnamed: 27', 'Unnamed: 28', 'Target Speed',
@@ -39,15 +39,7 @@ def preprocessing(file_name):
              'FWD', 'REV', 'Train In Station', 'Line Voltage',
              'DISTANCE', 'MR Pressure', 'Distance to Target'],
             axis=1, inplace=True)
-
-    df.rename(columns={'시간': 'time'}, inplace=True)
     df.columns = df.columns.str.lower()
-    df['time'] = pd.to_datetime(file_name[:-4] + df['time'].str.replace(':', ''))
-    df['hour'] = df['time'].dt.hour
-    df['dayOfWeek'] = df['time'].dt.dayofweek
-    df['rest'] = df['dayOfWeek'] > 4 # 0-mon
-    df['day'] = df['time'].dt.day
-    df.drop(['time'], axis=1, inplace=True)
 
     df['p/b'] = df['p/b'].str[:-3]
     df['p/b'] = df['p/b'].astype('int64')
@@ -93,156 +85,156 @@ def data_concat(df_lst):
     return concatd_data
 
 
-def feature_engineering(dataAll, predictStep=[10]):
+def feature_engineering(data_all, predict_step=[10]):
     """
     Main function of this file. Indeed, this part proceeds the feature engineering.
 
-    :param dataAll: dataframe.
-    :param predictStep: array of timesteps.
-    :return: newdata: feature-selected dataframe array.
+    :param data_all: dataframe.
+    :param predict_step: array of timesteps.
+    :return: new_data: feature-selected dataframe array.
     """
-    FLAG = dataAll['FLAG'].unique()
-    newData = []
+    FLAG = data_all['FLAG'].unique()
+    new_data = []
 
     print('=======')
     for flag in FLAG:
         print('Running with the file {}:'.format(flag))
-        data = dataAll[dataAll['FLAG'] == flag]
+        _data = data_all[data_all['FLAG'] == flag]
 
-        for name in list(data.columns):
-            if data[name].isnull().sum() <= 100:
-                data[name].fillna(method='ffill', inplace=True)
+        for name in list(_data.columns):
+            if _data[name].isnull().sum() <= 100:
+                _data[name].fillna(method='ffill', inplace=True)
 
-        data.reset_index(inplace=True, drop=True)
-        data.reset_index(inplace=True)
-        data.rename({'index': 'timeStep'}, axis=1, inplace=True)
+        _data.reset_index(inplace=True, drop=True)
+        _data.reset_index(inplace=True)
+        _data.rename({'index': 'timeStep'}, axis=1, inplace=True)
 
         print('Generating lagging features...')
-        data = lagging_features(data,
-                                name='actual speed',
-                                laggingStep=list(range(1, 11)) +[20, 30, 50, 80])
+        _data = lagging_features(_data,
+                                 name='actual speed',
+                                 lagging_step=list(range(1, 11)) + [20, 30, 50, 80])
 
         print('.')
-        data = lagging_features(data,
-                                name='permitted speed',
-                                laggingStep=list(range(1, 11)) +[20, 30, 50, 80])
+        _data = lagging_features(_data,
+                                 name='permitted speed',
+                                 lagging_step=list(range(1, 11)) + [20, 30, 50, 80])
 
         print('.')
-        data = lagging_features(data,
-                                name='p/b',
-                                laggingStep=[1, 3, 5, 20, 60])
+        _data = lagging_features(_data,
+                                 name='p/b',
+                                 lagging_step=[1, 3, 5, 20, 60])
 
         print('.')
-        data['speed_mult_0'] = data['actual speed']
+        _data['speed_mult_0'] = _data['actual speed']
         for k in range(1, 6):
-            data[f'speed_mult_{k}'] = data[f'speed_mult_{k-1}'] * data[f'lagged_actual speed_{k}']
+            _data[f'speed_mult_{k}'] = _data[f'speed_mult_{k - 1}'] * _data[f'lagged_actual speed_{k}']
         print('Completed.')
 
         print('Generating statistical features...')
         for k in [2, 5, 10, 20]:
-            data = statistical_features(data,
-                                        name='actual speed',
-                                        timeRange=k)
+            _data = statistical_features(_data,
+                                         name='actual speed',
+                                         time_range=k)
             print('.')
-            data = statistical_features(data,
-                                        name='permitted speed',
-                                        timeRange=k)
+            _data = statistical_features(_data,
+                                         name='permitted speed',
+                                         time_range=k)
             print('.')
-            data = statistical_features(data,
-                                        name='p/b',
-                                        timeRange=k)
+            _data = statistical_features(_data,
+                                         name='p/b',
+                                         time_range=k)
             print('.')
         print('Completed.')
 
         print('Marking the timestep flag to the target...')
-        data = create_target(data,
-                             predictStep=predictStep,
-                             targetName='actual speed')
-        data = data[~data['target'].isnull()]
-        data.reset_index(inplace=True, drop=True)
-        newData.append(data)
+        _data = create_target(_data,
+                              predict_step=predict_step,
+                              target_name='actual speed')
+        _data = _data[~_data['target'].isnull()]
+        _data.reset_index(inplace=True, drop=True)
+        new_data.append(_data)
         print('Completed.')
     print('=======')
 
-    return newData
+    return new_data
 
 
-def lagging_features(data,
+def lagging_features(_data,
                      name=None,
-                     laggingStep=[1, 2, 3]):
+                     lagging_step=[1, 2, 3]):
     """
     This part makes lagged features.
 
-    :param data: dataframe.
+    :param _data: dataframe.
     :param name: feature name.
-    :param laggingStep: array of timesteps.
+    :param lagging_step: array of timesteps.
     :return: data: dataframe with lagged features.
     """
     assert name, 'Invalid feature name.'
 
-    for step in laggingStep:
-        tmpframe = data[[name, 'timeStep']].copy()
+    for step in lagging_step:
+        tmpframe = _data[[name, 'timeStep']].copy()
         tmpframe.rename({name: 'lagged_' + f'{name}_' + str(step)}, axis=1, inplace=True)
         tmpframe['timeStep'] += step
-        data = pd.merge(data, tmpframe, on='timeStep', how='left')
+        _data = pd.merge(_data, tmpframe, on='timeStep', how='left')
 
-    return data
+    return _data
 
 
-def statistical_features(data,
+def statistical_features(_data,
                          name=None,
-                         timeRange=5):
+                         time_range=5):
     """
     This part makes statistical features.
 
-    :param data: dataframe.
+    :param _data: dataframe.
     :param name: feature name.
-    :param timeRange: single timestep.
+    :param time_range: single timestep.
     :return: data: dataframe with statistical features.
     """
     assert name, 'Invalid feature name.'
-    index = list(data.index)
-    featureValues = data[name].values
-    Means = []
-    Stds = []
-    Diffs = []
+    index = list(_data.index)
+    feature_values = _data[name].values
+    means = []
+    stds = []
+    diffs = []
 
     for currInd in index:
-        tmp = featureValues[max(0, currInd - timeRange):currInd]
-        Means.append(np.nanmean(tmp))
-        Stds.append(np.nanstd(tmp))
-        Diffs.append(featureValues[currInd] - featureValues[max(0, currInd - timeRange)])
-    data[name + '_lag_mean_' + str(timeRange)] = Means
-    data[name + '_lag_std_' + str(timeRange)] = Stds
-    data[name + '_diff_' + str(timeRange)] = Diffs
+        tmp = feature_values[max(0, currInd - time_range):currInd]
+        means.append(np.nanmean(tmp))
+        stds.append(np.nanstd(tmp))
+        diffs.append(feature_values[currInd] - feature_values[max(0, currInd - time_range)])
+    _data[name + '_lag_mean_' + str(time_range)] = means
+    _data[name + '_lag_std_' + str(time_range)] = stds
+    _data[name + '_diff_' + str(time_range)] = diffs
 
-    return data
+    return _data
 
 
-def create_target(data,
-                  predictStep=None,
-                  targetName='actual speed'):
+def create_target(_data,
+                  predict_step=None,
+                  target_name='actual speed'):
     """
     This part marks the target feature.
 
-    :param data: dataframe.
-    :param predictStep: array of timesteps.
-    :param targetName: Aim of feature prediction.
+    :param _data: dataframe.
+    :param predict_step: array of timesteps.
+    :param target_name: Aim of feature prediction.
     :return: data with a marked target.
     """
-    target = data[targetName].copy()
-    newData = pd.DataFrame(None, columns=list(data.columns), dtype=np.float64)
-    newData['target'] = None
-    newData['timeFlag'] = None
+    target = _data[target_name].copy()
+    new_data = pd.DataFrame(None, columns=list(_data.columns), dtype=np.float64)
+    new_data['target'] = None
+    new_data['timeFlag'] = None
 
-    for step in predictStep:
-        targetTmp = target[step:].copy()
-        data['target'] = targetTmp.reset_index(drop=True)
-        data['timeFlag'] = step
-        newData = pd.concat([newData, data], axis=0, ignore_index=True)
-    newData['timeFlag'] = newData['timeFlag'].astype(np.float64)
+    for step in predict_step:
+        target_tmp = target[step:].copy()
+        _data['target'] = target_tmp.reset_index(drop=True)
+        _data['timeFlag'] = step
+        new_data = pd.concat([new_data, _data], axis=0, ignore_index=True)
+    new_data['timeFlag'] = new_data['timeFlag'].astype(np.float64)
 
-    return newData
+    return new_data
 #######
 
 
@@ -255,7 +247,7 @@ if __name__ == '__main__':
     dfs = flag_setting(dfs)
     dataframe = data_concat(dfs)
 
-    dataAll = feature_engineering(dataframe, predictStep=[predicted_step])
+    dataAll = feature_engineering(dataframe, predict_step=[predicted_step])
     print('\nMerging the data:')
     print('=======')
     shapeList = [len(df) for df in dataAll]
@@ -266,9 +258,9 @@ if __name__ == '__main__':
         newData = pd.concat([newData, data], axis=0, ignore_index=True)
     print('=======')
 
-    dropList = ['timeStep', 'hour', 'dayOfWeek', 'rest', 'day', 'timeFlag', 'train speed', 'speed_mult_0']
-    for i in range(1, 7):
-       dropList.append(f'bc{i}')
+    dropList = ['timeStep', 'timeFlag', 'train speed', 'speed_mult_0']
+    for j in range(1, 7):
+        dropList.append(f'bc{j}')
     newData.drop(dropList, axis=1, inplace=True)
 
     # Save all the data

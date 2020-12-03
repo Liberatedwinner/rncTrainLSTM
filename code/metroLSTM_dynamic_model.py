@@ -168,14 +168,14 @@ def prepare_to_parse_data(_traindata, _testdata, raw_train, raw_valid):
     return _X_train, _y_train, _X_valid, _y_valid
 
 
-def main_model(_X_train, _y_train, _X_valid, _y_valid,
+def main_model(_x_train, _y_train, _x_valid, _y_valid,
                _hidden_size, _recurrent_activation, _learning_rate, _batch_size):
     """
     The core part of this model. Return LSTM model and history = model.fit.
 
-    :param _X_train:
+    :param _x_train:
     :param _y_train:
-    :param _X_valid:
+    :param _x_valid:
     :param _y_valid:
     :param int _hidden_size: hidden unit size.
     :param _recurrent_activation: recurrent activation function.
@@ -190,14 +190,14 @@ def main_model(_X_train, _y_train, _X_valid, _y_valid,
                     recurrent_initializer='orthogonal',
                     return_sequences=False,
                     recurrent_dropout=0.1,
-                    input_shape=(_X_train.shape[1], _X_train.shape[2])))
+                    input_shape=(_x_train.shape[1], _x_train.shape[2])))
     _model.add(Dense(1))
     _model.compile(loss=mean_squared_error,
                    optimizer=Adam(lr=_learning_rate),
                    metrics=['mae'])
-    _history = _model.fit(_X_train, _y_train,
+    _history = _model.fit(_x_train, _y_train,
                           epochs=500, batch_size=_batch_size,
-                          validation_data=(_X_valid, _y_valid), verbose=1,
+                          validation_data=(_x_valid, _y_valid), verbose=1,
                           shuffle=False,
                           callbacks=[earlyStopping, chkpt, save_chkpt_callback])
 
@@ -220,22 +220,22 @@ def evaluate_model(_train_data, _test_data,
     :param _batch_size:
     :return: y_valid, prediction of y_valid, y_test, prediction of y_test.
     """
-    X_train, y_train, X_valid, y_valid = prepare_to_parse_data(_train_data, _test_data, raw_train, raw_valid)
+    x_train, y_train, x_valid, y_valid = prepare_to_parse_data(_train_data, _test_data, raw_train, raw_valid)
 
     # Access the normalized data
-    X_sc, y_sc = MinMaxScaler(), MinMaxScaler()
+    x_sc, y_sc = MinMaxScaler(), MinMaxScaler()
 
-    X_train = X_sc.fit_transform(X_train)
-    X_valid = X_sc.transform(X_valid)
-    X_test = X_sc.transform(_test_data.drop(['target'], axis=1).values)
+    x_train = x_sc.fit_transform(x_train)
+    x_valid = x_sc.transform(x_valid)
+    x_test = x_sc.transform(_test_data.drop(['target'], axis=1).values)
 
     y_train = y_sc.fit_transform(y_train)
     y_valid = y_sc.transform(y_valid)
-    y_test = y_sc.transform(_test_data['target'].values.reshape(len(X_test), 1))
+    y_test = y_sc.transform(_test_data['target'].values.reshape(len(x_test), 1))
 
-    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-    X_valid = X_valid.reshape((X_valid.shape[0], 1, X_valid.shape[1]))
-    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+    x_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
+    x_valid = x_valid.reshape((x_valid.shape[0], 1, x_valid.shape[1]))
+    x_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
 
     if os.path.exists(_file_path + 'chkpt_best.pkl') and os.path.getsize(_file_path + 'chkpt_best.pkl') > 0:
         with open(_file_path + 'chkpt_best.pkl', 'rb') as f:
@@ -243,7 +243,7 @@ def evaluate_model(_train_data, _test_data,
             chkpt.best = best
 
     # Start training the model
-    model, history = main_model(X_train, y_train, X_valid, y_valid,
+    model, history = main_model(x_train, y_train, x_valid, y_valid,
                                 _hidden_size, recurrent_activation, _learning_rate, _batch_size)
 
     # Saving and evaluate the model
@@ -252,15 +252,15 @@ def evaluate_model(_train_data, _test_data,
     del model
     model = load_model(_file_path + 'saved_model.h5', custom_objects={'mish': mish})
     print('Start the evaluation...')
-    model.evaluate(X_test, y_test, verbose=1)
+    model.evaluate(x_test, y_test, verbose=1)
 
     y_valid = y_sc.inverse_transform(y_valid)
-    y_valid_pred = model.predict(X_valid)
+    y_valid_pred = model.predict(x_valid)
     y_valid_pred = y_sc.inverse_transform(y_valid_pred)
     y_valid_pred[y_valid_pred < 1] = 0
 
     y_test = y_sc.inverse_transform(y_test)
-    y_test_pred = model.predict(X_test)
+    y_test_pred = model.predict(x_test)
     y_test_pred = y_sc.inverse_transform(y_test_pred)
     y_test_pred[y_test_pred < 1] = 0
 

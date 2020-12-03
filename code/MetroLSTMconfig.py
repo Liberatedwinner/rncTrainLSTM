@@ -5,3 +5,4 @@ MODEL_CONFIG = {
     'learning_rates': [1e-5, 1e-4, 2e-4, 5e-4],
     'batch_sizes': [32, 64, 128, 256, 512]
 }
+# 26, 1e-4, 32

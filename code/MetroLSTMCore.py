@@ -65,7 +65,7 @@ class ModelCore(object):
         :param y_pred: prediction of X_test.
         :param y_test: Value of 'target feature'.
         :param picture_number: index of picture.
-        :param step: single timestep.
+        :param step: single time-step.
         """
         if not os.path.exists(self._filePath):
             os.makedirs(self._filePath)
