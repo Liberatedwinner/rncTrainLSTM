@@ -27,18 +27,25 @@ def preprocessing(file_name):
     """
     df = pd.read_csv(f'..//Data//metroKOR//{file_name}')
 
-    df.rename({'BC ＃1': 'BC1', 'BC ＃2': 'BC2', 'BC ＃3': 'BC3',
-               'BC ＃4': 'BC4', 'BC ＃7': 'BC5', 'BC ＃0': 'BC6'},
-              axis=1, inplace=True)
+    df.rename(
+        {'BC ＃1': 'BC1', 'BC ＃2': 'BC2', 'BC ＃3': 'BC3',
+         'BC ＃4': 'BC4', 'BC ＃7': 'BC5', 'BC ＃0': 'BC6'},
+         axis=1,
+         inplace=True
+    )
 
-    df.drop(['번호', '시간', 'OP Mode', '편성번호', '열차길이', 'VOBC ＃1', 'VOBC ＃0',
-             'Master Clock of VOBC', 'Train In Station.1',
-             'Next Platform ID', 'Final Platform ID',
-             'Unnamed: 27', 'Unnamed: 28', 'Target Speed',
-             'Train Room Temp ＃1', 'Train Outside Temp ＃1',
-             'FWD', 'REV', 'Train In Station', 'Line Voltage',
-             'DISTANCE', 'MR Pressure', 'Distance to Target'],
-            axis=1, inplace=True)
+    df.drop(
+        ['번호', '시간', 'OP Mode', '편성번호',
+         '열차길이', 'VOBC ＃1', 'VOBC ＃0',
+         'Master Clock of VOBC', 'Train In Station.1',
+         'Next Platform ID', 'Final Platform ID',
+         'Unnamed: 27', 'Unnamed: 28', 'Target Speed',
+         'Train Room Temp ＃1', 'Train Outside Temp ＃1',
+         'FWD', 'REV', 'Train In Station', 'Line Voltage',
+         'DISTANCE', 'MR Pressure', 'Distance to Target'],
+         axis=1,
+        inplace=True
+    )
     df.columns = df.columns.str.lower()
 
     df['p/b'] = df['p/b'].str[:-3]
@@ -110,21 +117,21 @@ def feature_engineering(data_all, predict_step=[10]):
         _data.rename({'index': 'timeStep'}, axis=1, inplace=True)
 
         print('Generating lagging features...')
-        _data = lagging_features(_data,
-                                 name='actual speed',
-                                 lagging_step=list(range(1, 11)) + [20, 30, 50, 80])
-
-        print('.')
-        _data = lagging_features(_data,
-                                 name='permitted speed',
-                                 lagging_step=list(range(1, 11)) + [20, 30, 50, 80])
-
-        print('.')
-        _data = lagging_features(_data,
-                                 name='p/b',
-                                 lagging_step=[1, 3, 5, 20, 60])
-
-        print('.')
+        _data = lagging_features(
+            _data,
+            name='actual speed',
+            lagging_step=list(range(1, 11)) + [20, 30, 50, 80]
+        )
+        _data = lagging_features(
+            _data,
+            name='permitted speed',
+            lagging_step=list(range(1, 11)) + [20, 30, 50, 80]
+        )
+        _data = lagging_features(
+            _data,
+            name='p/b',
+            lagging_step=[1, 3, 5, 20, 60]
+        )
         _data['speed_mult_0'] = _data['actual speed']
         for k in range(1, 6):
             _data[f'speed_mult_{k}'] = _data[f'speed_mult_{k - 1}'] * _data[f'lagged_actual speed_{k}']
@@ -132,24 +139,28 @@ def feature_engineering(data_all, predict_step=[10]):
 
         print('Generating statistical features...')
         for k in [2, 5, 10, 20]:
-            _data = statistical_features(_data,
-                                         name='actual speed',
-                                         time_range=k)
-            print('.')
-            _data = statistical_features(_data,
-                                         name='permitted speed',
-                                         time_range=k)
-            print('.')
-            _data = statistical_features(_data,
-                                         name='p/b',
-                                         time_range=k)
-            print('.')
+            _data = statistical_features(
+                _data,
+                name='actual speed',
+                time_range=k
+            )
+            _data = statistical_features(
+                _data,
+                name='permitted speed',
+                time_range=k
+            )
+            _data = statistical_features(
+                _data,
+                name='p/b',
+                time_range=k
+            )
         print('Completed.')
 
         print('Marking the timestep flag to the target...')
-        _data = create_target(_data,
-                              predict_step=predict_step,
-                              target_name='actual speed')
+        _data = create_target(
+            _data,
+            predict_step=predict_step,
+            target_name='actual speed')
         _data = _data[~_data['target'].isnull()]
         _data.reset_index(inplace=True, drop=True)
         new_data.append(_data)
@@ -174,16 +185,18 @@ def lagging_features(_data,
 
     for step in lagging_step:
         tmpframe = _data[[name, 'timeStep']].copy()
-        tmpframe.rename({name: 'lagged_' + f'{name}_' + str(step)}, axis=1, inplace=True)
+        tmpframe.rename(
+            {name: 'lagged_' + f'{name}_' + str(step)},
+            axis=1,
+            inplace=True
+        )
         tmpframe['timeStep'] += step
         _data = pd.merge(_data, tmpframe, on='timeStep', how='left')
 
     return _data
 
 
-def statistical_features(_data,
-                         name=None,
-                         time_range=5):
+def statistical_features(_data, name=None, time_range=5):
     """
     This part makes statistical features.
 
@@ -211,9 +224,7 @@ def statistical_features(_data,
     return _data
 
 
-def create_target(_data,
-                  predict_step=None,
-                  target_name='actual speed'):
+def create_target(_data, predict_step=None, target_name='actual speed'):
     """
     This part marks the target feature.
 

@@ -140,7 +140,8 @@ def main_model(x_train_, y_train_, x_valid_, y_valid_,
     )
     _history = _model.fit(
         x_train_, y_train_,
-        epochs=500, batch_size=batch_size_,
+        epochs=MetroLSTMconfig.MODEL_CONFIG['epochs'],
+        batch_size=batch_size_,
         validation_data=(x_valid_, y_valid_), verbose=1,
         shuffle=False,
         callbacks=[earlyStopping, dm.chkpt, dm.save_chkpt_callback]
@@ -225,7 +226,7 @@ def post_training(func):
         # saving the results
         filepath = dm.FILE_PATH
         score = func(*argss, **kwargs)
-        filename = f'score-{hs}-{lr}-{bs}'
+        filename = 'total_score'
         save_result(filepath, filename, score)
 
     return wrapper

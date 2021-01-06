@@ -77,6 +77,6 @@ class ModelCore(object):
         plt.xlim(1000, 2000)
         plt.ylim(0, 120)
         plt.grid(True)
-        plt.savefig(self._filePath + f'PredictedStepTest_{step}_folds_{picture_number + 1}.png',
+        plt.savefig(self._filePath + f'PredictedStep_Test_{step}_folds_{picture_number + 1}.png',
                     dpi=50, bbox_inches='tight')
         plt.close('all')

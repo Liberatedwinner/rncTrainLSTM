@@ -50,7 +50,7 @@ os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 rcParams['patch.force_edgecolor'] = True
 rcParams['patch.facecolor'] = 'b'
 sns.set(style='ticks', font_scale=1.1, palette='deep', color_codes=True)
-earlyStopping = MetroLSTMconfig.MODEL_CONFIG['early_stopping']
+
 DATA_PATH = MetroLSTMconfig.MODEL_CONFIG['data_path'] + f'sec{predicted_step}//'
 FILE_PATH = f'..//Plots-{recurrent_activation}//{predicted_step}//'
 #######
