@@ -6,11 +6,13 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 import tensorflow as tf
+import keras.losses
 from keras.layers import Dense, Dropout, LSTM
 from keras.models import Sequential, load_model
 from keras.optimizers import Adam
 from keras.utils import get_custom_objects
 from MetroLSTMCore import ModelCore
+import metroLSTM_dynamic_model as dm
 import MetroLSTMconfig
 
 earlyStopping = MetroLSTMconfig.MODEL_CONFIG['early_stopping']
@@ -47,14 +49,6 @@ def plot_history(_history, result_dir):
     plt.legend(['loss', 'val_loss'], loc='upper right')
     plt.savefig(result_dir, dpi=500, bbox_inches='tight')
     plt.close()
-
-
-def save_chkpt(filepath_, chkpt_):
-    """
-    Save the checkpoint of model to some location.
-    """
-    with open(filepath_ + 'chkpt_best.pkl', 'wb') as f:
-        pickle.dump(chkpt_.best, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def save_result(filepath_, filename_, score_):
@@ -140,7 +134,7 @@ def main_model(x_train_, y_train_, x_valid_, y_valid_,
     )
     _model.add(Dense(1))
     _model.compile(
-        loss=mean_squared_error,
+        loss=keras.losses.mean_squared_error,
         optimizer=Adam(lr=learning_rate_),
         metrics=['mae']
     )
@@ -149,7 +143,7 @@ def main_model(x_train_, y_train_, x_valid_, y_valid_,
         epochs=500, batch_size=batch_size_,
         validation_data=(x_valid_, y_valid_), verbose=1,
         shuffle=False,
-        callbacks=[earlyStopping, chkpt, save_chkpt_callback]
+        callbacks=[earlyStopping, dm.chkpt, dm.save_chkpt_callback]
     )
 
     return _model, _history
@@ -191,12 +185,12 @@ def evaluate_model(train_data_, test_data_,
     if os.path.exists(filepath_ + 'chkpt_best.pkl') and os.path.getsize(filepath_ + 'chkpt_best.pkl') > 0:
         with open(filepath_ + 'chkpt_best.pkl', 'rb') as f:
             best = pickle.load(f)
-            chkpt.best = best
+            dm.chkpt.best = best
 
     # Start training the model
     model, history = main_model(
         x_train, y_train, x_valid, y_valid,
-        hidden_size_, recurrent_activation,
+        hidden_size_, dm.recurrent_activation,
         learning_rate_, batch_size_
     )
 
@@ -229,7 +223,7 @@ def post_training(func):
     """
     def wrapper(*argss, **kwargs):
         # saving the results
-        filepath = FILE_PATH
+        filepath = dm.FILE_PATH
         score = func(*argss, **kwargs)
         filename = f'score-{hs}-{lr}-{bs}'
         save_result(filepath, filename, score)
@@ -269,7 +263,7 @@ def trained_model_score(filepath_, folds_, train_data_, test_data_,
         ])
 
         print(f'R-square: {score[ind][0]}, test MAE: {score[ind][3]}')
-        ModelCore(filepath_).pred_drawing(y_test_pred, y_test, ind, predicted_step)
+        ModelCore(filepath_).pred_drawing(y_test_pred, y_test, ind, dm.predicted_step)
         plot_history(history, filepath_ + f'error_pic{ind + 1}.png')
         print('The metro speed-prediction graph has been saved.\n')
 

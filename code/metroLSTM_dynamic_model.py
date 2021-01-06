@@ -55,6 +55,27 @@ DATA_PATH = MetroLSTMconfig.MODEL_CONFIG['data_path'] + f'sec{predicted_step}//'
 FILE_PATH = f'..//Plots-{recurrent_activation}//{predicted_step}//'
 #######
 
+
+def save_chkpt(filepath_, chkpt_):
+    """
+    Save the checkpoint of model to some location.
+    """
+    with open(filepath_ + 'chkpt_best.pkl', 'wb') as f:
+        pickle.dump(chkpt_.best, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+chkpt = ModelCheckpoint(
+    filepath=FILE_PATH + 'model.h5',
+    monitor='val_loss',
+    verbose=1,
+    save_best_only=True
+)
+
+save_chkpt_callback = LambdaCallback(
+    on_epoch_end=lambda epoch, logs: save_chkpt(FILE_PATH, chkpt)
+)
+
+#######
 if __name__ == '__main__':
     trainData, testData = drop_nan_data(DATA_PATH)
     fold_number = MetroLSTMconfig.MODEL_CONFIG['fold_number']
@@ -73,11 +94,5 @@ if __name__ == '__main__':
                 FILE_PATH = FILE_PATH + f'{hs}-{lr}-{bs}//'
                 if not os.path.exists(FILE_PATH):
                     os.makedirs(FILE_PATH)
-                chkpt = ModelCheckpoint(
-                    filepath=FILE_PATH + 'model.h5',
-                    monitor='val_loss',
-                    verbose=1,
-                    save_best_only=True
-                )
-                trained_model_score(FILE_PATH, folds, trainData, testData, hs, lr, bs)
 
+                trained_model_score(FILE_PATH, folds, trainData, testData, hs, lr, bs)
