@@ -32,6 +32,7 @@
   ```
 
   - `MetroLSTMCore.py`: `'metro'`가 붙은 파일에서 쓰이는 주요 클래스를 담아둔 코드.  
+  - `metroLSTMutil.py`: 모델에서 쓰이는 함수들을 담아둔 코드.
   - `MetroLSTMconfig.py`: `metroLSTM_dynamic_model.py`의 하이퍼패러미터 탐색 범위 등의 설정을 담아둔 코드. 하이퍼패러미터 탐색 시 이 파일 내부의 값을 조정하여 범위를 설정.  
   
 - 데이터는 계약에 의거하여 GitHub 저장소 내에서는 삭제처리되었음.
